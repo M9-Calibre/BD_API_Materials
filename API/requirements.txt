@@ -1,0 +1,7 @@
+Django~=4.1.3
+djangorestframework
+django-filter
+django-cors-headers
+django-mysql
+django-extensions
+PyMySql
