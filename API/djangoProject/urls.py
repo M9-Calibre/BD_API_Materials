@@ -15,19 +15,22 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
 from API_Materials import views
 
+router = DefaultRouter()
+router.register(r'materials', views.MaterialViewSet, basename="materials")
+router.register(r'users', views.UserViewSet, basename="users")
+router.register(r'suppliers', views.SupplierViewSet, basename='suppliers')
+router.register(r'labs', views.LaboratoryViewSet, basename='labs')
 
 urlpatterns = [
     path('users/register/', views.register_user),
     path('users/login/', views.login_user),
-    path('users/', views.UserList.as_view()),
-    path('users/<int:pk>/', views.UserDetail.as_view()),
     path('categories/upper', views.Categories1List.as_view()),
     path('categories/middle', views.Categories2List.as_view()),
     path('categories/lower', views.Categories3List.as_view()),
-    path('materials/', views.MaterialList.as_view()),
-    path('materials/<int:pk>/', views.MaterialDetail.as_view(), name='material_detail'),
-    path('api-auth/', include('rest_framework.urls'))
+    path('api-auth/', include('rest_framework.urls')),
+    path('', include(router.urls))
 ]

@@ -4,17 +4,23 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class MaterialCategory1(models.Model):
-    category = models.CharField(max_length=25, unique=True, primary_key=True)
+    category = models.CharField(max_length=25, unique=True)
 
 
 class MaterialCategory2(models.Model):
     upper_category = models.ForeignKey(MaterialCategory1, models.CASCADE, related_name='mid_categories')
-    category = models.CharField(max_length=25, unique=True, primary_key=True)
+    category = models.CharField(max_length=25)
+
+    class Meta:
+        unique_together = ('upper_category', 'category')
 
 
 class MaterialCategory3(models.Model):
     upper_category = models.ForeignKey(MaterialCategory2, models.CASCADE, related_name='lower_categories')
-    category = models.CharField(max_length=25, unique=True, primary_key=True)
+    category = models.CharField(max_length=25, unique=True)
+
+    class Meta:
+        unique_together = ('upper_category', 'category')
 
 
 class ThermalProperties(models.Model):
@@ -109,24 +115,34 @@ class ThermogDatapoint(models.Model):
 
 
 class Entity(models.Model):
-    material_types = models.CharField(max_length=100, null=True)
-    country = models.CharField(max_length=25)
-    about = models.TextField()
+    name = models.CharField(max_length=100, unique=True)
+    material_types = models.JSONField(null=True)
+    country = models.CharField(max_length=50)
+    about = models.TextField(null=True)
 
 
 class Supplier(Entity):
-    applications = models.CharField(max_length=100, null=True)
+    applications = models.JSONField(null=True)
+    headquarters = models.CharField(max_length=100)
+    website = models.CharField(max_length=250, null=True)
     year_founded = models.IntegerField()
-    patents = models.CharField(max_length=250)
-    certifications = models.CharField(max_length=250)
-    # TODO more fields?
+    type = models.CharField(max_length=50)
+    patents = models.TextField(null=True)
+    industries = models.CharField(max_length=500)
+    processing_capabilities = models.CharField(max_length=500, null=True)
+    quality_certifications = models.CharField(max_length=500, null=True)
+    certifications = models.CharField(max_length=500, null=True)
+    extra_services = models.TextField(null=True)
 
 
 class Location(models.Model):
-    supplier = models.ForeignKey(Supplier, models.CASCADE)
-    number = models.IntegerField()
-    postal_code = models.CharField(max_length=25)
+    supplier = models.ForeignKey(Supplier, models.CASCADE, related_name="supplier_locations")
+    name = models.CharField(max_length=100)
     street = models.CharField(max_length=100)
+    postal_code = models.CharField(max_length=50)
+
+    class Meta:
+        unique_together = ('supplier', 'name')
 
 
 class Laboratory(Entity):

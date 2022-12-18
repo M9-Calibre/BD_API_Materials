@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Material, MaterialCategory3, MaterialCategory2, MaterialCategory1, Test, ThermalProperties, \
-    MechanicalProperties, PhysicalProperties
+    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location
 from django.contrib.auth.models import User
 
 
@@ -45,7 +45,6 @@ class MaterialSerializer(serializers.ModelSerializer):
             mechanical_props = None
 
         material_info = validated_data
-        print(validated_data)
         material = Material.objects.create(**material_info)
         if thermal_props:
             thermal_props = ThermalProperties.objects.create(material=material, **thermal_props)
@@ -84,30 +83,42 @@ class MaterialSerializer(serializers.ModelSerializer):
 
         if validated_thermal_props:
             if thermal_props:
-                thermal_props.thermal_conductivity = validated_thermal_props.get('thermal_conductivity', thermal_props.thermal_conductivity)
-                thermal_props.thermal_expansion_coef = validated_thermal_props.get('thermal_expansion_coef', thermal_props.thermal_expansion_coef)
-                thermal_props.specific_heat_capacity = validated_thermal_props.get('specific_heat_capacity', thermal_props.specific_heat_capacity)
+                thermal_props.thermal_conductivity = validated_thermal_props.get('thermal_conductivity',
+                                                                                 thermal_props.thermal_conductivity)
+                thermal_props.thermal_expansion_coef = validated_thermal_props.get('thermal_expansion_coef',
+                                                                                   thermal_props.thermal_expansion_coef)
+                thermal_props.specific_heat_capacity = validated_thermal_props.get('specific_heat_capacity',
+                                                                                   thermal_props.specific_heat_capacity)
             else:
                 thermal_props = ThermalProperties.objects.create(material=instance, **validated_thermal_props)
                 instance.thermal_properties = thermal_props
 
         if validated_physical_props:
             if physical_props:
-                physical_props.chemical_composition = validated_physical_props.get('chemical_composition', physical_props.chemical_composition)
+                physical_props.chemical_composition = validated_physical_props.get('chemical_composition',
+                                                                                   physical_props.chemical_composition)
             else:
                 physical_props = PhysicalProperties.objects.create(material=instance, **validated_physical_props)
                 instance.physical_properties = physical_props
 
         if validated_mechanical_props:
             if mechanical_props:
-                mechanical_props.tensile_strength = validated_mechanical_props.get('tensile_strength', mechanical_props.tensile_strength)
-                mechanical_props.thermal_conductivity = validated_mechanical_props.get('thermal_conductivity', mechanical_props.thermal_conductivity)
-                mechanical_props.reduction_of_area = validated_mechanical_props.get('reduction_of_area', mechanical_props.reduction_of_area)
-                mechanical_props.cyclic_yield_strength = validated_mechanical_props.get('cyclic_yield_strength', mechanical_props.cyclic_yield_strength)
-                mechanical_props.elastic_modulus = validated_mechanical_props.get('elastic_modulus', mechanical_props.elastic_modulus)
-                mechanical_props.poissons_ratio = validated_mechanical_props.get('poissons_ratio', mechanical_props.poissons_ratio)
-                mechanical_props.shear_modulus = validated_mechanical_props.get('shear_modulus', mechanical_props.shear_modulus)
-                mechanical_props.yield_strength = validated_mechanical_props.get('yield_strength', mechanical_props.yield_strength)
+                mechanical_props.tensile_strength = validated_mechanical_props.get('tensile_strength',
+                                                                                   mechanical_props.tensile_strength)
+                mechanical_props.thermal_conductivity = validated_mechanical_props.get('thermal_conductivity',
+                                                                                       mechanical_props.thermal_conductivity)
+                mechanical_props.reduction_of_area = validated_mechanical_props.get('reduction_of_area',
+                                                                                    mechanical_props.reduction_of_area)
+                mechanical_props.cyclic_yield_strength = validated_mechanical_props.get('cyclic_yield_strength',
+                                                                                        mechanical_props.cyclic_yield_strength)
+                mechanical_props.elastic_modulus = validated_mechanical_props.get('elastic_modulus',
+                                                                                  mechanical_props.elastic_modulus)
+                mechanical_props.poissons_ratio = validated_mechanical_props.get('poissons_ratio',
+                                                                                 mechanical_props.poissons_ratio)
+                mechanical_props.shear_modulus = validated_mechanical_props.get('shear_modulus',
+                                                                                mechanical_props.shear_modulus)
+                mechanical_props.yield_strength = validated_mechanical_props.get('yield_strength',
+                                                                                 mechanical_props.yield_strength)
             else:
                 mechanical_props = MechanicalProperties.objects.create(material=instance, **validated_mechanical_props)
                 instance.mechanical_properties = mechanical_props
@@ -122,16 +133,18 @@ class MaterialSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    materials = serializers.HyperlinkedRelatedField(many=True, queryset=Material.objects.all(), view_name='material_detail')
+    materials = serializers.HyperlinkedRelatedField(many=True, queryset=Material.objects.all(),
+                                                    view_name='materials-detail')
     tests = serializers.PrimaryKeyRelatedField(many=True, queryset=Test.objects.all())
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'materials', 'tests']
+        fields = ['id', 'first_name', 'last_name', 'username', 'email', 'materials', 'tests']
 
 
 class Category3Serializer(serializers.ModelSerializer):
-    materials = serializers.HyperlinkedRelatedField(many=True, queryset=Material.objects.all(), view_name='material_detail')
+    materials = serializers.HyperlinkedRelatedField(many=True, queryset=Material.objects.all(),
+                                                    view_name='materials-detail')
 
     class Meta:
         model = MaterialCategory3
@@ -152,3 +165,76 @@ class Category1Serializer(serializers.ModelSerializer):
     class Meta:
         model = MaterialCategory1
         fields = ['category', 'mid_categories']
+
+
+class LocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Location
+        exclude = ['supplier', 'id']
+
+
+class LaboratorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Laboratory
+        fields = '__all__'
+
+
+class SupplierSerializer(serializers.ModelSerializer):
+    locations = LocationSerializer(many=True, required=False, source="supplier_locations")
+
+    class Meta:
+        model = Supplier
+        fields = '__all__'
+
+    def create(self, validated_data):
+        try:
+            locations = validated_data.pop("supplier_locations")
+        except KeyError:
+            locations = None
+
+        supplier = Supplier(**validated_data)
+
+        objs = []
+        if locations:
+            for location in locations:
+                location_obj = Location(supplier=supplier, **location)
+                print(location_obj.supplier)
+                objs.append(location_obj)
+
+        supplier.save()
+        for location in objs:
+            location.save()
+
+        return supplier
+
+    def update(self, instance: Supplier, validated_data):
+        instance.name = validated_data.get("name", instance.name)
+        instance.material_types = validated_data.get("material_types", instance.material_types)
+        instance.country = validated_data.get("country", instance.country)
+        instance.about = validated_data.get("about", instance.about)
+        instance.applications = validated_data.get("applications", instance.applications)
+        instance.headquarters = validated_data.get("headquarters", instance.headquarters)
+        instance.website = validated_data.get("website", instance.website)
+        instance.year_founded = validated_data.get("year_founded", instance.year_founded)
+        instance.type = validated_data.get("type", instance.type)
+        instance.patents = validated_data.get("patents", instance.patents)
+        instance.industries = validated_data.get("industries", instance.industries)
+        instance.processing_capabilities = validated_data.get("processing_capabilities", instance.processing_capabilities)
+        instance.quality_certifications = validated_data.get("quality_certifications", instance.quality_certifications)
+        instance.certifications = validated_data.get("certifications", instance.certifications)
+        instance.extra_services = validated_data.get("extra_services", instance.extra_services)
+
+        validated_locations = validated_data.get('supplier_locations', [])
+        if validated_locations:
+            instance.supplier_locations.all().delete()
+            locations = []
+            for location in validated_locations:
+                location_obj = Location(supplier=instance, **location)
+                locations.append(location_obj)
+
+        instance.save()
+        for location in locations:
+            location.save()
+
+        return instance
+

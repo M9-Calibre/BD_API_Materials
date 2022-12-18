@@ -1,15 +1,15 @@
 import json
 
-from rest_framework import generics, permissions, mixins
+from rest_framework import generics, permissions, viewsets
 from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
 
-from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCategory3
-from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, Category3Serializer
-from .permissions import IsOwnerOrReadOnly
+from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCategory3, Supplier, Laboratory
+from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, Category3Serializer, SupplierSerializer, LaboratorySerializer
+from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 
 
 # Create your views here.
@@ -71,8 +71,8 @@ def login_user(request):
     return response
 
 
-class MaterialList(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+class MaterialViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     queryset = Material.objects.all()
     serializer_class = MaterialSerializer
 
@@ -80,37 +80,37 @@ class MaterialList(generics.ListCreateAPIView):
         serializer.save(submitted_by=self.request.user)
 
 
-class MaterialDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-    queryset = Material.objects.all()
-    serializer_class = MaterialSerializer
-
-
-class UserList(generics.ListAPIView):
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAdminUser]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
-class UserDetail(generics.RetrieveAPIView):
-    permission_classes = [permissions.IsAdminUser]
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+class SupplierViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+    queryset = Supplier.objects.all()
+    serializer_class = SupplierSerializer
+
+
+class LaboratoryViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+    queryset = Laboratory.objects.all()
+    serializer_class = LaboratorySerializer
 
 
 class Categories1List(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory1.objects.all()
     serializer_class = Category1Serializer
 
 
 class Categories2List(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory2.objects.all()
     serializer_class = Category2Serializer
 
 
 class Categories3List(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory3.objects.all()
     serializer_class = Category3Serializer
