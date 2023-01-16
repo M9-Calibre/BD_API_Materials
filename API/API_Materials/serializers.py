@@ -1,4 +1,7 @@
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
+
 from .models import Material, MaterialCategory3, MaterialCategory2, MaterialCategory1, Test, ThermalProperties, \
     MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location
 from django.contrib.auth.models import User
@@ -142,13 +145,36 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'first_name', 'last_name', 'username', 'email', 'materials', 'tests']
 
 
+class RegisterSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+
+    class Meta:
+        model = User
+        fields = ('username', 'password', 'email', 'first_name', 'last_name')
+        extra_kwargs = {
+            'first_name': {'required': True},
+            'last_name': {'required': True}
+        }
+
+    def create(self, validated_data):
+        user = User.objects.create(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name']
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
+
 class Category3Serializer(serializers.ModelSerializer):
-    materials = serializers.HyperlinkedRelatedField(many=True, queryset=Material.objects.all(),
-                                                    view_name='materials-detail')
+    materials = serializers.HyperlinkedRelatedField(many=True, view_name='materials-detail', read_only=True)
 
     class Meta:
         model = MaterialCategory3
-        fields = ['upper_category', 'category', 'materials']
+        fields = ['id', 'upper_category', 'category', 'materials']
 
 
 class Category2Serializer(serializers.ModelSerializer):
@@ -219,7 +245,8 @@ class SupplierSerializer(serializers.ModelSerializer):
         instance.type = validated_data.get("type", instance.type)
         instance.patents = validated_data.get("patents", instance.patents)
         instance.industries = validated_data.get("industries", instance.industries)
-        instance.processing_capabilities = validated_data.get("processing_capabilities", instance.processing_capabilities)
+        instance.processing_capabilities = validated_data.get("processing_capabilities",
+                                                              instance.processing_capabilities)
         instance.quality_certifications = validated_data.get("quality_certifications", instance.quality_certifications)
         instance.certifications = validated_data.get("certifications", instance.certifications)
         instance.extra_services = validated_data.get("extra_services", instance.extra_services)
@@ -237,4 +264,3 @@ class SupplierSerializer(serializers.ModelSerializer):
             location.save()
 
         return instance
-

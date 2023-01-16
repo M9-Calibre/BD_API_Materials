@@ -4,4 +4,5 @@ django-filter
 django-cors-headers
 django-mysql
 django-extensions
+drf-yasg
 PyMySql

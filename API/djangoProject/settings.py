@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'API_Materials.apps.ApiMaterialsConfig',
     'rest_framework',
     'rest_framework.authtoken',
-    'django_extensions'
+    'django_extensions',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [

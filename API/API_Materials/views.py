@@ -6,50 +6,18 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
+from rest_framework.permissions import AllowAny
 
 from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCategory3, Supplier, Laboratory
-from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, Category3Serializer, SupplierSerializer, LaboratorySerializer
+from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
+    Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 
 
 # Create your views here.
-@api_view(['POST'])
-def register_user(request):
-    request_json = json.loads(request.body.decode())
-    print(request_json)
-    try:
-        username = request_json["username"]
-        password = request_json["password"]
-        email = request_json["email"]
-        first_name = request_json["first_name"]
-        last_name = request_json["last_name"]
-    except KeyError:
-        response = HttpResponseBadRequest()
-        response.reason_phrase = "Missing registration parameter."
-        return response
-
-    if username in [user.username for user in User.objects.all()]:
-        response = HttpResponse()
-        response.status_code = 409
-        response.reason_phrase = "Username already taken."
-        return response
-
-    user = User.objects.create_user(username, email, password)
-    user.first_name = first_name
-    user.last_name = last_name
-
-    user.save()
-    token = Token.objects.create(user=user)
-    response = JsonResponse({"token": token.key})
-    response.status_code = 200
-    response.reason_phrase = "Registration completed successfully."
-    return response
-
-
 @api_view(['GET'])
 def login_user(request):
     request_json = json.loads(request.body.decode())
-    print(request_json)
     try:
         username = request_json["username"]
         password = request_json["password"]
@@ -86,6 +54,11 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
 
 
+class RegisterUserAPIView(generics.CreateAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
+
+
 class SupplierViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     queryset = Supplier.objects.all()
@@ -98,19 +71,19 @@ class LaboratoryViewSet(viewsets.ModelViewSet):
     serializer_class = LaboratorySerializer
 
 
-class Categories1List(generics.ListCreateAPIView):
+class CategoriesUpperList(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory1.objects.all()
     serializer_class = Category1Serializer
 
 
-class Categories2List(generics.ListCreateAPIView):
+class CategoriesMiddleList(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory2.objects.all()
     serializer_class = Category2Serializer
 
 
-class Categories3List(generics.ListCreateAPIView):
+class CategoriesLowerList(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory3.objects.all()
     serializer_class = Category3Serializer

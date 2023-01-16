@@ -59,6 +59,7 @@ class Material(models.Model):
     physical_properties = models.OneToOneField(PhysicalProperties, models.CASCADE, null=True)
 
 
+# we keep parameters, the equation
 class Model(models.Model):
     material = models.ForeignKey(Material, models.CASCADE)
     name = models.CharField(max_length=50)
@@ -68,6 +69,7 @@ class Model(models.Model):
     model_file = models.FileField()
 
 
+# maybe discretize DIC metadata
 class Test(models.Model):
     user = models.ForeignKey(User, models.SET_NULL, null=True, related_name='tests')
     material = models.ForeignKey(Material, models.CASCADE, related_name='tests')
