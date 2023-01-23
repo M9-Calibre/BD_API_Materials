@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class MaterialCategory1(models.Model):
-    category = models.CharField(max_length=25, unique=True)
+    category = models.CharField(max_length=25, unique=True, primary_key=True)
 
 
 class MaterialCategory2(models.Model):
@@ -71,11 +71,14 @@ class Model(models.Model):
 
 # maybe discretize DIC metadata
 class Test(models.Model):
-    user = models.ForeignKey(User, models.SET_NULL, null=True, related_name='tests')
+    submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='tests')
     material = models.ForeignKey(Material, models.CASCADE, related_name='tests')
     name = models.CharField(max_length=50)
     DIC_params = models.JSONField()
     thermog_params = models.JSONField(null=True)
+
+    class Meta:
+        unique_together = ('material', 'name')
 
 
 class DICStage(models.Model):
@@ -84,8 +87,10 @@ class DICStage(models.Model):
     timestamp_undef = models.DecimalField(decimal_places=6, max_digits=10)  # maybe not needed
     timestamp_def = models.DecimalField(decimal_places=6, max_digits=10)
     ambient_temperature = models.DecimalField(decimal_places=2, max_digits=5)
-    load = models.DecimalField(decimal_places=2, max_digits=5)  # TODO check digits for this
-    # TODO AD-Channels ?
+    load = models.DecimalField(decimal_places=2, max_digits=5)
+
+    class Meta:
+        unique_together = ('test', 'stage_num')
 
 
 class DICDatapoint(models.Model):
@@ -104,11 +109,16 @@ class DICDatapoint(models.Model):
     strain_minor = models.DecimalField(decimal_places=6, max_digits=8, null=True)
     thickness_reduction = models.DecimalField(decimal_places=6, max_digits=8, null=True)
 
+    class Meta:
+        unique_together = ('stage', 'index_x', 'index_y')
+
 
 class ThermogStage(models.Model):
     test = models.ForeignKey(Test, models.CASCADE)
     stage_num = models.IntegerField()
-    # TODO
+
+    class Meta:
+        unique_together = ('test', 'stage_num')
 
 
 class ThermogDatapoint(models.Model):

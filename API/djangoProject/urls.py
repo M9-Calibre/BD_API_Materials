@@ -39,13 +39,16 @@ router.register(r'materials', views.MaterialViewSet, basename="materials")
 router.register(r'users', views.UserViewSet, basename="users")
 router.register(r'suppliers', views.SupplierViewSet, basename='suppliers')
 router.register(r'labs', views.LaboratoryViewSet, basename='labs')
+router.register(r'tests', views.TestViewSet, basename='tests')
+router.register(r'DICstages', views.DICStageViewSet, basename='DICstages')
+router.register(r'DICdata', views.DICDataViewSet, basename='DICdata')
 
 urlpatterns = [
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('users/register/', views.RegisterUserAPIView.as_view()),
-    path('users/login/', views.login_user),
+    path('users/login/', views.LogInView.as_view()),
     path('categories/upper', views.CategoriesUpperList.as_view()),
     path('categories/middle', views.CategoriesMiddleList.as_view()),
     path('categories/lower', views.CategoriesLowerList.as_view()),

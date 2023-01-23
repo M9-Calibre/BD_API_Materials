@@ -1,10 +1,55 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.validators import UniqueValidator
 
 from .models import Material, MaterialCategory3, MaterialCategory2, MaterialCategory1, Test, ThermalProperties, \
-    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location
+    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint
 from django.contrib.auth.models import User
+
+
+class TestSerializer(serializers.ModelSerializer):
+    submitted_by = serializers.SlugRelatedField(many=False, read_only=True, slug_field='username')
+    material = serializers.HyperlinkedRelatedField(many=False, read_only=True, view_name='materials-detail')
+
+    class Meta:
+        model = Test
+        fields = '__all__'
+
+
+class DICStageSerializer(serializers.ModelSerializer):
+    test = serializers.HyperlinkedRelatedField(many=False, read_only=False, view_name="tests-detail",
+                                               queryset=Test.objects.all())
+
+    def validate(self, data):
+        linked_obj = data['test']
+        # print(self.context['request'].user)
+        if linked_obj.submitted_by == self.context['request'].user:
+            return data
+        else:
+            raise PermissionDenied(detail=None, code=None)
+
+    class Meta:
+        model = DICStage
+        exclude = ['id']
+
+
+class DICDataSerializer(serializers.ModelSerializer):
+    stage = serializers.HyperlinkedRelatedField(many=False, read_only=False, view_name="DICstages-detail",
+                                                queryset=DICStage.objects.all())
+
+    def validate(self, data):
+        linked_obj = data['stage']
+        # print(self.context['request'].user)
+        print(linked_obj.test.submitted_by)
+        if linked_obj.test.submitted_by == self.context['request'].user:
+            return data
+        else:
+            raise PermissionDenied(detail=None, code=None)
+
+    class Meta:
+        model = DICDatapoint
+        exclude = ['id']
 
 
 class ThermalPropsSerializer(serializers.ModelSerializer):
@@ -138,7 +183,7 @@ class MaterialSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     materials = serializers.HyperlinkedRelatedField(many=True, queryset=Material.objects.all(),
                                                     view_name='materials-detail')
-    tests = serializers.PrimaryKeyRelatedField(many=True, queryset=Test.objects.all())
+    tests = serializers.HyperlinkedRelatedField(many=True, queryset=Test.objects.all(), view_name='tests-detail')
 
     class Meta:
         model = User
@@ -171,6 +216,8 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class Category3Serializer(serializers.ModelSerializer):
     materials = serializers.HyperlinkedRelatedField(many=True, view_name='materials-detail', read_only=True)
+    upper_category = serializers.SlugRelatedField(many=False, read_only=False, slug_field='category',
+                                                  queryset=MaterialCategory2.objects.all())
 
     class Meta:
         model = MaterialCategory3
@@ -179,6 +226,8 @@ class Category3Serializer(serializers.ModelSerializer):
 
 class Category2Serializer(serializers.ModelSerializer):
     lower_categories = Category3Serializer(read_only=True, many=True)
+    upper_category = serializers.SlugRelatedField(many=False, read_only=False, slug_field='category',
+                                                  queryset=MaterialCategory1.objects.all())
 
     class Meta:
         model = MaterialCategory2

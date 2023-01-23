@@ -9,7 +9,8 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
+
+    def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
         return request.user.is_staff

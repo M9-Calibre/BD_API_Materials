@@ -5,38 +5,36 @@ from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.response import Response
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.views import APIView
 
-from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCategory3, Supplier, Laboratory
+from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCategory3, Supplier, Laboratory, Test, \
+    DICStage, DICDatapoint
 from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
-    Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer
+    Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer,  \
+    DICStageSerializer, DICDataSerializer
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 
 
 # Create your views here.
-@api_view(['GET'])
-def login_user(request):
-    request_json = json.loads(request.body.decode())
-    try:
-        username = request_json["username"]
-        password = request_json["password"]
-    except KeyError:
-        response = HttpResponseBadRequest()
-        response.reason_phrase = "Missing registration parameter."
-        return response
+class LogInView(APIView):
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
 
-    user = authenticate(username=username, password=password)
+    def get(self, request):
+        content = {
+            'user': str(request.user),  # `django.contrib.auth.User` instance.
+            'auth': str(request.auth),  # None
+        }
+        return Response(content)
 
-    if user:
-        token = Token.objects.get(user=user)
-        response = JsonResponse({"token": token.key})
-        response.status_code = 200
-        response.reason_phrase = "Login successful."
-        return response
-    response = HttpResponseForbidden()
-    response.reason_phrase = "Wrong credentials."
-    return response
+
+class RegisterUserAPIView(generics.CreateAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
 
 
 class MaterialViewSet(viewsets.ModelViewSet):
@@ -48,15 +46,31 @@ class MaterialViewSet(viewsets.ModelViewSet):
         serializer.save(submitted_by=self.request.user)
 
 
+class TestViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    queryset = Test.objects.all()
+    serializer_class = TestSerializer
+
+    def perform_create(self, serializer: TestSerializer):
+        serializer.save(submitted_by=self.request.user)
+
+
+class DICStageViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    queryset = DICStage.objects.all()
+    serializer_class = DICStageSerializer
+
+
+class DICDataViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    queryset = DICDatapoint.objects.all()
+    serializer_class = DICDataSerializer
+
+
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAdminUser]
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
-
-class RegisterUserAPIView(generics.CreateAPIView):
-    permission_classes = (AllowAny,)
-    serializer_class = RegisterSerializer
 
 
 class SupplierViewSet(viewsets.ModelViewSet):

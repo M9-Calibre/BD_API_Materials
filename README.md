@@ -28,3 +28,6 @@ python3 manage.py migrate
 python3 manage.py createsuperuser
 # then follow the instructions
 ```
+
+API Documentation can be found in /swagger or /redoc
+
