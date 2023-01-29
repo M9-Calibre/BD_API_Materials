@@ -3,6 +3,7 @@ import json
 from rest_framework import generics, permissions, viewsets
 from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
+from django_filters import rest_framework as filters
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import BasicAuthentication
@@ -17,6 +18,7 @@ from .serializers import MaterialSerializer, UserSerializer, Category1Serializer
     Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer,  \
     DICStageSerializer, DICDataSerializer
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
+from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter
 
 
 # Create your views here.
@@ -50,6 +52,7 @@ class TestViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     queryset = Test.objects.all()
     serializer_class = TestSerializer
+    filterset_fields = ["material"]
 
     def perform_create(self, serializer: TestSerializer):
         serializer.save(submitted_by=self.request.user)
@@ -89,15 +92,18 @@ class CategoriesUpperList(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory1.objects.all()
     serializer_class = Category1Serializer
+    filterset_class = CategoryUpperFilter
 
 
 class CategoriesMiddleList(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory2.objects.all()
     serializer_class = Category2Serializer
+    filterset_class = CategoryMiddleFilter
 
 
 class CategoriesLowerList(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory3.objects.all()
     serializer_class = Category3Serializer
+    filterset_class = CategoryLowerFilter

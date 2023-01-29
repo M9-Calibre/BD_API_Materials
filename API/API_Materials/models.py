@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class MaterialCategory1(models.Model):
-    category = models.CharField(max_length=25, unique=True, primary_key=True)
+    category = models.CharField(max_length=25, unique=True)
 
 
 class MaterialCategory2(models.Model):

@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 
 class TestSerializer(serializers.ModelSerializer):
     submitted_by = serializers.SlugRelatedField(many=False, read_only=True, slug_field='username')
-    material = serializers.HyperlinkedRelatedField(many=False, read_only=True, view_name='materials-detail')
+    material = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Material.objects.all())
 
     class Meta:
         model = Test
@@ -216,8 +216,8 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class Category3Serializer(serializers.ModelSerializer):
     materials = serializers.HyperlinkedRelatedField(many=True, view_name='materials-detail', read_only=True)
-    upper_category = serializers.SlugRelatedField(many=False, read_only=False, slug_field='category',
-                                                  queryset=MaterialCategory2.objects.all())
+    upper_category = serializers.PrimaryKeyRelatedField(many=False, read_only=False,
+                                                        queryset=MaterialCategory2.objects.all())
 
     class Meta:
         model = MaterialCategory3
@@ -226,12 +226,12 @@ class Category3Serializer(serializers.ModelSerializer):
 
 class Category2Serializer(serializers.ModelSerializer):
     lower_categories = Category3Serializer(read_only=True, many=True)
-    upper_category = serializers.SlugRelatedField(many=False, read_only=False, slug_field='category',
-                                                  queryset=MaterialCategory1.objects.all())
+    upper_category = serializers.PrimaryKeyRelatedField(many=False, read_only=False,
+                                                        queryset=MaterialCategory1.objects.all())
 
     class Meta:
         model = MaterialCategory2
-        fields = ['upper_category', 'category', 'lower_categories']
+        fields = ['id', 'upper_category', 'category', 'lower_categories']
 
 
 class Category1Serializer(serializers.ModelSerializer):
@@ -239,7 +239,7 @@ class Category1Serializer(serializers.ModelSerializer):
 
     class Meta:
         model = MaterialCategory1
-        fields = ['category', 'mid_categories']
+        fields = ['id', 'category', 'mid_categories']
 
 
 class LocationSerializer(serializers.ModelSerializer):
