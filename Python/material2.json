@@ -1,8 +1,8 @@
 {
-    "name": "EN 10028-2 Grade 10CrMo9-10 normalized and tempered (+NT)",
-    "description": "This is a metal!",
-    "mat_id": 40810028,
-    "source": "Boller C, Seeger T. Materials data for cyclic loading, Part B. Amsterdam: Elsevier; 1987",
+    "name": "Some Example Glass",
+    "description": "This is a glass!",
+    "mat_id": 51234028,
+    "source": "Example Source",
     "designation": "DIN 10 CrMo 9 10",
     "heat_treatment": "Normalized & tempered, 950°C/30min air, 750°C/2h air",
     "thermal_properties": {
@@ -23,10 +23,10 @@
         }
     },
     "mechanical_properties": {
-        "tensile_strength": 500,
+        "tensile_strength": 550,
         "thermal_conductivity": 46.8,
-        "reduction_of_area": 41.4,
-        "cyclic_yield_strength": 250,
+        "reduction_of_area": 32.7,
+        "cyclic_yield_strength": 270,
         "elastic_modulus": {
             "-100":217,
             "20":214,
@@ -35,33 +35,33 @@
         },
         "poissons_ratio": {
             "20":0.283,
-            "200":0.292,
-            "300":0.294
+            "200":0.402,
+            "300":0.504
         },
         "shear_modulus": {
             "20":82.8,
-            "200":77.9,
+            "200":76.9,
             "300":74.9
         },
         "yield_strength": {
-            "20":280,
+            "20":290,
             "200":224,
             "300":221
         }
     },
     "physical_properties": {
         "chemical_composition": {
-            "C":0.105,
+            "C":0.145,
             "Si":0.24,
             "Mn":0.43,
-            "P":0.012,
+            "P":0.022,
             "S":0.014,
-            "Cr":2.29,
-            "Mo":1.004,
+            "Cr":1.39,
+            "Mo":0.004,
             "Ni":0.16,
             "Cu":0.9,
             "Ti":0.03,
-            "V":0.02,
+            "V":0.04,
             "Al":0.02
         }
     }
