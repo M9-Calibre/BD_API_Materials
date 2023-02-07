@@ -6,6 +6,6 @@ django-mysql==4.8.0
 django-extensions
 drf-yasg
 PyMySql
-mysql_connector
-mysqlclient
-mysql
+#mysql_connector
+#mysqlclient
+#mysql
