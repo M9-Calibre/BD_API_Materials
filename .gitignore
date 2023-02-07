@@ -132,3 +132,4 @@ dmypy.json
 
 # Extra
 SupportingDocuments/
+API/secrets.json
