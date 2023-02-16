@@ -1,3 +1,5 @@
+.venv_bdapi/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -133,3 +135,5 @@ SupportingDocuments/
 API/secrets.json
 API/API_Materials/migrations/
 API/.idea/
+.venv_bd/
+API/.vend_bd/
