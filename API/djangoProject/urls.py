@@ -53,5 +53,6 @@ urlpatterns = [
     path('categories/middle', views.CategoriesMiddleList.as_view()),
     path('categories/lower', views.CategoriesLowerList.as_view()),
     path('api-auth/', include('rest_framework.urls')),
+    path('tests/<int:pk>/upload', views.upload_test_data),
     path('', include(router.urls))
 ]

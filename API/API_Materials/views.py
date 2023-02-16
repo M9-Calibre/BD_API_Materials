@@ -19,6 +19,7 @@ from .serializers import MaterialSerializer, UserSerializer, Category1Serializer
     DICStageSerializer, DICDataSerializer
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter
+from .utils import process_test_data
 
 
 # Create your views here.
@@ -107,3 +108,12 @@ class CategoriesLowerList(generics.ListCreateAPIView):
     queryset = MaterialCategory3.objects.all()
     serializer_class = Category3Serializer
     filterset_class = CategoryLowerFilter
+
+
+@api_view(['POST'])
+def upload_test_data(request, pk):
+    print(pk)
+    test_data = request.FILES["data"]
+    process_test_data(test_data)
+    return Response()
+

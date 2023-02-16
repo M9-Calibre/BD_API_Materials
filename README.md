@@ -31,3 +31,5 @@ python3 manage.py createsuperuser
 
 API Documentation can be found in /swagger or /redoc
 
+It is also possible to run the project from the Pycharm GUI. Pycharm is free with a student licence.
+

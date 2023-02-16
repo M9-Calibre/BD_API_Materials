@@ -81,4 +81,4 @@ def create_test(username, password, test_name, material_id, DIC_params : dict, t
         "thermog_params": thermog_params
     }
     return requests.post(f"{URL}/tests/?format=json", auth=(username,password), json=test_json)
-
+    

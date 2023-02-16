@@ -75,6 +75,8 @@ class MaterialSerializer(serializers.ModelSerializer):
     thermal_properties = ThermalPropsSerializer(many=False, required=False)
     mechanical_properties = MechanicalPropsSerializer(many=False, required=False)
     physical_properties = PhysicalPropsSerializer(many=False, required=False)
+    category = serializers.StringRelatedField(many=False)
+    tests = serializers.HyperlinkedRelatedField(many=True, queryset=Test.objects.all(), view_name='tests-detail')
 
     def create(self, validated_data):
         try:
@@ -177,7 +179,8 @@ class MaterialSerializer(serializers.ModelSerializer):
     class Meta:
         model = Material
         fields = ['id', 'name', 'category', 'description', 'submitted_by', 'mat_id', 'entry_date', 'source',
-                  'designation', 'heat_treatment', 'thermal_properties', 'mechanical_properties', 'physical_properties']
+                  'designation', 'heat_treatment', 'thermal_properties', 'mechanical_properties', 'physical_properties',
+                  'tests']
 
 
 class UserSerializer(serializers.ModelSerializer):

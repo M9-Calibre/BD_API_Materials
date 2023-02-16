@@ -22,6 +22,9 @@ class MaterialCategory3(models.Model):
     class Meta:
         unique_together = ('upper_category', 'category')
 
+    def __str__(self):
+        return f"{self.upper_category.upper_category.category}->{self.upper_category.category}->{self.category}"
+
 
 class ThermalProperties(models.Model):
     thermal_expansion_coef = models.JSONField(null=True)
@@ -86,8 +89,8 @@ class DICStage(models.Model):
     stage_num = models.IntegerField()
     timestamp_undef = models.DecimalField(decimal_places=6, max_digits=10)  # maybe not needed
     timestamp_def = models.DecimalField(decimal_places=6, max_digits=10)
-    ambient_temperature = models.DecimalField(decimal_places=2, max_digits=5)
-    load = models.DecimalField(decimal_places=2, max_digits=5)
+    ambient_temperature = models.DecimalField(decimal_places=2, max_digits=5, null=True)  # TODO: Where to find in the file
+    load = models.DecimalField(decimal_places=2, max_digits=5, null=True)  # TODO: related to AD channels?
 
     class Meta:
         unique_together = ('test', 'stage_num')
@@ -95,7 +98,7 @@ class DICStage(models.Model):
 
 class DICDatapoint(models.Model):
     stage = models.ForeignKey(DICStage, models.CASCADE)
-    index_x = models.IntegerField()  # in mm
+    index_x = models.IntegerField()  # TODO: in mm?
     index_y = models.IntegerField()  # in mm
     x = models.DecimalField(decimal_places=6, max_digits=8)
     y = models.DecimalField(decimal_places=6, max_digits=8)

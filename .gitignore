@@ -131,3 +131,5 @@ dmypy.json
 # Extra
 SupportingDocuments/
 API/secrets.json
+API/API_Materials/migrations/
+API/.idea/
