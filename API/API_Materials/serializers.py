@@ -70,13 +70,23 @@ class PhysicalPropsSerializer(serializers.ModelSerializer):
         exclude = ['id']
 
 
+class CategoryObjectSerializer(serializers.ModelSerializer):
+    upper_category = serializers.ReadOnlyField(source="upper_category.upper_category.category")
+    middle_category = serializers.ReadOnlyField(source="upper_category.category")
+    lower_category = serializers.ReadOnlyField(source="category")
+
+    class Meta:
+        model = MaterialCategory3
+        fields = ['upper_category', 'middle_category', 'lower_category']
+
+
 class MaterialSerializer(serializers.ModelSerializer):
     submitted_by = serializers.SlugRelatedField(many=False, read_only=True, slug_field='username')
     thermal_properties = ThermalPropsSerializer(many=False, required=False)
     mechanical_properties = MechanicalPropsSerializer(many=False, required=False)
     physical_properties = PhysicalPropsSerializer(many=False, required=False)
-    category = serializers.StringRelatedField(many=False)
-    tests = serializers.HyperlinkedRelatedField(many=True, queryset=Test.objects.all(), view_name='tests-detail')
+    category = CategoryObjectSerializer(many=False, read_only=True)
+    tests = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     def create(self, validated_data):
         try:
