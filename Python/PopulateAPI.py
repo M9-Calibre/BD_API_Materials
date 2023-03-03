@@ -23,7 +23,7 @@ last_name = "Bobby"
 email = "bob@example.pt"
 
 x = register_user(username_bob, password_bob, first_name, last_name, email)
-print(f"Register Bob: {x.status_code}")
+print(f"Register Bob: {x.status_code} {x.reason} {x.text}")
 
 # Get user list (should have 3 users)
 
@@ -34,7 +34,7 @@ print(json.dumps(user_list, indent=3))
 
 # Upper
 x = create_upper_category(username_staff, password_staff, "Metal")
-print(f"Create upper category Metal: {x.status_code}")
+print(f"Create upper category Metal: {x.status_code}  {x.text}")
 
 x = create_upper_category(username_staff, password_staff, "Glass")
 print(f"Create upper category Glass: {x.status_code}")
@@ -72,7 +72,7 @@ x = create_lower_category(username_staff, password_staff, "Glass", "Laminated Gl
 print(f"Create lower category Glass->Laminated Glass->EVA: {x.status_code}")
 
 x = create_lower_category(username_staff, password_staff, "Other", "Other", "Other")
-print(f"Create middle category Other->Other->Other: {x.status_code}")
+print(f"Create lower category Other->Other->Other: {x.status_code}")
 
 # Check category trees
 
@@ -123,6 +123,11 @@ dic_params_example = {
 }
  
 x = create_test(username_bob, password_bob, "Test A", material1_id, dic_params_example, None)
-print(f"Bob submits a test: {x.status_code}, {x.reason}, {x.content}")
+print(f"Bob submits a test: {x.status_code}, {x.reason}")
 test_id = x.json()['id']
 print(f"Test -> ID: {test_id}, Owner: {x.json()['submitted_by']}, Material: {x.json()['material']}")
+
+files = {'1' : open("./data/1.txt", "r"), '2' : open("./data/2.txt", "rb"), '3' : open("./data/3.txt", "rb")}
+
+x = upload_test_data(username_bob, password_bob, test_id, files)
+print(f"Bob submits test data: {x.status_code}")

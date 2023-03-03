@@ -97,6 +97,7 @@ class CategoriesUpperList(generics.ListCreateAPIView):
 
 
 class CategoriesMiddleList(generics.ListCreateAPIView):
+    
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory2.objects.all()
     serializer_class = Category2Serializer
@@ -112,8 +113,31 @@ class CategoriesLowerList(generics.ListCreateAPIView):
 
 @api_view(['POST'])
 def upload_test_data(request, pk):
-    print(pk)
-    test_data = request.FILES["data"]
-    process_test_data(test_data)
+    # TODO check user's permission
+    test_data = request.FILES
+    stages = process_test_data(test_data)
+    to_save = dict()
+    stage_list = list()
+    for stage, ts_undef, ts_def in stages:
+        s = DICStage(test_id=pk, stage_num=stage, timestamp_undef=ts_undef, timestamp_def=ts_undef)
+        stage_list.append(s)
+        datapoint_list = list()
+        datapoint_dict = stages[(stage, ts_undef, ts_def)]
+        for datapoint in datapoint_dict:
+            data = datapoint_dict[datapoint]
+            datapoint_list.append(DICDatapoint(stage=s, index_x=datapoint[0], index_y=datapoint[1], x=data["x"],
+                                    y=data["y"], z=data["z"], displacement_x=data["displacement_x"],
+                                    displacement_y=data["displacement_y"], displacement_z=data["displacement_z"],
+                                    strain_x=data["strain_x"], strain_y=data["strain_y"],
+                                    strain_major=data["strain_major"], strain_minor=data["strain_minor"],
+                                    thickness_reduction=data["thickness_reduction"]))
+        to_save[stage] = datapoint_list
+
+    for stage in stage_list:
+        stage.save()
+    for stage in to_save:
+        for datapoint in to_save[stage]:
+            datapoint.save()
+
     return Response()
 

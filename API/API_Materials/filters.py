@@ -27,3 +27,6 @@ class CategoryUpperFilter(filters.FilterSet):
     class Meta:
         model = MaterialCategory1
         fields = ["upper_category"]
+
+
+
