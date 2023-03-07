@@ -49,6 +49,7 @@ urlpatterns = [
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('users/register/', views.RegisterUserAPIView.as_view()),
     path('users/login/', views.LogInView.as_view()),
+    path('categories/', views.CategoriesList.as_view()),
     path('categories/upper', views.CategoriesUpperList.as_view()),
     path('categories/middle', views.CategoriesMiddleList.as_view()),
     path('categories/lower', views.CategoriesLowerList.as_view()),

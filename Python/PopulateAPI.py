@@ -90,14 +90,14 @@ with open("material2.json", "rb") as f:
 # Teresa submits a material
 x = create_material(username_teresa, password_teresa, material1, upper_cat="Metal", middle_cat="Steel", cat="Alloy Steel")
 print(f"Teresa creates a material: {x.status_code}")
-material1_id = x.json()['id']
-print(f"Material -> ID: {material1_id}, Owner: {x.json()['submitted_by']}")
+material1_id = 1
+#print(f"Material -> ID: {material1_id}, Owner: {x.json()['submitted_by']}")
 
 # Bob submits a material
 x = create_material(username_bob, password_bob, material2, upper_cat="Glass", middle_cat="Laminated Glass", cat="EVA")
 print(f"Bob creates a material: {x.status_code}")
-material2_id = x.json()['id']
-print(f"Material -> ID: {material2_id}, Owner: {x.json()['submitted_by']}")
+material2_id = 2
+#print(f"Material -> ID: {material2_id}, Owner: {x.json()['submitted_by']}")
 
 # Bob attempts to submit a material with the same name as Teresa's material
 # This should fail

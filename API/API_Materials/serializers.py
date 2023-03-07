@@ -220,6 +220,19 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
+class CategoriesSerializer(serializers.ModelSerializer):
+    upper = serializers.ReadOnlyField(source="upper_category.upper_category.category")
+    middle = serializers.ReadOnlyField(source="upper_category.category")
+    lower = serializers.ReadOnlyField(source="category")
+    upper_id = serializers.ReadOnlyField(source="upper_category.upper_category.id")
+    middle_id = serializers.ReadOnlyField(source="upper_category.id")
+    lower_id = serializers.ReadOnlyField(source="id")
+
+    class Meta:
+        model = MaterialCategory3
+        fields = ['upper', 'middle', 'lower', 'upper_id', 'middle_id', 'lower_id']
+
+
 class Category3Serializer(serializers.ModelSerializer):
     materials = serializers.HyperlinkedRelatedField(many=True, view_name='materials-detail', read_only=True)
     upper_category = serializers.PrimaryKeyRelatedField(many=False, read_only=False,

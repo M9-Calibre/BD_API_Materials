@@ -1,9 +1,9 @@
 import json
 
-from rest_framework import generics, permissions, viewsets
+from rest_framework import generics, permissions, viewsets, filters
 from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
-from django_filters import rest_framework as filters
+from django_filters import rest_framework as filters2
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import BasicAuthentication
@@ -16,7 +16,7 @@ from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCate
     DICStage, DICDatapoint
 from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
     Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer,  \
-    DICStageSerializer, DICDataSerializer
+    DICStageSerializer, DICDataSerializer, CategoriesSerializer
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter
 from .utils import process_test_data
@@ -44,6 +44,10 @@ class MaterialViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     queryset = Material.objects.all()
     serializer_class = MaterialSerializer
+    filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
+    ordering = ("id",)
+    ordering_fields = ('name', 'mat_id', 'entry_date')
+    search_fields = ('name', 'description',)
 
     def perform_create(self, serializer: MaterialSerializer):
         serializer.save(submitted_by=self.request.user)
@@ -109,6 +113,11 @@ class CategoriesLowerList(generics.ListCreateAPIView):
     queryset = MaterialCategory3.objects.all()
     serializer_class = Category3Serializer
     filterset_class = CategoryLowerFilter
+
+
+class CategoriesList(generics.ListAPIView):
+    queryset = MaterialCategory3.objects.all()
+    serializer_class = CategoriesSerializer
 
 
 @api_view(['POST'])
