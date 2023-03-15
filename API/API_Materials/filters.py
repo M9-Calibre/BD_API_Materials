@@ -1,5 +1,22 @@
 from django_filters import rest_framework as filters
-from .models import MaterialCategory3, MaterialCategory2, MaterialCategory1
+from .models import MaterialCategory3, MaterialCategory2, MaterialCategory1, DICDatapoint, DICStage
+
+
+class DICDataFilter(filters.FilterSet):
+    test = filters.NumberFilter(field_name="stage__test", label="test")
+    stage = filters.NumberFilter(field_name="stage", label="stage")
+
+    class Meta:
+        model = DICDatapoint
+        fields = ["test", "stage"]
+
+
+class DICStageFilter(filters.FilterSet):
+    test = filters.NumberFilter(field_name="test", label="test")
+
+    class Meta:
+        model = DICStage
+        fields = ["test"]
 
 
 class CategoryLowerFilter(filters.FilterSet):

@@ -4,21 +4,20 @@ from rest_framework import generics, permissions, viewsets, filters
 from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
 from django_filters import rest_framework as filters2
-from django.contrib.auth import authenticate
-from rest_framework.authtoken.models import Token
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.response import Response
-from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponseNotFound, HttpResponse
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 
 from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCategory3, Supplier, Laboratory, Test, \
     DICStage, DICDatapoint
 from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
-    Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer,  \
+    Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer, \
     DICStageSerializer, DICDataSerializer, CategoriesSerializer
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
-from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter
+from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter
 from .utils import process_test_data
 
 
@@ -67,12 +66,18 @@ class DICStageViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = DICStage.objects.all()
     serializer_class = DICStageSerializer
+    filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter)
+    ordering = ("stage_num",)
+    filterset_class = DICStageFilter
 
 
 class DICDataViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = DICDatapoint.objects.all()
     serializer_class = DICDataSerializer
+    filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter)
+    ordering = ("stage", "index_x", "index_y")
+    filterset_class = DICDataFilter
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -101,7 +106,6 @@ class CategoriesUpperList(generics.ListCreateAPIView):
 
 
 class CategoriesMiddleList(generics.ListCreateAPIView):
-    
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory2.objects.all()
     serializer_class = Category2Serializer
@@ -122,31 +126,44 @@ class CategoriesList(generics.ListAPIView):
 
 @api_view(['POST'])
 def upload_test_data(request, pk):
-    # TODO check user's permission
+    try:
+        test = Test.objects.get(pk=pk)
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound()
+
+    if request.user != test.submitted_by:
+        return HttpResponseForbidden()
+
+    # TODO handle duplicates
+
     test_data = request.FILES
     stages = process_test_data(test_data)
+
     to_save = dict()
     stage_list = list()
     for stage, ts_undef, ts_def in stages:
-        s = DICStage(test_id=pk, stage_num=stage, timestamp_undef=ts_undef, timestamp_def=ts_undef)
+        s = DICStage(test_id=pk, stage_num=stage, timestamp_undef=ts_undef, timestamp_def=ts_def)
         stage_list.append(s)
         datapoint_list = list()
         datapoint_dict = stages[(stage, ts_undef, ts_def)]
         for datapoint in datapoint_dict:
             data = datapoint_dict[datapoint]
             datapoint_list.append(DICDatapoint(stage=s, index_x=datapoint[0], index_y=datapoint[1], x=data["x"],
-                                    y=data["y"], z=data["z"], displacement_x=data["displacement_x"],
-                                    displacement_y=data["displacement_y"], displacement_z=data["displacement_z"],
-                                    strain_x=data["strain_x"], strain_y=data["strain_y"],
-                                    strain_major=data["strain_major"], strain_minor=data["strain_minor"],
-                                    thickness_reduction=data["thickness_reduction"]))
+                                               y=data["y"], z=data["z"], displacement_x=data["displacement_x"],
+                                               displacement_y=data["displacement_y"],
+                                               displacement_z=data["displacement_z"],
+                                               strain_x=data["strain_x"], strain_y=data["strain_y"],
+                                               strain_major=data["strain_major"], strain_minor=data["strain_minor"],
+                                               thickness_reduction=data["thickness_reduction"]))
         to_save[stage] = datapoint_list
 
-    for stage in stage_list:
-        stage.save()
+    DICStage.objects.bulk_create(stage_list)
+
+    #for stage in stage_list:
+    #    stage.save()
     for stage in to_save:
-        for datapoint in to_save[stage]:
-            datapoint.save()
+        DICDatapoint.objects.bulk_create(to_save[stage])
+        #for datapoint in to_save[stage]:
+            #datapoint.save()
 
-    return Response()
-
+    return HttpResponse()

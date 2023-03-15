@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 class TestSerializer(serializers.ModelSerializer):
     submitted_by = serializers.SlugRelatedField(many=False, read_only=True, slug_field='username')
     material = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Material.objects.all())
+    stages = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Test
@@ -18,8 +19,7 @@ class TestSerializer(serializers.ModelSerializer):
 
 
 class DICStageSerializer(serializers.ModelSerializer):
-    test = serializers.HyperlinkedRelatedField(many=False, read_only=False, view_name="tests-detail",
-                                               queryset=Test.objects.all())
+    test = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Test.objects.all())
 
     def validate(self, data):
         linked_obj = data['test']
@@ -35,8 +35,7 @@ class DICStageSerializer(serializers.ModelSerializer):
 
 
 class DICDataSerializer(serializers.ModelSerializer):
-    stage = serializers.HyperlinkedRelatedField(many=False, read_only=False, view_name="DICstages-detail",
-                                                queryset=DICStage.objects.all())
+    stage = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=DICStage.objects.all())
 
     def validate(self, data):
         linked_obj = data['stage']
@@ -187,9 +186,8 @@ class MaterialSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    materials = serializers.HyperlinkedRelatedField(many=True, queryset=Material.objects.all(),
-                                                    view_name='materials-detail')
-    tests = serializers.HyperlinkedRelatedField(many=True, queryset=Test.objects.all(), view_name='tests-detail')
+    materials = serializers.PrimaryKeyRelatedField(many=True, queryset=Material.objects.all())
+    tests = serializers.PrimaryKeyRelatedField(many=True, queryset=Test.objects.all())
 
     class Meta:
         model = User
@@ -227,14 +225,15 @@ class CategoriesSerializer(serializers.ModelSerializer):
     upper_id = serializers.ReadOnlyField(source="upper_category.upper_category.id")
     middle_id = serializers.ReadOnlyField(source="upper_category.id")
     lower_id = serializers.ReadOnlyField(source="id")
+    materials = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = MaterialCategory3
-        fields = ['upper', 'middle', 'lower', 'upper_id', 'middle_id', 'lower_id']
+        fields = ['upper', 'middle', 'lower', 'upper_id', 'middle_id', 'lower_id', 'materials']
 
 
 class Category3Serializer(serializers.ModelSerializer):
-    materials = serializers.HyperlinkedRelatedField(many=True, view_name='materials-detail', read_only=True)
+    materials = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     upper_category = serializers.PrimaryKeyRelatedField(many=False, read_only=False,
                                                         queryset=MaterialCategory2.objects.all())
 

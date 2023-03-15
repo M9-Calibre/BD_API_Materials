@@ -1,5 +1,7 @@
 from API import *
 import json
+import os
+import time
 
 # superuser must be created as indicated in README.md, change variables to your liking
 username_staff = "afonso"
@@ -122,12 +124,44 @@ dic_params_example = {
     "Step size": "5px"
 }
  
-x = create_test(username_bob, password_bob, "Test A", material1_id, dic_params_example, None)
+x = create_test(username_bob, password_bob, "0deg", material1_id, dic_params_example, None)
 print(f"Bob submits a test: {x.status_code}, {x.reason}")
 test_id = x.json()['id']
 print(f"Test -> ID: {test_id}, Owner: {x.json()['submitted_by']}, Material: {x.json()['material']}")
 
-files = {'1' : open("./data/1.txt", "r"), '2' : open("./data/2.txt", "rb"), '3' : open("./data/3.txt", "rb")}
+f = []
+for (dirpath, dirnames, filenames) in os.walk("./Test0deg"):
+    f.extend(filenames)
+    break
+
+files = {str(k) : open(f"./Test0deg/{f}", "rb") for k, f in enumerate(f)}
+
+tik = time.time()
 
 x = upload_test_data(username_bob, password_bob, test_id, files)
 print(f"Bob submits test data: {x.status_code}")
+
+tok = time.time()
+
+print("Upload time:", tok-tik)
+
+x = create_test(username_teresa, password_teresa, "45deg", material1_id, dic_params_example, None)
+print(f"Teresa submits a test: {x.status_code}, {x.reason}")
+test_id = x.json()['id']
+print(f"Test -> ID: {test_id}, Owner: {x.json()['submitted_by']}, Material: {x.json()['material']}")
+
+f = []
+for (dirpath, dirnames, filenames) in os.walk("./Test45deg"):
+    f.extend(filenames)
+    break
+
+files = {str(k) : open(f"./Test45deg/{f}", "rb") for k, f in enumerate(f)}
+
+tik = time.time()
+
+x = upload_test_data(username_teresa, password_teresa, test_id, files)
+print(f"Teresa submits test data: {x.status_code}")
+
+tok = time.time()
+
+print("Upload time:", tok-tik)

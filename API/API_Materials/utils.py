@@ -12,6 +12,7 @@ FileDict = Dict[str, _io.BufferedReader]
 def process_test_data(files: FileDict, file_type="aramis"):
     field_names = ["x", "y", "z", "displacement_x", "displacement_y", "displacement_z", "strain_x", "strain_y",
                    "strain_major", "strain_minor", "thickness_reduction"]
+
     stages = dict()
     for file in files.values():
         stage = None  # TODO handle stage/ts not found
@@ -42,5 +43,4 @@ def process_test_data(files: FileDict, file_type="aramis"):
                 # TODO
                 pass
         stages[(stage, ts_undef, ts_def)] = datapoints
-        print(stage, ts_undef, ts_def)
     return stages

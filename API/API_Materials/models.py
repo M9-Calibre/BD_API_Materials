@@ -67,7 +67,7 @@ class Model(models.Model):
     material = models.ForeignKey(Material, models.CASCADE)
     name = models.CharField(max_length=50)
     equation = models.CharField(max_length=50)
-    parameters = models.JSONField()
+    x = models.JSONField()
     parametersKPI = models.JSONField()
     model_file = models.FileField()
 
@@ -85,7 +85,7 @@ class Test(models.Model):
 
 
 class DICStage(models.Model):
-    test = models.ForeignKey(Test, models.CASCADE)
+    test = models.ForeignKey(Test, models.CASCADE, related_name='stages')
     stage_num = models.IntegerField()
     timestamp_undef = models.DecimalField(decimal_places=6, max_digits=10)  # maybe not needed
     timestamp_def = models.DecimalField(decimal_places=6, max_digits=10)
@@ -106,10 +106,10 @@ class DICDatapoint(models.Model):
     displacement_x = models.DecimalField(decimal_places=6, max_digits=8)
     displacement_y = models.DecimalField(decimal_places=6, max_digits=8)
     displacement_z = models.DecimalField(decimal_places=6, max_digits=8, null=True)
-    strain_x = models.DecimalField(decimal_places=6, max_digits=8, null=True)
-    strain_y = models.DecimalField(decimal_places=6, max_digits=8, null=True)
-    strain_major = models.DecimalField(decimal_places=6, max_digits=8, null=True)
-    strain_minor = models.DecimalField(decimal_places=6, max_digits=8, null=True)
+    strain_x = models.DecimalField(decimal_places=6, max_digits=9, null=True)
+    strain_y = models.DecimalField(decimal_places=6, max_digits=9, null=True)
+    strain_major = models.DecimalField(decimal_places=6, max_digits=9, null=True)
+    strain_minor = models.DecimalField(decimal_places=6, max_digits=9, null=True)
     thickness_reduction = models.DecimalField(decimal_places=6, max_digits=8, null=True)
 
     class Meta:
