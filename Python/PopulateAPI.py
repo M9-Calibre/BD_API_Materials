@@ -24,136 +24,138 @@ first_name = "Bob"
 last_name = "Bobby"
 email = "bob@example.pt"
 
-x = register_user(username_bob, password_bob, first_name, last_name, email)
-print(f"Register Bob: {x.status_code} {x.reason} {x.text}")
+# x = register_user(username_bob, password_bob, first_name, last_name, email)
+# print(f"Register Bob: {x.status_code} {x.reason} {x.text}")
 
-# Get user list (should have 3 users)
+# # Get user list (should have 3 users)
 
-user_list = get_user_list(username_staff,password_staff)
-print(json.dumps(user_list, indent=3))
+# user_list = get_user_list(username_staff,password_staff)
+# print(json.dumps(user_list, indent=3))
 
-# Create come categories as superuser
+# # Create come categories as superuser
 
-# Upper
-x = create_upper_category(username_staff, password_staff, "Metal")
-print(f"Create upper category Metal: {x.status_code}  {x.text}")
+# # Upper
+# x = create_upper_category(username_staff, password_staff, "Metal")
+# print(f"Create upper category Metal: {x.status_code}  {x.text}")
 
-x = create_upper_category(username_staff, password_staff, "Glass")
-print(f"Create upper category Glass: {x.status_code}")
+# x = create_upper_category(username_staff, password_staff, "Glass")
+# print(f"Create upper category Glass: {x.status_code}")
 
-x = create_upper_category(username_staff, password_staff, "Other")
-print(f"Create upper category Other: {x.status_code}")
+# x = create_upper_category(username_staff, password_staff, "Other")
+# print(f"Create upper category Other: {x.status_code}")
 
-# Middle
-x = create_middle_category(username_staff, password_staff, "Metal", "Steel")
-print(f"Create middle category Metal->Steel: {x.status_code}")
+# # Middle
+# x = create_middle_category(username_staff, password_staff, "Metal", "Steel")
+# print(f"Create middle category Metal->Steel: {x.status_code}")
 
-x = create_middle_category(username_staff, password_staff, "Metal", "Aluminium")
-print(f"Create middle category Metal->Aluminium: {x.status_code}")
+# x = create_middle_category(username_staff, password_staff, "Metal", "Aluminium")
+# print(f"Create middle category Metal->Aluminium: {x.status_code}")
 
-x = create_middle_category(username_staff, password_staff, "Metal", "Other")
-print(f"Create middle category Metal->Other: {x.status_code}")
+# x = create_middle_category(username_staff, password_staff, "Metal", "Other")
+# print(f"Create middle category Metal->Other: {x.status_code}")
 
-x = create_middle_category(username_staff, password_staff, "Glass", "Laminated Glass")
-print(f"Create middle category Glass->Laminated Glass: {x.status_code}")
+# x = create_middle_category(username_staff, password_staff, "Glass", "Laminated Glass")
+# print(f"Create middle category Glass->Laminated Glass: {x.status_code}")
 
-x = create_middle_category(username_staff, password_staff, "Glass", "Other")
-print(f"Create middle category Glass->Other: {x.status_code}")
+# x = create_middle_category(username_staff, password_staff, "Glass", "Other")
+# print(f"Create middle category Glass->Other: {x.status_code}")
 
-x = create_middle_category(username_staff, password_staff, "Other", "Other")
-print(f"Create middle category Other->Other: {x.status_code}")
+# x = create_middle_category(username_staff, password_staff, "Other", "Other")
+# print(f"Create middle category Other->Other: {x.status_code}")
 
-# Lower
-x = create_lower_category(username_staff, password_staff, "Metal", "Steel", "Alloy Steel")
-print(f"Create lower category Metal->Steel->Alloy Steel: {x.status_code}")
+# # Lower
+# x = create_lower_category(username_staff, password_staff, "Metal", "Steel", "Alloy Steel")
+# print(f"Create lower category Metal->Steel->Alloy Steel: {x.status_code}")
 
-x = create_lower_category(username_staff, password_staff, "Metal", "Aluminium", "Aluminium 1100")
-print(f"Create lower category Metal->Aluminium->Aluminium 1100: {x.status_code}")
+# x = create_lower_category(username_staff, password_staff, "Metal", "Aluminium", "Aluminium 1100")
+# print(f"Create lower category Metal->Aluminium->Aluminium 1100: {x.status_code}")
 
-x = create_lower_category(username_staff, password_staff, "Glass", "Laminated Glass", "EVA")
-print(f"Create lower category Glass->Laminated Glass->EVA: {x.status_code}")
+# x = create_lower_category(username_staff, password_staff, "Glass", "Laminated Glass", "EVA")
+# print(f"Create lower category Glass->Laminated Glass->EVA: {x.status_code}")
 
-x = create_lower_category(username_staff, password_staff, "Other", "Other", "Other")
-print(f"Create lower category Other->Other->Other: {x.status_code}")
+# x = create_lower_category(username_staff, password_staff, "Other", "Other", "Other")
+# print(f"Create lower category Other->Other->Other: {x.status_code}")
 
-# Check category trees
+# # Check category trees
 
-category_tree = get_category_tree(username_staff, password_staff)
-print(json.dumps(category_tree, indent=3))
+# category_tree = get_category_tree(username_staff, password_staff)
+# print(json.dumps(category_tree, indent=3))
 
-# Create some materials
+# # Create some materials
 
-with open("material.json", "rb") as f:
-    material1 = json.load(f)
+# with open("material.json", "rb") as f:
+#     material1 = json.load(f)
 
-with open("material2.json", "rb") as f:
-    material2 = json.load(f)
+# with open("material2.json", "rb") as f:
+#     material2 = json.load(f)
 
-# Teresa submits a material
-x = create_material(username_teresa, password_teresa, material1, upper_cat="Metal", middle_cat="Steel", cat="Alloy Steel")
-print(f"Teresa creates a material: {x.status_code}")
-material1_id = 1
-#print(f"Material -> ID: {material1_id}, Owner: {x.json()['submitted_by']}")
+# # Teresa submits a material
+# x = create_material(username_teresa, password_teresa, material1, upper_cat="Metal", middle_cat="Steel", cat="Alloy Steel")
+# print(f"Teresa creates a material: {x.status_code}")
+# material1_id = 1
+# #print(f"Material -> ID: {material1_id}, Owner: {x.json()['submitted_by']}")
 
-# Bob submits a material
-x = create_material(username_bob, password_bob, material2, upper_cat="Glass", middle_cat="Laminated Glass", cat="EVA")
-print(f"Bob creates a material: {x.status_code}")
-material2_id = 2
-#print(f"Material -> ID: {material2_id}, Owner: {x.json()['submitted_by']}")
+# # Bob submits a material
+# x = create_material(username_bob, password_bob, material2, upper_cat="Glass", middle_cat="Laminated Glass", cat="EVA")
+# print(f"Bob creates a material: {x.status_code}")
+# material2_id = 2
+# #print(f"Material -> ID: {material2_id}, Owner: {x.json()['submitted_by']}")
 
-# Bob attempts to submit a material with the same name as Teresa's material
-# This should fail
-x = create_material(username_bob, password_bob, material1, upper_cat="Glass", middle_cat="Laminated Glass", cat="EVA")
-print(f"Bob attempts to create a material (should fail): {x.status_code}, {x.reason}")
+# # Bob attempts to submit a material with the same name as Teresa's material
+# # This should fail
+# x = create_material(username_bob, password_bob, material1, upper_cat="Glass", middle_cat="Laminated Glass", cat="EVA")
+# print(f"Bob attempts to create a material (should fail): {x.status_code}, {x.reason}")
 
-materials = get_material_list()
-print(f"Number of materials: {len(materials)}")
+# materials = get_material_list()
+# print(f"Number of materials: {len(materials)}")
 
-# Test Creation
-# Bob creates test for Teresas Alloy Steel material
+# # Test Creation
+# # Bob creates test for Teresas Alloy Steel material
 
-dic_params_example = {
-    "Camera": "FlirBackflyBFS-U3-51S5M-C",
-    "Focal length": 12.5,
-    "Image resolution": "2448x2048 px2",
-    "Camera noise": "0.48% ofrange",
-    "Working distance": "251 nm",
-    "Image conversion factor": "0.05039 mm/px",
-    "Average speckle size": "3px",
-    "Subject size": "21 px",
-    "Step size": "5px"
-}
+# dic_params_example = {
+#     "Camera": "FlirBackflyBFS-U3-51S5M-C",
+#     "Focal length": 12.5,
+#     "Image resolution": "2448x2048 px2",
+#     "Camera noise": "0.48% ofrange",
+#     "Working distance": "251 nm",
+#     "Image conversion factor": "0.05039 mm/px",
+#     "Average speckle size": "3px",
+#     "Subject size": "21 px",
+#     "Step size": "5px"
+# }
  
-x = create_test(username_bob, password_bob, "0deg", material1_id, dic_params_example, None)
-print(f"Bob submits a test: {x.status_code}, {x.reason}")
-test_id = x.json()['id']
-print(f"Test -> ID: {test_id}, Owner: {x.json()['submitted_by']}, Material: {x.json()['material']}")
+# x = create_test(username_bob, password_bob, "0deg", material1_id, dic_params_example, None)
+# print(f"Bob submits a test: {x.status_code}, {x.reason}")
+# test_id = x.json()['id']
+# print(f"Test -> ID: {test_id}, Owner: {x.json()['submitted_by']}, Material: {x.json()['material']}")
 
-f = []
-for (dirpath, dirnames, filenames) in os.walk("./Test0deg"):
-    f.extend(filenames)
-    break
+# f = []
+# for (dirpath, dirnames, filenames) in os.walk("./Test0deg"):
+#     f.extend(filenames)
+#     break
 
-files = {str(k) : open(f"./Test0deg/{f}", "rb") for k, f in enumerate(f)}
+# files = {str(k) : open(f"./Test0deg/{f}", "rb") for k, f in enumerate(f)}
 
-tik = time.time()
+# tik = time.time()
 
-x = upload_test_data(username_bob, password_bob, test_id, files)
-print(f"Bob submits test data: {x.status_code}")
+# x = upload_test_data(username_bob, password_bob, test_id, files)
+# print(f"Bob submits test data: {x.status_code}")
 
-tok = time.time()
+# tok = time.time()
 
-print("Upload time:", tok-tik)
+# print("Upload time:", tok-tik)
 
-x = create_test(username_teresa, password_teresa, "45deg", material1_id, dic_params_example, None)
-print(f"Teresa submits a test: {x.status_code}, {x.reason}")
-test_id = x.json()['id']
-print(f"Test -> ID: {test_id}, Owner: {x.json()['submitted_by']}, Material: {x.json()['material']}")
+# x = create_test(username_teresa, password_teresa, "45deg", material1_id, dic_params_example, None)
+# print(f"Teresa submits a test: {x.status_code}, {x.reason}")
+# test_id = x.json()['id']
+# print(f"Test -> ID: {test_id}, Owner: {x.json()['submitted_by']}, Material: {x.json()['material']}")
 
 f = []
 for (dirpath, dirnames, filenames) in os.walk("./Test45deg"):
     f.extend(filenames)
     break
+
+test_id = 4
 
 files = {str(k) : open(f"./Test45deg/{f}", "rb") for k, f in enumerate(f)}
 
