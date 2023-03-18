@@ -155,8 +155,6 @@ for (dirpath, dirnames, filenames) in os.walk("./Test45deg"):
     f.extend(filenames)
     break
 
-test_id = 4
-
 files = {str(k) : open(f"./Test45deg/{f}", "rb") for k, f in enumerate(f)}
 
 tik = time.time()

@@ -19,6 +19,7 @@ from .serializers import MaterialSerializer, UserSerializer, Category1Serializer
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter
 from .utils import process_test_data
+from .pagination import DICDataPagination
 
 
 # Create your views here.
@@ -78,6 +79,7 @@ class DICDataViewSet(viewsets.ModelViewSet):
     filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter)
     ordering = ("stage", "index_x", "index_y")
     filterset_class = DICDataFilter
+    pagination_class = DICDataPagination
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
