@@ -141,11 +141,9 @@ def upload_test_data(request, pk):
     test_data = request.FILES
     stages = process_test_data(test_data)
 
-    to_save = dict()
-    stage_list = list()
     for stage, ts_undef, ts_def in stages:
         s = DICStage(test_id=pk, stage_num=stage, timestamp_undef=ts_undef, timestamp_def=ts_def)
-        stage_list.append(s)
+        s.save()
         datapoint_list = list()
         datapoint_dict = stages[(stage, ts_undef, ts_def)]
         for datapoint in datapoint_dict:
@@ -157,15 +155,6 @@ def upload_test_data(request, pk):
                                                strain_x=data["strain_x"], strain_y=data["strain_y"],
                                                strain_major=data["strain_major"], strain_minor=data["strain_minor"],
                                                thickness_reduction=data["thickness_reduction"]))
-        to_save[stage] = datapoint_list
-
-    DICStage.objects.bulk_create(stage_list)
-
-    #for stage in stage_list:
-    #    stage.save()
-    for stage in to_save:
-        DICDatapoint.objects.bulk_create(to_save[stage])
-        #for datapoint in to_save[stage]:
-            #datapoint.save()
+        DICDatapoint.objects.bulk_create(datapoint_list)
 
     return HttpResponse()
