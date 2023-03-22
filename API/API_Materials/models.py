@@ -29,12 +29,12 @@ class MaterialCategory3(models.Model):
 class ThermalProperties(models.Model):
     thermal_expansion_coef = models.JSONField(null=True)
     specific_heat_capacity = models.JSONField(null=True)
-    thermal_conductivity = models.JSONField(null=True)
+    thermal_conductivity_tp = models.JSONField(null=True)
 
 
 class MechanicalProperties(models.Model):
     tensile_strength = models.IntegerField(null=True)
-    thermal_conductivity = models.DecimalField(null=True, decimal_places=2, max_digits=6)
+    thermal_conductivity_mp = models.DecimalField(null=True, decimal_places=2, max_digits=6)
     reduction_of_area = models.DecimalField(null=True, decimal_places=2, max_digits=5)  # percentage
     cyclic_yield_strength = models.IntegerField(null=True)
     elastic_modulus = models.JSONField(null=True)

@@ -15,6 +15,14 @@ def register_user(username, password, first_name, last_name, email):
 
     return requests.post(f"{URL}/users/register/", json=json_req_body)
 
+def login_user(username, password):
+    json_req_body = {
+        "username" : username,
+        "password" : password
+    }
+
+    return requests.post(f"{URL}/users/login/", json=json_req_body)
+
 # Can only be performed by a superuser
 # Steps to create superuser in the README.md
 def get_user_list(username, password):
@@ -85,4 +93,7 @@ def create_test(username, password, test_name, material_id, DIC_params : dict, t
 
 def upload_test_data(username, password, test_id, files):
     return requests.post(f"{URL}/tests/{test_id}/upload", files=files, auth=(username,password))
+
+def update_test_data(username, password, test_id, files):
+    return requests.put(f"{URL}/tests/{test_id}/aaaa", files=files, auth=(username,password))
     

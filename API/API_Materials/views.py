@@ -5,11 +5,13 @@ from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
 from django_filters import rest_framework as filters2
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework.authentication import BasicAuthentication
+from django.db import transaction
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.response import Response
 from django.http import HttpResponseForbidden, HttpResponseNotFound, HttpResponse
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
+from rest_framework.authtoken.models import Token
 
 from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCategory3, Supplier, Laboratory, Test, \
     DICStage, DICDatapoint
@@ -20,19 +22,6 @@ from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter
 from .utils import process_test_data
 from .pagination import DICDataPagination
-
-
-# Create your views here.
-class LogInView(APIView):
-    authentication_classes = [BasicAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        content = {
-            'user': str(request.user),  # `django.contrib.auth.User` instance.
-            'auth': str(request.auth),  # None
-        }
-        return Response(content)
 
 
 class RegisterUserAPIView(generics.CreateAPIView):
@@ -126,7 +115,9 @@ class CategoriesList(generics.ListAPIView):
     serializer_class = CategoriesSerializer
 
 
-@api_view(['POST'])
+# TODO: test transaction
+@transaction.atomic
+@api_view(['POST', 'PUT', 'DELETE'])
 def upload_test_data(request, pk):
     try:
         test = Test.objects.get(pk=pk)
@@ -136,10 +127,20 @@ def upload_test_data(request, pk):
     if request.user != test.submitted_by:
         return HttpResponseForbidden()
 
+    if request.method == 'POST':
+        pass
+    elif request.method == 'PUT':
+        pass
+    elif request.method == 'DELETE':
+        pass
+
+    existing_stages = {stage.stage_num for stage in test.stages.all()}
+    print(existing_stages)
+
     # TODO handle duplicates
 
     test_data = request.FILES
-    stages = process_test_data(test_data)
+    stages, bad_format, duplicated_stages = process_test_data(test_data)
 
     for stage, ts_undef, ts_def in stages:
         s = DICStage(test_id=pk, stage_num=stage, timestamp_undef=ts_undef, timestamp_def=ts_def)

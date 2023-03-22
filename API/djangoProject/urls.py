@@ -20,6 +20,7 @@ from drf_yasg import openapi
 from rest_framework import permissions
 
 from API_Materials import views
+from rest_framework.authtoken import views as views2
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -48,7 +49,7 @@ urlpatterns = [
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('users/register/', views.RegisterUserAPIView.as_view()),
-    path('users/login/', views.LogInView.as_view()),
+    path('users/login/', views2.obtain_auth_token),
     path('categories/', views.CategoriesList.as_view()),
     path('categories/upper', views.CategoriesUpperList.as_view()),
     path('categories/middle', views.CategoriesMiddleList.as_view()),

@@ -135,8 +135,8 @@ class MaterialSerializer(serializers.ModelSerializer):
 
         if validated_thermal_props:
             if thermal_props:
-                thermal_props.thermal_conductivity = validated_thermal_props.get('thermal_conductivity',
-                                                                                 thermal_props.thermal_conductivity)
+                thermal_props.thermal_conductivity_tp = validated_thermal_props.get('thermal_conductivity_tp',
+                                                                                    thermal_props.thermal_conductivity_tp)
                 thermal_props.thermal_expansion_coef = validated_thermal_props.get('thermal_expansion_coef',
                                                                                    thermal_props.thermal_expansion_coef)
                 thermal_props.specific_heat_capacity = validated_thermal_props.get('specific_heat_capacity',
@@ -157,8 +157,8 @@ class MaterialSerializer(serializers.ModelSerializer):
             if mechanical_props:
                 mechanical_props.tensile_strength = validated_mechanical_props.get('tensile_strength',
                                                                                    mechanical_props.tensile_strength)
-                mechanical_props.thermal_conductivity = validated_mechanical_props.get('thermal_conductivity',
-                                                                                       mechanical_props.thermal_conductivity)
+                mechanical_props.thermal_conductivity_mp = validated_mechanical_props.get('thermal_conductivity_mp',
+                                                                                          mechanical_props.thermal_conductivity_mp)
                 mechanical_props.reduction_of_area = validated_mechanical_props.get('reduction_of_area',
                                                                                     mechanical_props.reduction_of_area)
                 mechanical_props.cyclic_yield_strength = validated_mechanical_props.get('cyclic_yield_strength',

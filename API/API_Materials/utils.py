@@ -13,8 +13,11 @@ def process_test_data(files: FileDict, file_type="aramis"):
     field_names = ["x", "y", "z", "displacement_x", "displacement_y", "displacement_z", "strain_x", "strain_y",
                    "strain_major", "strain_minor", "thickness_reduction"]
 
+    duplicated_stages = []
+    bad_format = []
+
     stages = dict()
-    for file in files.values():
+    for file_name, file in files.items():
         stage = None  # TODO handle stage/ts not found
         ts_undef = None
         ts_def = None
@@ -23,8 +26,8 @@ def process_test_data(files: FileDict, file_type="aramis"):
             line = line.decode()
             if file_type == "aramis":
                 if line.startswith("# Stage :"):  # get stage
-                    stage = int(float(line.split("-")[1].strip()))  # TODO maybe remove int cast?
-                elif line.startswith("# Time  :  undeformt: "): # get timestamp
+                    stage = int(float(line.split("-")[1].strip()))
+                elif line.startswith("# Time  :  undeformt: "):  # get timestamp
                     ts_undef = float(line.split()[4])
                 elif line.startswith("#            deformt: "):  # get timestamp
                     ts_def = float(line.split()[2])
@@ -38,9 +41,14 @@ def process_test_data(files: FileDict, file_type="aramis"):
                     for idx2, name in enumerate(field_names):
                         data[name] = fields[idx2]
                     datapoints[idx] = data
-                # TODO: AD channels?
+                # TODO: load?
             elif file_type == "matchid":
                 # TODO
                 pass
+        # check for errors or duplicates
+        if not stage or not datapoints or not ts_undef or not ts_def:
+            bad_format.append(file_name)
+        elif (stage, ts_undef, ts_def) in stages:  # duplicate
+            duplicated_stages.append(stage)
         stages[(stage, ts_undef, ts_def)] = datapoints
-    return stages
+    return stages, bad_format, duplicated_stages
