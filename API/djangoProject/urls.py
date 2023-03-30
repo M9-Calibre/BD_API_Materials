@@ -49,12 +49,13 @@ urlpatterns = [
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('users/register/', views.RegisterUserAPIView.as_view()),
-    path('users/login/', views2.obtain_auth_token),
+    path('users/login/', views.login_view),
     path('categories/', views.CategoriesList.as_view()),
     path('categories/upper', views.CategoriesUpperList.as_view()),
     path('categories/middle', views.CategoriesMiddleList.as_view()),
     path('categories/lower', views.CategoriesLowerList.as_view()),
     path('api-auth/', include('rest_framework.urls')),
     path('tests/<int:pk>/upload', views.upload_test_data),
+    path('tests/<int:pk>/delete', views.delete_test_data),
     path('', include(router.urls))
 ]

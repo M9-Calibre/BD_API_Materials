@@ -1,5 +1,4 @@
-import json
-
+from django.contrib.auth import authenticate, login
 from rest_framework import generics, permissions, viewsets, filters
 from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
@@ -22,6 +21,29 @@ from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter
 from .utils import process_test_data
 from .pagination import DICDataPagination
+
+
+@api_view(['POST'])
+def login_view(request):
+    if request.method == 'POST':
+        data = request.data
+
+        username = data.get('username', None)
+        password = data.get('password', None)
+
+        user = authenticate(username=username, password=password)
+
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                token = Token.objects.get(user=user)
+                data = {"token": token.key}
+
+                return Response(status=200, data=data)
+            else:
+                return Response(status=400)
+        else:
+            return Response(status=404)
 
 
 class RegisterUserAPIView(generics.CreateAPIView):
@@ -115,9 +137,28 @@ class CategoriesList(generics.ListAPIView):
     serializer_class = CategoriesSerializer
 
 
-# TODO: test transaction
+@api_view(['DELETE'])
+def delete_test_data(request, pk):
+    try:
+        test = Test.objects.get(pk=pk)
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound()
+
+    if request.user != test.submitted_by:
+        return HttpResponseForbidden()
+
+    existing_stages = {stage.stage_num for stage in test.stages.all()}
+    if request.method == 'DELETE':
+        if not existing_stages:
+            data = {"message": "Cannot DELETE test data as it doesn't exist."}
+            return Response(status=404, data=data)
+
+        DICStage.objects.filter(test=test).delete()
+        return Response()
+
+
 @transaction.atomic
-@api_view(['POST', 'PUT', 'DELETE'])
+@api_view(['POST', 'PUT'])
 def upload_test_data(request, pk):
     try:
         test = Test.objects.get(pk=pk)
@@ -127,21 +168,32 @@ def upload_test_data(request, pk):
     if request.user != test.submitted_by:
         return HttpResponseForbidden()
 
-    if request.method == 'POST':
-        pass
-    elif request.method == 'PUT':
-        pass
-    elif request.method == 'DELETE':
-        pass
-
     existing_stages = {stage.stage_num for stage in test.stages.all()}
-    print(existing_stages)
-
-    # TODO handle duplicates
+    if request.method == 'POST':
+        if existing_stages:
+            data = {"message": "Cannot POST test data, as it already exists."}
+            return Response(status=400, data=data)
 
     test_data = request.FILES
     stages, bad_format, duplicated_stages = process_test_data(test_data)
 
+    if duplicated_stages:
+        data = {"message": "Duplicated stages in uploaded data.", "duplicated_stages": duplicated_stages}
+        return Response(status=400, data=data)
+
+    read_stages = {stage[0] for stage in stages}
+    already_in_db = read_stages.intersection(existing_stages)
+
+    if already_in_db:
+        if not request.query_params.get("override", None):
+            data = {
+                "message": "Uploaded stages already in DB. If you wish to override them set the \"override\" query param to true.",
+                "overridden_stages": already_in_db}
+            return Response(status=400, data=data)
+        else:
+            test.stages.filter(stage_num__in=already_in_db).delete()
+
+    # Create data
     for stage, ts_undef, ts_def in stages:
         s = DICStage(test_id=pk, stage_num=stage, timestamp_undef=ts_undef, timestamp_def=ts_def)
         s.save()
@@ -158,4 +210,6 @@ def upload_test_data(request, pk):
                                                thickness_reduction=data["thickness_reduction"]))
         DICDatapoint.objects.bulk_create(datapoint_list)
 
-    return HttpResponse()
+    data = {"created_stages": read_stages - already_in_db, "overridden_stages": already_in_db if already_in_db else None}
+
+    return HttpResponse(data=data)
