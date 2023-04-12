@@ -64,33 +64,39 @@ class Material(models.Model):
 
 # we keep parameters, the equation
 class Model(models.Model):
-    material = models.ForeignKey(Material, models.CASCADE)
     name = models.CharField(max_length=50)
-    equation = models.CharField(max_length=50)
-    x = models.JSONField()
-    parametersKPI = models.JSONField()
-    model_file = models.FileField()
+    tag = models.CharField(max_length=30)
+    input = models.CharField(max_length=50)
+    output = models.CharField(max_length=50)
+    parameters = models.JSONField()
 
 
-# maybe discretize DIC metadata
 class Test(models.Model):
     submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='tests')
     material = models.ForeignKey(Material, models.CASCADE, related_name='tests')
     name = models.CharField(max_length=50)
     DIC_params = models.JSONField()
-    thermog_params = models.JSONField(null=True)
 
     class Meta:
         unique_together = ('material', 'name')
 
 
+class MaterialModelParams(models.Model):
+    test = models.ForeignKey(Test, models.CASCADE, related_name='params')
+    model = models.ForeignKey(Model, models.CASCADE, related_name='params')
+    submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='params')
+    params = models.JSONField()
+
+    class Meta:
+        unique_together = ("test", "model", "submitted_by")
+
+
 class DICStage(models.Model):
     test = models.ForeignKey(Test, models.CASCADE, related_name='stages')
     stage_num = models.IntegerField()
-    timestamp_undef = models.DecimalField(decimal_places=6, max_digits=10)  # maybe not needed
-    timestamp_def = models.DecimalField(decimal_places=6, max_digits=10)
-    ambient_temperature = models.DecimalField(decimal_places=2, max_digits=5, null=True)  # TODO: Where to find in the file
-    load = models.DecimalField(decimal_places=2, max_digits=5, null=True)  # TODO: related to AD channels?
+    timestamp_def = models.FloatField()
+    # ambient_temperature = models.DecimalField(decimal_places=2, max_digits=5, null=True)  # TODO: Where to find in the file
+    load = models.FloatField()
 
     class Meta:
         unique_together = ('test', 'stage_num')
@@ -98,35 +104,21 @@ class DICStage(models.Model):
 
 class DICDatapoint(models.Model):
     stage = models.ForeignKey(DICStage, models.CASCADE)
-    index_x = models.IntegerField()  # TODO: in mm?
-    index_y = models.IntegerField()  # in mm
-    x = models.DecimalField(decimal_places=6, max_digits=8)
-    y = models.DecimalField(decimal_places=6, max_digits=8)
-    z = models.DecimalField(decimal_places=6, max_digits=8, null=True)
-    displacement_x = models.DecimalField(decimal_places=6, max_digits=8)
-    displacement_y = models.DecimalField(decimal_places=6, max_digits=8)
-    displacement_z = models.DecimalField(decimal_places=6, max_digits=8, null=True)
-    strain_x = models.DecimalField(decimal_places=6, max_digits=9, null=True)
-    strain_y = models.DecimalField(decimal_places=6, max_digits=9, null=True)
-    strain_major = models.DecimalField(decimal_places=6, max_digits=9, null=True)
-    strain_minor = models.DecimalField(decimal_places=6, max_digits=9, null=True)
-    thickness_reduction = models.DecimalField(decimal_places=6, max_digits=8, null=True)
+    x = models.FloatField()
+    y = models.FloatField()
+    z = models.FloatField(null=True)
+    displacement_x = models.FloatField()
+    displacement_y = models.FloatField()
+    displacement_z = models.FloatField(null=True)
+    strain_x = models.FloatField(null=True)
+    strain_y = models.FloatField(null=True)
+    strain_xy = models.FloatField(null=True)
+    strain_major = models.FloatField(null=True)
+    strain_minor = models.FloatField(null=True)
+    thickness_reduction = models.FloatField(null=True)
 
     class Meta:
-        unique_together = ('stage', 'index_x', 'index_y')
-
-
-class ThermogStage(models.Model):
-    test = models.ForeignKey(Test, models.CASCADE)
-    stage_num = models.IntegerField()
-
-    class Meta:
-        unique_together = ('test', 'stage_num')
-
-
-class ThermogDatapoint(models.Model):
-    stage = models.ForeignKey(ThermogStage, models.CASCADE)
-    # TODO
+        unique_together = ('stage', 'x', 'y')
 
 
 class Entity(models.Model):

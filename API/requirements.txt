@@ -1,6 +1,6 @@
-Django==4.1.7
+Django==4.2
 djangorestframework
-django-filter
+django-filter==23.1
 django-cors-headers==3.14.0
 django-mysql==4.9.0
 django-extensions
@@ -9,5 +9,8 @@ PyMySql
 mysql
 mysqlclient
 mysql_connector
+numpy
+pandas
+
 
 

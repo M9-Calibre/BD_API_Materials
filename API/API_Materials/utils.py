@@ -1,54 +1,90 @@
 import _io
-
+import pandas as pd
+import re
 from typing import Dict
 
 FileDict = Dict[str, _io.BufferedReader]
 
-# Stage -> DataPoint
-# Datapoint (required) -> idx_x, idx_y, x, y, z, dis_x, dis_y, dis_z, str_x, str_y, str_major, str_minor, thick_red
+# Aramis: idx_x, idx_y, x, y, z, dis_x, dis_y, dis_z, str_x, str_y, str_major, str_minor, thick_red
+field_names = ["x", "y", "z", "displacement_x", "displacement_y", "displacement_z", "strain_x", "strain_y", "strain_xy",
+               "strain_major", "strain_minor", "thickness_reduction"]
+match_id_field_names = ['coor.X [mm]', 'coor.Y [mm]', 'coor.Z [mm]', 'disp.Horizontal Displacement U [mm]',
+                        'disp.Vertical Displacement V [mm]', 'TODO', 'strain.Strain-global frame: Exx [ ]',
+                        'strain.Strain-global frame: Eyy [ ]', 'strain.Strain-global frame: Exy [ ]', 'TODO', 'TODO', 'TODO']
+match_id_mapper = {match_id_field_names[i]: field_names[i] for i in range(len(field_names))}
 
 
-# TODO handle repeated stages
-def process_test_data(files: FileDict, file_type="aramis"):
-    field_names = ["x", "y", "z", "displacement_x", "displacement_y", "displacement_z", "strain_x", "strain_y",
-                   "strain_major", "strain_minor", "thickness_reduction"]
-
-    duplicated_stages = []
-    bad_format = []
-
+def process_test_data(files: FileDict, file_format="aramis", _3d=False):
+    duplicated_stages = list()
+    bad_format = list()
+    not_in_metadata = list()
+    skipped_files = list()
+    read_stages = list()
     stages = dict()
+    metadata = pd.read_csv(files["stage_metadata.csv"], delimiter=",", header=None,
+                           names=["stage_num", "ts_def", "load"])
     for file_name, file in files.items():
-        stage = None  # TODO handle stage/ts not found
-        ts_undef = None
-        ts_def = None
-        datapoints = dict()
-        for line in file:
-            line = line.decode()
-            if file_type == "aramis":
-                if line.startswith("# Stage :"):  # get stage
-                    stage = int(float(line.split("-")[1].strip()))
-                elif line.startswith("# Time  :  undeformt: "):  # get timestamp
-                    ts_undef = float(line.split()[4])
-                elif line.startswith("#            deformt: "):  # get timestamp
-                    ts_def = float(line.split()[2])
-                elif not line.startswith("#"):  # get datapoint
-                    fields = [float(x) for x in line.split()]
-                    idx = (fields[0], fields[1])
-                    fields = fields[2:5] + fields[8:]
-                    if len(fields) == 6 or len(fields) < 11:
-                        fields = fields + [None, None, None, None, None]
-                    data = dict()
-                    for idx2, name in enumerate(field_names):
-                        data[name] = fields[idx2]
-                    datapoints[idx] = data
-                # TODO: load?
-            elif file_type == "matchid":
-                # TODO
-                pass
-        # check for errors or duplicates
-        if not stage or not datapoints or not ts_undef or not ts_def:
-            bad_format.append(file_name)
-        elif (stage, ts_undef, ts_def) in stages:  # duplicate
+        if file_name == "stage_metadata.csv":
+            continue
+        numbers = re.findall(r'\d+', file_name)
+        if not numbers:
+            skipped_files.append(file_name)
+            continue
+        stage = int(numbers[-1])
+        if stage in read_stages:  # duplicate
             duplicated_stages.append(stage)
-        stages[(stage, ts_undef, ts_def)] = datapoints
-    return stages, bad_format, duplicated_stages
+            continue
+        stage_metadata = metadata[metadata["stage_num"] == stage]
+        if stage_metadata.empty:
+            if stage == 0:
+                ts_def = 0
+                load = 0
+            else:
+                not_in_metadata.append(file_name)
+                continue
+        else:
+            ts_def = float(stage_metadata["ts_def"].iloc[0])
+            load = float(stage_metadata["load"].iloc[0])
+        datapoints = list()
+        if file_format == "aramis":  # Todo 2D aramis? If not verify
+            for line in file:
+                line = line.decode()
+                if not line.startswith("#"):  # get datapoint
+                    fields = [float(x) for x in line.split()]
+                    if len(fields) < 11 or len(fields) > 17:
+                        bad_format.append(file_name)
+                        break
+                    fields = fields[2:5] + fields[8:]
+                    data = dict()
+                    for idx, name in enumerate(field_names):
+                        if idx < len(fields):
+                            data[name] = fields[idx]
+                        else:
+                            data[name] = None
+                            print(data)
+                    datapoints.append(data)
+        elif file_format == "matchid":  # TODO
+            content = pd.read_csv(file, delimiter=',')
+            if _3d:
+                pass
+            else:
+                required = {'coor.X [mm]', 'coor.Y [mm]', 'disp.Horizontal Displacement U [mm]', 'disp.Vertical Displacement V [mm]'}
+                if all([req in content.columns for req in required]):
+                    present = required
+                    additional = {'strain.Strain-global frame: Exx [ ]', 'strain.Strain-global frame: Eyy [ ]', 'strain.Strain-global frame: Exy [ ]'}
+                    for adt in additional:
+                        if adt in content.columns:
+                            present.add(adt)
+                    content = content.filter(items=present)
+                    content.rename(inplace=True, columns=match_id_mapper)
+                    datapoints = content.to_dict(orient='records')
+                else:
+                    bad_format.append(file_name)
+                    continue
+        # check for errors or duplicates
+        if not datapoints:
+            bad_format.append(file_name)
+            continue
+        stages[(stage, ts_def, load)] = datapoints
+        read_stages.append(stage)
+    return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files

@@ -4,7 +4,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.validators import UniqueValidator
 
 from .models import Material, MaterialCategory3, MaterialCategory2, MaterialCategory1, Test, ThermalProperties, \
-    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint
+    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model, MaterialModelParams
 from django.contrib.auth.models import User
 
 
@@ -23,7 +23,6 @@ class DICStageSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         linked_obj = data['test']
-        # print(self.context['request'].user)
         if linked_obj.submitted_by == self.context['request'].user:
             return data
         else:
@@ -39,8 +38,6 @@ class DICDataSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         linked_obj = data['stage']
-        # print(self.context['request'].user)
-        print(linked_obj.test.submitted_by)
         if linked_obj.test.submitted_by == self.context['request'].user:
             return data
         else:
@@ -67,6 +64,12 @@ class PhysicalPropsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PhysicalProperties
         exclude = ['id']
+
+
+class MaterialNameIdSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Material
+        fields = ['id', 'name']
 
 
 class MaterialSerializer(serializers.ModelSerializer):
@@ -331,3 +334,15 @@ class SupplierSerializer(serializers.ModelSerializer):
             location.save()
 
         return instance
+
+
+class ModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Model
+        fields = '__all__'
+
+
+class MaterialParamsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MaterialModelParams
+        fields = '__all__'

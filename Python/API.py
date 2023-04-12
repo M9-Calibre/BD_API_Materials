@@ -31,39 +31,39 @@ def get_user_list(username, password):
 # Can only be performed by a superuser
 # Steps to create superuser in the README.md
 def create_upper_category(username, password, category_name):
-    return requests.post(f"{URL}/categories/upper", auth=(username,password), json={"category":category_name})
+    return requests.post(f"{URL}/categories/upper/", auth=(username,password), json={"category":category_name})
 
 # Can only be performed by a superuser
 # An upper category must already be created to link to
 def create_middle_category(username, password, upper_category, category_name):
     upper_category_id = get_upper_category_id(username, password, upper_category)
-    return requests.post(f"{URL}/categories/middle", auth=(username,password), json={"category":category_name,"upper_category":upper_category_id})
+    return requests.post(f"{URL}/categories/middle/", auth=(username,password), json={"category":category_name,"upper_category":upper_category_id})
 
 # Can only be performed by a superuser
 # A middle category must already be created to link to
 def create_lower_category(username, password, upper_category, middle_category, category_name):
     middle_category_id = get_middle_category_id(username, password, upper_category, middle_category)
-    return requests.post(f"{URL}/categories/lower", auth=(username,password), json={"category":category_name,"upper_category":middle_category_id})
+    return requests.post(f"{URL}/categories/lower/", auth=(username,password), json={"category":category_name,"upper_category":middle_category_id})
 
 def get_category_tree(username, password):
-    return requests.get(f"{URL}/categories/upper?format=json", auth=(username,password)).json()['results']
+    return requests.get(f"{URL}/categories/upper/?format=json", auth=(username,password)).json()['results']
 
 def get_upper_category_id(username, password, upper_category):
-    results = requests.get(f"{URL}/categories/upper?upper_category={upper_category}&format=json", 
+    results = requests.get(f"{URL}/categories/upper/?upper_category={upper_category}&format=json", 
                             auth=(username,password)).json()['results']
     if len(results) != 1:
         return None
     return results[0]['id']
 
 def get_middle_category_id(username, password, upper_category, middle_category):
-    results = requests.get(f"{URL}/categories/middle?upper_category={upper_category}&middle_category={middle_category}&format=json", 
+    results = requests.get(f"{URL}/categories/middle/?upper_category={upper_category}&middle_category={middle_category}&format=json", 
                             auth=(username,password)).json()['results']
     if len(results) != 1:
         return None
     return results[0]['id']
 
 def get_lower_category_id(username, password, upper_category, middle_category, category):
-    results = requests.get(f"{URL}/categories/lower?upper_category={upper_category}&middle_category={middle_category}&category={category}&format=json",
+    results = requests.get(f"{URL}/categories/lower/?upper_category={upper_category}&middle_category={middle_category}&category={category}&format=json",
                             auth=(username,password)).json()['results']
     if len(results) != 1:
         return None
@@ -91,9 +91,6 @@ def create_test(username, password, test_name, material_id, DIC_params : dict, t
     }
     return requests.post(f"{URL}/tests/?format=json", auth=(username,password), json=test_json)
 
-def upload_test_data(username, password, test_id, files):
-    return requests.post(f"{URL}/tests/{test_id}/upload", files=files, auth=(username,password))
-
-def update_test_data(username, password, test_id, files):
-    return requests.put(f"{URL}/tests/{test_id}/aaaa", files=files, auth=(username,password))
-    
+def upload_test_data(username, password, test_id, files, stage_metadata, format="aramis", _3d=False, override=False):
+    files["stage_metadata.csv"] = stage_metadata
+    return requests.post(f"{URL}/tests/{test_id}/upload/?file_format={format}&3d={_3d}&override={override}", files=files, auth=(username,password))

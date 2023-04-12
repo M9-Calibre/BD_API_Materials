@@ -15,6 +15,7 @@ import json
 import os
 from django.core.exceptions import ImproperlyConfigured
 import pymysql
+pymysql.version_info = (1, 4, 3, "final", 0)
 pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -190,4 +191,4 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',)
 }
 
-DATA_UPLOAD_MAX_NUMBER_FILES = 200
+DATA_UPLOAD_MAX_NUMBER_FILES = 400

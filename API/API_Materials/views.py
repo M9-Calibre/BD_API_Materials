@@ -5,22 +5,21 @@ from django.contrib.auth.models import User
 from django_filters import rest_framework as filters2
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.response import Response
 from django.http import HttpResponseForbidden, HttpResponseNotFound, HttpResponse
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
 
 from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCategory3, Supplier, Laboratory, Test, \
-    DICStage, DICDatapoint
+    DICStage, DICDatapoint, Model, MaterialModelParams
 from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
     Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer, \
-    DICStageSerializer, DICDataSerializer, CategoriesSerializer
+    DICStageSerializer, DICDataSerializer, CategoriesSerializer, ModelSerializer, MaterialParamsSerializer, \
+    MaterialNameIdSerializer
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter
 from .utils import process_test_data
-from .pagination import DICDataPagination
+from .pagination import DICDataPagination, AllMaterialsPagination, AllCategoriesPagination
 
 
 @api_view(['POST'])
@@ -40,6 +39,29 @@ def login_view(request):
                 data = {"token": token.key}
 
                 return Response(status=200, data=data)
+            else:
+                return Response(status=400)
+        else:
+            return Response(status=404)
+
+
+@api_view(['GET'])
+def profile(request):
+    if request.method == 'GET':
+        user = request.user
+
+        if user is not None:
+            if user.is_active:
+                data = {
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "email": user.email,
+                    "username": user.username,
+                    "admin": user.is_staff
+                }
+
+                return Response(status=200, data=data)
+
             else:
                 return Response(status=400)
         else:
@@ -93,6 +115,18 @@ class DICDataViewSet(viewsets.ModelViewSet):
     pagination_class = DICDataPagination
 
 
+class ModelsViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+    queryset = Model.objects.all()
+    serializer_class = ModelSerializer
+
+
+class MaterialParamsViewSet(viewsets.ModelViewSet):
+    # TODO permission_classes
+    queryset = MaterialModelParams.objects.all()
+    serializer_class = MaterialParamsSerializer
+
+
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAdminUser]
     queryset = User.objects.all()
@@ -133,8 +167,15 @@ class CategoriesLowerList(generics.ListCreateAPIView):
 
 
 class CategoriesList(generics.ListAPIView):
+    pagination_class = AllCategoriesPagination
     queryset = MaterialCategory3.objects.all()
     serializer_class = CategoriesSerializer
+
+
+class MaterialList(generics.ListAPIView):
+    pagination_class = AllMaterialsPagination
+    queryset = Material.objects.all()
+    serializer_class = MaterialNameIdSerializer
 
 
 @api_view(['DELETE'])
@@ -168,6 +209,19 @@ def upload_test_data(request, pk):
     if request.user != test.submitted_by:
         return HttpResponseForbidden()
 
+    override = request.query_params.get("override", False)
+    if override:
+        override = override.lower() in ["true", "1"]
+
+    _3d = request.query_params.get("3d", False)
+    if _3d:
+        _3d = _3d.lower() in ["true", "1"]
+
+    file_format = request.query_params.get("file_format", "aramis").lower()
+    if file_format not in ["aramis", "matchid"]:
+        data = {"message": f"Unrecognized file format: {file_format}."}
+        return Response(status=400, data=data)
+
     existing_stages = {stage.stage_num for stage in test.stages.all()}
     if request.method == 'POST':
         if existing_stages:
@@ -175,7 +229,34 @@ def upload_test_data(request, pk):
             return Response(status=400, data=data)
 
     test_data = request.FILES
-    stages, bad_format, duplicated_stages = process_test_data(test_data)
+
+    if not test_data:
+        data = {"message": "Cannot POST/PUT test data, as no files were uploaded."}
+        return Response(status=400, data=data)
+
+    if "stage_metadata.csv" not in test_data:
+        data = {"message": "No stage metadata file provided."}
+        return Response(status=400, data=data)
+
+    stages, bad_format, duplicated_stages, not_in_metadata, skipped_files = process_test_data(test_data, file_format,
+                                                                                              _3d)
+    if not stages:
+        data = {"message": "Cannot POST/PUT test data, as no valid files were uploaded.",
+                "skipped_files": skipped_files if skipped_files else None}
+        return Response(status=400, data=data)
+
+    print(f"{bad_format = }")
+    print(f"{duplicated_stages = }")
+    print(f"{not_in_metadata = }")
+    print(f"{skipped_files = }")
+
+    if not_in_metadata:
+        data = {"message": "Missings metadata for files.", "no_metadata": not_in_metadata}
+        return Response(status=400, data=data)
+
+    if bad_format:
+        data = {"message": "Bad format found in input data files.", "bad_format_files": bad_format}
+        return Response(status=400, data=data)
 
     if duplicated_stages:
         data = {"message": "Duplicated stages in uploaded data.", "duplicated_stages": duplicated_stages}
@@ -185,7 +266,7 @@ def upload_test_data(request, pk):
     already_in_db = read_stages.intersection(existing_stages)
 
     if already_in_db:
-        if not request.query_params.get("override", None):
+        if not override:
             data = {
                 "message": "Uploaded stages already in DB. If you wish to override them set the \"override\" query param to true.",
                 "overridden_stages": already_in_db}
@@ -194,22 +275,22 @@ def upload_test_data(request, pk):
             test.stages.filter(stage_num__in=already_in_db).delete()
 
     # Create data
-    for stage, ts_undef, ts_def in stages:
-        s = DICStage(test_id=pk, stage_num=stage, timestamp_undef=ts_undef, timestamp_def=ts_def)
+    for stage, ts_def, load in stages:
+        print(stage)
+        s = DICStage(test_id=pk, stage_num=stage, timestamp_def=ts_def, load=load)
         s.save()
-        datapoint_list = list()
-        datapoint_dict = stages[(stage, ts_undef, ts_def)]
-        for datapoint in datapoint_dict:
-            data = datapoint_dict[datapoint]
-            datapoint_list.append(DICDatapoint(stage=s, index_x=datapoint[0], index_y=datapoint[1], x=data["x"],
-                                               y=data["y"], z=data["z"], displacement_x=data["displacement_x"],
-                                               displacement_y=data["displacement_y"],
-                                               displacement_z=data["displacement_z"],
-                                               strain_x=data["strain_x"], strain_y=data["strain_y"],
-                                               strain_major=data["strain_major"], strain_minor=data["strain_minor"],
-                                               thickness_reduction=data["thickness_reduction"]))
+        datapoint_list = []
+        datapoints = stages[(stage, ts_def, load)]
+        for datapoint in datapoints:
+            print(datapoint)
+            datapoint_list.append(DICDatapoint(stage=s, **datapoint))
+
         DICDatapoint.objects.bulk_create(datapoint_list)
 
-    data = {"created_stages": read_stages - already_in_db, "overridden_stages": already_in_db if already_in_db else None}
+    data = {"created_stages": read_stages - already_in_db,
+            "overridden_stages": already_in_db if already_in_db else None,
+            "skipped_files": skipped_files if skipped_files else None}
 
-    return HttpResponse(data=data)
+    print(data)
+
+    return Response(data=data)
