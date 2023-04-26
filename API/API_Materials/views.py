@@ -14,7 +14,7 @@ from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCate
     DICStage, DICDatapoint, Model, MaterialModelParams
 from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
     Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer, \
-    DICStageSerializer, DICDataSerializer, CategoriesSerializer, ModelSerializer, MaterialParamsSerializer, \
+    DICStageSerializer, DICDataSerializer, CategoriesSerializer, \
     MaterialNameIdSerializer
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter
@@ -35,7 +35,7 @@ def login_view(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                token = Token.objects.get(user=user)
+                token = Token.objects.get_or_create(user=user)[0]
                 data = {"token": token.key}
 
                 return Response(status=200, data=data)
@@ -53,6 +53,7 @@ def profile(request):
         if user is not None:
             if user.is_active:
                 data = {
+                    "id": user.id,
                     "first_name": user.first_name,
                     "last_name": user.last_name,
                     "email": user.email,
@@ -90,7 +91,7 @@ class TestViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     queryset = Test.objects.all()
     serializer_class = TestSerializer
-    filterset_fields = ["material"]
+    filterset_fields = ["material", "submitted_by"]
 
     def perform_create(self, serializer: TestSerializer):
         serializer.save(submitted_by=self.request.user)
@@ -110,21 +111,9 @@ class DICDataViewSet(viewsets.ModelViewSet):
     queryset = DICDatapoint.objects.all()
     serializer_class = DICDataSerializer
     filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter)
-    ordering = ("stage", "index_x", "index_y")
+    ordering = ("stage",)
     filterset_class = DICDataFilter
     pagination_class = DICDataPagination
-
-
-class ModelsViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminOrReadOnly]
-    queryset = Model.objects.all()
-    serializer_class = ModelSerializer
-
-
-class MaterialParamsViewSet(viewsets.ModelViewSet):
-    # TODO permission_classes
-    queryset = MaterialModelParams.objects.all()
-    serializer_class = MaterialParamsSerializer
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -145,21 +134,21 @@ class LaboratoryViewSet(viewsets.ModelViewSet):
     serializer_class = LaboratorySerializer
 
 
-class CategoriesUpperList(generics.ListCreateAPIView):
+class CategoriesUpperList(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory1.objects.all()
     serializer_class = Category1Serializer
     filterset_class = CategoryUpperFilter
 
 
-class CategoriesMiddleList(generics.ListCreateAPIView):
+class CategoriesMiddleList(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory2.objects.all()
     serializer_class = Category2Serializer
     filterset_class = CategoryMiddleFilter
 
 
-class CategoriesLowerList(generics.ListCreateAPIView):
+class CategoriesLowerList(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory3.objects.all()
     serializer_class = Category3Serializer
@@ -195,7 +184,7 @@ def delete_test_data(request, pk):
             return Response(status=404, data=data)
 
         DICStage.objects.filter(test=test).delete()
-        return Response()
+        return Response(status=204)
 
 
 @transaction.atomic
@@ -230,25 +219,17 @@ def upload_test_data(request, pk):
 
     test_data = request.FILES
 
-    if not test_data:
-        data = {"message": "Cannot POST/PUT test data, as no files were uploaded."}
-        return Response(status=400, data=data)
+    files = test_data.keys()
 
-    if "stage_metadata.csv" not in test_data:
+    if "stage_metadata.csv" not in files:
         data = {"message": "No stage metadata file provided."}
         return Response(status=400, data=data)
 
-    stages, bad_format, duplicated_stages, not_in_metadata, skipped_files = process_test_data(test_data, file_format,
-                                                                                              _3d)
-    if not stages:
-        data = {"message": "Cannot POST/PUT test data, as no valid files were uploaded.",
-                "skipped_files": skipped_files if skipped_files else None}
+    if not (files-{"stage_metadata.csv"}):
+        data = {"message": "Cannot POST/PUT test data, as no DIC files were uploaded."}
         return Response(status=400, data=data)
 
-    print(f"{bad_format = }")
-    print(f"{duplicated_stages = }")
-    print(f"{not_in_metadata = }")
-    print(f"{skipped_files = }")
+    stages, bad_format, duplicated_stages, not_in_metadata, skipped_files = process_test_data(test_data, file_format, _3d)
 
     if not_in_metadata:
         data = {"message": "Missings metadata for files.", "no_metadata": not_in_metadata}
@@ -260,6 +241,11 @@ def upload_test_data(request, pk):
 
     if duplicated_stages:
         data = {"message": "Duplicated stages in uploaded data.", "duplicated_stages": duplicated_stages}
+        return Response(status=400, data=data)
+
+    if not stages:
+        data = {"message": "Cannot POST/PUT test data, as no valid files were uploaded.",
+                "skipped_files": skipped_files if skipped_files else None}
         return Response(status=400, data=data)
 
     read_stages = {stage[0] for stage in stages}
@@ -276,13 +262,11 @@ def upload_test_data(request, pk):
 
     # Create data
     for stage, ts_def, load in stages:
-        print(stage)
         s = DICStage(test_id=pk, stage_num=stage, timestamp_def=ts_def, load=load)
         s.save()
         datapoint_list = []
         datapoints = stages[(stage, ts_def, load)]
         for datapoint in datapoints:
-            print(datapoint)
             datapoint_list.append(DICDatapoint(stage=s, **datapoint))
 
         DICDatapoint.objects.bulk_create(datapoint_list)
@@ -290,7 +274,5 @@ def upload_test_data(request, pk):
     data = {"created_stages": read_stages - already_in_db,
             "overridden_stages": already_in_db if already_in_db else None,
             "skipped_files": skipped_files if skipped_files else None}
-
-    print(data)
 
     return Response(data=data)

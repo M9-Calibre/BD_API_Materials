@@ -1,7 +1,7 @@
 import requests
 
-#URL = 'http://afonsocampos100.pythonanywhere.com'
-URL = 'http://127.0.0.1:8000'
+URL = 'http://afonsocampos100.pythonanywhere.com'
+#URL = 'http://127.0.0.1:8000'
 
 # Usernames and emails must be unique
 def register_user(username, password, first_name, last_name, email):
@@ -94,3 +94,6 @@ def create_test(username, password, test_name, material_id, DIC_params : dict, t
 def upload_test_data(username, password, test_id, files, stage_metadata, format="aramis", _3d=False, override=False):
     files["stage_metadata.csv"] = stage_metadata
     return requests.post(f"{URL}/tests/{test_id}/upload/?file_format={format}&3d={_3d}&override={override}", files=files, auth=(username,password))
+
+def get_profile(username, password):
+    return requests.get(f"{URL}/users/profile/", auth=(username,password)).json()

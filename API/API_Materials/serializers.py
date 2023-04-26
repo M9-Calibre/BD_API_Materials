@@ -4,7 +4,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.validators import UniqueValidator
 
 from .models import Material, MaterialCategory3, MaterialCategory2, MaterialCategory1, Test, ThermalProperties, \
-    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model, MaterialModelParams
+    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint
 from django.contrib.auth.models import User
 
 
@@ -334,15 +334,3 @@ class SupplierSerializer(serializers.ModelSerializer):
             location.save()
 
         return instance
-
-
-class ModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Model
-        fields = '__all__'
-
-
-class MaterialParamsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MaterialModelParams
-        fields = '__all__'

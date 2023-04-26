@@ -9,8 +9,10 @@ FileDict = Dict[str, _io.BufferedReader]
 field_names = ["x", "y", "z", "displacement_x", "displacement_y", "displacement_z", "strain_x", "strain_y", "strain_xy",
                "strain_major", "strain_minor", "thickness_reduction"]
 match_id_field_names = ['coor.X [mm]', 'coor.Y [mm]', 'coor.Z [mm]', 'disp.Horizontal Displacement U [mm]',
-                        'disp.Vertical Displacement V [mm]', 'TODO', 'strain.Strain-global frame: Exx [ ]',
-                        'strain.Strain-global frame: Eyy [ ]', 'strain.Strain-global frame: Exy [ ]', 'TODO', 'TODO', 'TODO']
+                        'disp.Vertical Displacement V [mm]', 'disp.Out-Of-Plane: W [mm]',
+                        'strain.Strain-global frame: Exx [ ]', 'strain.Strain-global frame: Eyy [ ]',
+                        'strain.Strain-global frame: Exy [ ]', 'strain.Strain-major: E1 [ ]',
+                        'strain.Strain-minor: E2 [ ]', 'deltaThick: dThick [ ]']
 match_id_mapper = {match_id_field_names[i]: field_names[i] for i in range(len(field_names))}
 
 
@@ -61,26 +63,34 @@ def process_test_data(files: FileDict, file_format="aramis", _3d=False):
                             data[name] = fields[idx]
                         else:
                             data[name] = None
-                            print(data)
                     datapoints.append(data)
         elif file_format == "matchid":  # TODO
-            content = pd.read_csv(file, delimiter=',')
+            try:
+                content = pd.read_csv(file, delimiter=',')
+            except:
+                bad_format.append(file_name)
+                continue
+
             if _3d:
-                pass
+                required = {'coor.X [mm]', 'coor.Y [mm]', 'coor.Z [mm]', 'disp.Horizontal Displacement U [mm]',
+                            'disp.Vertical Displacement V [mm]', 'disp.Out-Of-Plane: W [mm]'}
             else:
-                required = {'coor.X [mm]', 'coor.Y [mm]', 'disp.Horizontal Displacement U [mm]', 'disp.Vertical Displacement V [mm]'}
-                if all([req in content.columns for req in required]):
-                    present = required
-                    additional = {'strain.Strain-global frame: Exx [ ]', 'strain.Strain-global frame: Eyy [ ]', 'strain.Strain-global frame: Exy [ ]'}
-                    for adt in additional:
-                        if adt in content.columns:
-                            present.add(adt)
-                    content = content.filter(items=present)
-                    content.rename(inplace=True, columns=match_id_mapper)
-                    datapoints = content.to_dict(orient='records')
-                else:
-                    bad_format.append(file_name)
-                    continue
+                required = {'coor.X [mm]', 'coor.Y [mm]', 'disp.Horizontal Displacement U [mm]',
+                            'disp.Vertical Displacement V [mm]'}
+            if all([req in content.columns for req in required]):
+                present = required
+                additional = {'strain.Strain-global frame: Exx [ ]', 'strain.Strain-global frame: Eyy [ ]',
+                              'strain.Strain-global frame: Exy [ ]', 'strain.Strain-major: E1 [ ]',
+                              'strain.Strain-minor: E2 [ ]', 'deltaThick: dThick [ ]'}
+                for adt in additional:
+                    if adt in content.columns:
+                        present.add(adt)
+                content = content.filter(items=present)
+                content.rename(inplace=True, columns=match_id_mapper)
+                datapoints = content.to_dict(orient='records')
+            else:
+                bad_format.append(file_name)
+                continue
         # check for errors or duplicates
         if not datapoints:
             bad_format.append(file_name)
