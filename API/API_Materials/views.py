@@ -134,21 +134,21 @@ class LaboratoryViewSet(viewsets.ModelViewSet):
     serializer_class = LaboratorySerializer
 
 
-class CategoriesUpperList(generics.RetrieveUpdateDestroyAPIView):
+class CategoriesUpperList(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory1.objects.all()
     serializer_class = Category1Serializer
     filterset_class = CategoryUpperFilter
 
 
-class CategoriesMiddleList(generics.RetrieveUpdateDestroyAPIView):
+class CategoriesMiddleList(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory2.objects.all()
     serializer_class = Category2Serializer
     filterset_class = CategoryMiddleFilter
 
 
-class CategoriesLowerList(generics.RetrieveUpdateDestroyAPIView):
+class CategoriesLowerList(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory3.objects.all()
     serializer_class = Category3Serializer

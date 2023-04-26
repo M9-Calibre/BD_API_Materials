@@ -42,6 +42,9 @@ router.register(r'labs', views.LaboratoryViewSet, basename='labs')
 router.register(r'tests', views.TestViewSet, basename='tests')
 router.register(r'DICstages', views.DICStageViewSet, basename='DICstages')
 router.register(r'DICdata', views.DICDataViewSet, basename='DICdata')
+router.register(r'categories/upper', views.CategoriesUpperList, basename='categories_upper')
+router.register(r'categories/middle', views.CategoriesMiddleList, basename='categories_middle')
+router.register(r'categories/lower', views.CategoriesLowerList, basename='categories_lower')
 
 urlpatterns = [
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
@@ -51,9 +54,6 @@ urlpatterns = [
     path('users/login/', views.login_view),
     path('users/profile/', views.profile),
     path('categories/', views.CategoriesList.as_view()),
-    path('categories/upper/', views.CategoriesUpperList.as_view()),
-    path('categories/middle/', views.CategoriesMiddleList.as_view()),
-    path('categories/lower/', views.CategoriesLowerList.as_view()),
     path('materials/list/', views.MaterialList.as_view()),
     path('api-auth/', include('rest_framework.urls')),
     path('tests/<int:pk>/upload/', views.upload_test_data),
