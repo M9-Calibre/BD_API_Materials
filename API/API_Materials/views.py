@@ -19,7 +19,7 @@ from .serializers import MaterialSerializer, UserSerializer, Category1Serializer
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter
 from .utils import process_test_data
-from .pagination import DICDataPagination, AllMaterialsPagination, AllCategoriesPagination
+from .pagination import DICDataPagination, AllMaterialsPagination, AllCategoriesPagination, AllUpperCategoriesPagination
 
 
 @api_view(['POST'])
@@ -139,6 +139,7 @@ class CategoriesUpperList(viewsets.ModelViewSet):
     queryset = MaterialCategory1.objects.all()
     serializer_class = Category1Serializer
     filterset_class = CategoryUpperFilter
+    pagination_class = AllUpperCategoriesPagination
 
 
 class CategoriesMiddleList(viewsets.ModelViewSet):

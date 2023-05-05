@@ -1,5 +1,5 @@
 from rest_framework.pagination import PageNumberPagination
-from .models import Material, MaterialCategory3
+from .models import Material, MaterialCategory3, MaterialCategory1
 
 
 class DICDataPagination(PageNumberPagination):
@@ -15,4 +15,9 @@ class AllMaterialsPagination(PageNumberPagination):
 
 class AllCategoriesPagination(PageNumberPagination):
     page_size = MaterialCategory3.objects.count()
+    page_size_query_param = "page_size"
+
+
+class AllUpperCategoriesPagination(PageNumberPagination):
+    page_size = MaterialCategory1.objects.count()
     page_size_query_param = "page_size"
