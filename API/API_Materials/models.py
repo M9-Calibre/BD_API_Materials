@@ -16,11 +16,11 @@ class MaterialCategory2(models.Model):
 
 
 class MaterialCategory3(models.Model):
-    upper_category = models.ForeignKey(MaterialCategory2, models.CASCADE, related_name='lower_categories')
+    middle_category = models.ForeignKey(MaterialCategory2, models.CASCADE, related_name='lower_categories')
     category = models.CharField(max_length=25, unique=True)
 
     class Meta:
-        unique_together = ('upper_category', 'category')
+        unique_together = ('middle_category', 'category')
 
     def __str__(self):
         return f"{self.upper_category.upper_category.category}->{self.upper_category.category}->{self.category}"

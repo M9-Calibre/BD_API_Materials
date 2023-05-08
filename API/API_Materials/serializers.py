@@ -237,15 +237,15 @@ class CategoriesSerializer(serializers.ModelSerializer):
 
 class Category3Serializer(serializers.ModelSerializer):
     materials = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    upper_category = serializers.PrimaryKeyRelatedField(many=False, read_only=False,
+    middle_category = serializers.PrimaryKeyRelatedField(many=False, read_only=False,
                                                         queryset=MaterialCategory2.objects.all())
-    upper_upper_category = serializers.ReadOnlyField(source="upper_category.upper_category.id")
-    upper_upper_name = serializers.ReadOnlyField(source="upper_category.upper_category.category")
-    upper_name = serializers.ReadOnlyField(source="upper_category.category")
+    upper_category = serializers.ReadOnlyField(source="middle_category.upper_category.id")
+    upper_name = serializers.ReadOnlyField(source="middle_category.upper_category.category")
+    middle_name = serializers.ReadOnlyField(source="middle_category.category")
 
     class Meta:
         model = MaterialCategory3
-        fields = ['id', 'category', 'upper_category', 'upper_name', 'upper_upper_category', 'upper_upper_name', 'materials']
+        fields = ['id', 'category', 'middle_category', 'middle_name', 'upper_category', 'upper_name', 'materials']
 
 
 class Category2Serializer(serializers.ModelSerializer):
