@@ -14,8 +14,7 @@ from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCate
     DICStage, DICDatapoint, Model, MaterialModelParams
 from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
     Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer, \
-    DICStageSerializer, DICDataSerializer, CategoriesSerializer, \
-    MaterialNameIdSerializer
+    DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter
 from .utils import process_test_data
@@ -80,7 +79,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
     serializer_class = MaterialSerializer
     filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
     ordering = ("id",)
-    ordering_fields = ('name', 'mat_id', 'entry_date')
+    ordering_fields = ('name', 'mat_id', 'entry_date', 'id')
     search_fields = ('name', 'description',)
 
     def perform_create(self, serializer: MaterialSerializer):
@@ -120,24 +119,34 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAdminUser]
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter)
+    ordering = ("id",)
+    ordering_fields = ('username', 'id')
 
 
 class SupplierViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     queryset = Supplier.objects.all()
     serializer_class = SupplierSerializer
+    filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter)
+    ordering = ("id",)
 
 
 class LaboratoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     queryset = Laboratory.objects.all()
     serializer_class = LaboratorySerializer
+    filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter)
+    ordering = ("id",)
 
 
 class CategoriesUpperList(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory1.objects.all()
     serializer_class = Category1Serializer
+    filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter)
+    ordering = ("category",)
+    ordering_fields = ('category', 'id')
     filterset_class = CategoryUpperFilter
     pagination_class = AllUpperCategoriesPagination
 
@@ -146,6 +155,9 @@ class CategoriesMiddleList(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory2.objects.all()
     serializer_class = Category2Serializer
+    filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter)
+    ordering = ("category",)
+    ordering_fields = ('category', 'id')
     filterset_class = CategoryMiddleFilter
 
 
@@ -153,19 +165,20 @@ class CategoriesLowerList(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     queryset = MaterialCategory3.objects.all()
     serializer_class = Category3Serializer
+    filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter)
+    ordering = ("category",)
+    ordering_fields = ('category', 'id')
     filterset_class = CategoryLowerFilter
-
-
-class CategoriesList(generics.ListAPIView):
-    pagination_class = AllCategoriesPagination
-    queryset = MaterialCategory3.objects.all()
-    serializer_class = CategoriesSerializer
 
 
 class MaterialList(generics.ListAPIView):
     pagination_class = AllMaterialsPagination
     queryset = Material.objects.all()
     serializer_class = MaterialNameIdSerializer
+    filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
+    ordering = ("id",)
+    ordering_fields = ('name', 'id',)
+    search_fields = ('name',)
 
 
 @api_view(['DELETE'])

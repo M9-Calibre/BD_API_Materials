@@ -69,14 +69,15 @@ class PhysicalPropsSerializer(serializers.ModelSerializer):
 class MaterialNameIdSerializer(serializers.ModelSerializer):
     class Meta:
         model = Material
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'submitted_by']
 
 
 class MaterialSerializer(serializers.ModelSerializer):
     upper_category = serializers.ReadOnlyField(source="category.upper_category.upper_category.category")
     middle_category = serializers.ReadOnlyField(source="category.upper_category.category")
     lower_category = serializers.ReadOnlyField(source="category.category")
-    submitted_by = serializers.SlugRelatedField(many=False, read_only=True, slug_field='username')
+    user = serializers.ReadOnlyField(source="submitted_by.username")
+    submitted_by = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     thermal_properties = ThermalPropsSerializer(many=False, required=False)
     mechanical_properties = MechanicalPropsSerializer(many=False, required=False)
     physical_properties = PhysicalPropsSerializer(many=False, required=False)
@@ -183,7 +184,7 @@ class MaterialSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Material
-        fields = ['id', 'name', 'category', 'description', 'submitted_by', 'mat_id', 'entry_date', 'source',
+        fields = ['id', 'name', 'category', 'description', 'submitted_by', 'user', 'mat_id', 'entry_date', 'source',
                   'designation', 'heat_treatment', 'thermal_properties', 'mechanical_properties', 'physical_properties',
                   'tests', 'upper_category', 'middle_category', 'lower_category']
 
@@ -219,20 +220,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
-
-
-class CategoriesSerializer(serializers.ModelSerializer):
-    upper = serializers.ReadOnlyField(source="upper_category.upper_category.category")
-    middle = serializers.ReadOnlyField(source="upper_category.category")
-    lower = serializers.ReadOnlyField(source="category")
-    upper_id = serializers.ReadOnlyField(source="upper_category.upper_category.id")
-    middle_id = serializers.ReadOnlyField(source="upper_category.id")
-    lower_id = serializers.ReadOnlyField(source="id")
-    materials = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-
-    class Meta:
-        model = MaterialCategory3
-        fields = ['upper', 'middle', 'lower', 'upper_id', 'middle_id', 'lower_id', 'materials']
 
 
 class Category3Serializer(serializers.ModelSerializer):

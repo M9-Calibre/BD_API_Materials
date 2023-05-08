@@ -1,10 +1,105 @@
 import requests
 
-URL = 'http://afonsocampos100.pythonanywhere.com'
-#URL = 'http://127.0.0.1:8000'
+URL = 'http://127.0.0.1:8000'
 
-# Usernames and emails must be unique
-def register_user(username, password, first_name, last_name, email):
+class APIFailedRequest(Exception):
+    def __init__(self, response : requests.Response) -> None:
+        self.status_code = response.status_code
+        self.reason = response.reason
+        self.message = f'Invalid request. (Status Code {self.status_code}: {self.reason})'
+        super().__init__(self.message)
+
+class UpperCategory():
+    def __init__(self, name : str) -> None:
+        self.id = None
+        self.name = name
+
+class MiddleCategory():
+    def __init__(self, upper : UpperCategory, name : str) -> None:
+        self.id = None
+        self.upper = upper
+        self.name = name
+
+class LowerCategory():
+    def __init__(self, middle : MiddleCategory, name : str) -> None:
+        self.id = None
+        self.middle = middle
+        self.name = name
+
+class ThermalProperties():
+    def __init__(self, thermal_expansion_coef : dict = None, specific_heat_capacity : dict = None, thermal_conductivity_tp : dict = None) -> None:
+        self.thermal_expansion_coef = thermal_expansion_coef
+        self.specific_heat_capacity = specific_heat_capacity
+        self.thermal_conductivity_tp = thermal_conductivity_tp
+
+class MechanicalProperties():
+    def __init__(self, tensile_strength : int = None, thermal_conductivity_mp : float = None, reduction_of_area : float = None, 
+                 cyclic_yield_strength : int = None, elastic_modulus : dict = None, poissons_ratio : dict = None, shear_modulus : dict = None, 
+                 yield_strength : dict = None) -> None:
+        self.tensile_strength = tensile_strength
+        self.thermal_conductivity_mp = thermal_conductivity_mp
+        self.reduction_of_area = reduction_of_area
+        self.cyclic_yield_strength = cyclic_yield_strength
+        self.elastic_modulus = elastic_modulus
+        self.poissons_ratio = poissons_ratio
+        self.shear_modulus = shear_modulus
+        self.yield_strength = yield_strength
+
+class PhysicalProperties():
+    def __init__(self, chemical_composition : dict = None) -> None:
+        self.chemical_composition = chemical_composition
+
+class Material():
+    def __init__(self, name : str, category : LowerCategory, mat_id : int, source : str, designation : str, heat_treatment : str, 
+                 description : str = None, thermal_properties : ThermalProperties = None, mechanical_properties : MechanicalProperties = None, 
+                 physical_properties : PhysicalProperties = None) -> None:
+        self.id = None
+        self.submitted_by = None
+        self.date = None
+        self.name = name
+        self.category = category
+        self.mat_id = mat_id
+        self.source = source
+        self.designation = designation
+        self.heat_treatment = heat_treatment
+        self.description = description
+        self.thermal_properties = thermal_properties
+        self.mechanical_properties = mechanical_properties
+        self.physical_properties = physical_properties
+
+def authenticate(username : str, password : str) -> str:
+    json_req_body = {
+        "username" : username,
+        "password" : password
+    }
+    login = requests.post(f"{URL}/users/login/", json=json_req_body)
+
+    if login.status_code != 200:
+        raise APIFailedRequest(login)
+    
+    token = login.json()["token"]
+
+    return token
+
+
+
+def register_user(username : str, password : str, first_name : str, last_name : str, email : str) -> str:
+    """A function to register a new user on the MaterialAPI.
+
+    Parameters
+    ----------
+    username : str
+        The username of the new user, must not have been previously registered
+    password : str
+        The password of the new user, used for future logins
+    first_name : str
+        The first name of the new user
+    first_name : str
+        The last name of the new user
+    email : str
+        The email of the new user, must not have been previously registered
+    
+    """
     json_req_body = {
         "username" : username,
         "password" : password,
@@ -13,7 +108,12 @@ def register_user(username, password, first_name, last_name, email):
         "email" : email
     }
 
-    return requests.post(f"{URL}/users/register/", json=json_req_body)
+    req = requests.post(f"{URL}/users/register/", json=json_req_body)
+
+    if req.status_code != 200:
+        raise 
+    
+    return f"Registration of user {username} successful!"
 
 def login_user(username, password):
     json_req_body = {

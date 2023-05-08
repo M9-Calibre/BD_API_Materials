@@ -53,7 +53,6 @@ urlpatterns = [
     path('users/register/', views.RegisterUserAPIView.as_view()),
     path('users/login/', views.login_view),
     path('users/profile/', views.profile),
-    path('categories/', views.CategoriesList.as_view()),
     path('materials/list/', views.MaterialList.as_view()),
     path('api-auth/', include('rest_framework.urls')),
     path('tests/<int:pk>/upload/', views.upload_test_data),
