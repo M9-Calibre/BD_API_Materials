@@ -18,7 +18,7 @@ from .serializers import MaterialSerializer, UserSerializer, Category1Serializer
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter
 from .utils import process_test_data
-from .pagination import DICDataPagination, AllMaterialsPagination, AllCategoriesPagination, AllUpperCategoriesPagination
+from .pagination import DICDataPagination, AllMaterialsPagination, AllUpperCategoriesPagination
 
 
 @api_view(['POST'])

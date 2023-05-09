@@ -73,8 +73,8 @@ class MaterialNameIdSerializer(serializers.ModelSerializer):
 
 
 class MaterialSerializer(serializers.ModelSerializer):
-    upper_category = serializers.ReadOnlyField(source="category.upper_category.upper_category.category")
-    middle_category = serializers.ReadOnlyField(source="category.upper_category.category")
+    upper_category = serializers.ReadOnlyField(source="category.middle_category.upper_category.category")
+    middle_category = serializers.ReadOnlyField(source="category.middle_category.category")
     lower_category = serializers.ReadOnlyField(source="category.category")
     user = serializers.ReadOnlyField(source="submitted_by.username")
     submitted_by = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
