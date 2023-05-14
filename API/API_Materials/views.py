@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, login
 from rest_framework import generics, permissions, viewsets, filters
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User
 from django_filters import rest_framework as filters2
 from django.core.exceptions import ObjectDoesNotExist
@@ -18,10 +18,29 @@ from .serializers import MaterialSerializer, UserSerializer, Category1Serializer
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter
 from .utils import process_test_data
-from .pagination import DICDataPagination, AllMaterialsPagination, AllUpperCategoriesPagination
+from .pagination import DICDataPagination
+from .model_scripts.yield_code import run_yld2000
+from .model_scripts.YieldLocus import main
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def test(request):
+    data = request.data
+
+    arguments = data.get("arguments", None)
+
+    print(arguments)
+
+    img = main(arguments)
+
+    print(img)
+
+    return Response(status=200, data=img)
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def login_view(request):
     if request.method == 'POST':
         data = request.data
@@ -148,7 +167,7 @@ class CategoriesUpperList(viewsets.ModelViewSet):
     ordering = ("category",)
     ordering_fields = ('category', 'id')
     filterset_class = CategoryUpperFilter
-    pagination_class = AllUpperCategoriesPagination
+    pagination_class = None
 
 
 class CategoriesMiddleList(viewsets.ModelViewSet):
@@ -159,6 +178,7 @@ class CategoriesMiddleList(viewsets.ModelViewSet):
     ordering = ("category",)
     ordering_fields = ('category', 'id')
     filterset_class = CategoryMiddleFilter
+    pagination_class = None
 
 
 class CategoriesLowerList(viewsets.ModelViewSet):
@@ -169,16 +189,17 @@ class CategoriesLowerList(viewsets.ModelViewSet):
     ordering = ("category",)
     ordering_fields = ('category', 'id')
     filterset_class = CategoryLowerFilter
+    pagination_class = None
 
 
 class MaterialList(generics.ListAPIView):
-    pagination_class = AllMaterialsPagination
     queryset = Material.objects.all()
     serializer_class = MaterialNameIdSerializer
     filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
     ordering = ("id",)
     ordering_fields = ('name', 'id',)
     search_fields = ('name',)
+    pagination_class = None
 
 
 @api_view(['DELETE'])

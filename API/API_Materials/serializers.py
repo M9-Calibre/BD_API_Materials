@@ -4,8 +4,14 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.validators import UniqueValidator
 
 from .models import Material, MaterialCategory3, MaterialCategory2, MaterialCategory1, Test, ThermalProperties, \
-    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint
+    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model, MaterialModelParams
 from django.contrib.auth.models import User
+
+
+class ModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Model
+        fields = '__all__'
 
 
 class TestSerializer(serializers.ModelSerializer):
@@ -76,6 +82,8 @@ class MaterialSerializer(serializers.ModelSerializer):
     upper_category = serializers.ReadOnlyField(source="category.middle_category.upper_category.category")
     middle_category = serializers.ReadOnlyField(source="category.middle_category.category")
     lower_category = serializers.ReadOnlyField(source="category.category")
+    upper_category_id = serializers.ReadOnlyField(source="category.middle_category.upper_category.id")
+    middle_category_id = serializers.ReadOnlyField(source="category.middle_category.id")
     user = serializers.ReadOnlyField(source="submitted_by.username")
     submitted_by = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     thermal_properties = ThermalPropsSerializer(many=False, required=False)
@@ -186,7 +194,7 @@ class MaterialSerializer(serializers.ModelSerializer):
         model = Material
         fields = ['id', 'name', 'category', 'description', 'submitted_by', 'user', 'mat_id', 'entry_date', 'source',
                   'designation', 'heat_treatment', 'thermal_properties', 'mechanical_properties', 'physical_properties',
-                  'tests', 'upper_category', 'middle_category', 'lower_category']
+                  'tests', 'upper_category', 'middle_category', 'lower_category', "upper_category_id", "middle_category_id"]
 
 
 class UserSerializer(serializers.ModelSerializer):

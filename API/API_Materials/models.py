@@ -62,15 +62,6 @@ class Material(models.Model):
     physical_properties = models.OneToOneField(PhysicalProperties, models.CASCADE, null=True)
 
 
-# we keep parameters, the equation
-class Model(models.Model):
-    name = models.CharField(max_length=50)
-    tag = models.CharField(max_length=30)
-    input = models.CharField(max_length=50)
-    output = models.CharField(max_length=50)
-    parameters = models.JSONField()
-
-
 class Test(models.Model):
     submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='tests')
     material = models.ForeignKey(Material, models.CASCADE, related_name='tests')
@@ -81,11 +72,17 @@ class Test(models.Model):
         unique_together = ('material', 'name')
 
 
+class Model(models.Model):
+    name = models.CharField(max_length=50)
+    tag = models.CharField(max_length=30)
+    input = models.JSONField()  # {"x" : default, "y": default}
+
+
 class MaterialModelParams(models.Model):
     test = models.ForeignKey(Test, models.CASCADE, related_name='params')
     model = models.ForeignKey(Model, models.CASCADE, related_name='params')
     submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='params')
-    params = models.JSONField()
+    params = models.JSONField()  # {"x": 10, "z": 40, "output_do_outro" : 30} // {"input": [12, 1, 3.4], "output":}
 
     class Meta:
         unique_together = ("test", "model", "submitted_by")
@@ -95,7 +92,6 @@ class DICStage(models.Model):
     test = models.ForeignKey(Test, models.CASCADE, related_name='stages')
     stage_num = models.IntegerField()
     timestamp_def = models.FloatField()
-    # ambient_temperature = models.DecimalField(decimal_places=2, max_digits=5, null=True)  # TODO: Where to find in the file
     load = models.FloatField()
 
     class Meta:

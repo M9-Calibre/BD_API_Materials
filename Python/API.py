@@ -1,6 +1,19 @@
 import requests
+import json
+from enum import Enum
 
+#URL = 'http://afonsocampos100.pythonanywhere.com/'
 URL = 'http://127.0.0.1:8000'
+
+class MaterialOrderings(Enum):
+    Id = "id"
+    Date = "entry_date"
+    Mat_Id = "mat_id"
+    Name = "name"
+
+class CategoriesDisplayModes(Enum):
+    Tree = "tree"
+    List = "list"
 
 class APIFailedRequest(Exception):
     def __init__(self, response : requests.Response) -> None:
@@ -14,11 +27,17 @@ class UpperCategory():
         self.id = None
         self.name = name
 
+    def __str__(self) -> str:
+        return f"Upper Category {self.id}: {self.name}"
+
 class MiddleCategory():
     def __init__(self, upper : UpperCategory, name : str) -> None:
         self.id = None
         self.upper = upper
         self.name = name
+
+    def __str__(self) -> str:
+        return f"Middle Category {self.id}: {self.name}"
 
 class LowerCategory():
     def __init__(self, middle : MiddleCategory, name : str) -> None:
@@ -26,18 +45,34 @@ class LowerCategory():
         self.middle = middle
         self.name = name
 
+    def __str__(self) -> str:
+        return f"Lower Category {self.id}: {self.name}"
+
 class ThermalProperties():
-    def __init__(self, thermal_expansion_coef : dict = None, specific_heat_capacity : dict = None, thermal_conductivity_tp : dict = None) -> None:
+    def __init__(self, thermal_expansion_coef : dict[str, float] = None, specific_heat_capacity : dict[str, float] = None, thermal_conductivity : dict[str, float] = None) -> None:
         self.thermal_expansion_coef = thermal_expansion_coef
         self.specific_heat_capacity = specific_heat_capacity
-        self.thermal_conductivity_tp = thermal_conductivity_tp
+        self.thermal_conductivity = thermal_conductivity
+
+    def to_dict(self) -> dict:
+        json_data = self.__dict__
+        json_data["thermal_conductivity_tp"] = json_data.pop("thermal_conductivity")
+        return json_data
+
+    @classmethod
+    def load_json(cls, thermal_properties_json : dict):
+        thermal_properties = ThermalProperties()
+        thermal_properties.thermal_expansion_coef = thermal_properties_json.get("thermal_expansion_coef", None)
+        thermal_properties.specific_heat_capacity = thermal_properties_json.get("specific_heat_capacity", None)
+        thermal_properties.thermal_conductivity = thermal_properties_json.get("thermal_conductivity_tp", None)
+        return thermal_properties
 
 class MechanicalProperties():
-    def __init__(self, tensile_strength : int = None, thermal_conductivity_mp : float = None, reduction_of_area : float = None, 
-                 cyclic_yield_strength : int = None, elastic_modulus : dict = None, poissons_ratio : dict = None, shear_modulus : dict = None, 
-                 yield_strength : dict = None) -> None:
+    def __init__(self, tensile_strength : int = None, thermal_conductivity : float = None, reduction_of_area : float = None, 
+                 cyclic_yield_strength : int = None, elastic_modulus : dict[str, float] = None, poissons_ratio : dict[str, float] = None, shear_modulus : dict[str, float] = None, 
+                 yield_strength : dict[str, float] = None) -> None:
         self.tensile_strength = tensile_strength
-        self.thermal_conductivity_mp = thermal_conductivity_mp
+        self.thermal_conductivity = thermal_conductivity
         self.reduction_of_area = reduction_of_area
         self.cyclic_yield_strength = cyclic_yield_strength
         self.elastic_modulus = elastic_modulus
@@ -45,9 +80,36 @@ class MechanicalProperties():
         self.shear_modulus = shear_modulus
         self.yield_strength = yield_strength
 
+    def to_dict(self) -> dict:
+        json_data = self.__dict__
+        json_data["thermal_conductivity_mp"] = json_data.pop("thermal_conductivity")
+        return json_data
+
+    @classmethod
+    def load_json(cls, mechanical_properties_json : dict):
+        mechanical_properties = MechanicalProperties()
+        mechanical_properties.tensile_strength = mechanical_properties_json.get("tensile_strength", None)
+        mechanical_properties.thermal_conductivity = mechanical_properties_json.get("thermal_conductivity_mp", None)
+        mechanical_properties.reduction_of_area = mechanical_properties_json.get("reduction_of_area", None)
+        mechanical_properties.cyclic_yield_strength = mechanical_properties_json.get("cyclic_yield_strength", None)
+        mechanical_properties.elastic_modulus = mechanical_properties_json.get("elastic_modulus", None)
+        mechanical_properties.poissons_ratio = mechanical_properties_json.get("poissons_ratio", None)
+        mechanical_properties.shear_modulus = mechanical_properties_json.get("shear_modulus", None)
+        mechanical_properties.yield_strength = mechanical_properties_json.get("yield_strength", None)
+        return mechanical_properties
+
 class PhysicalProperties():
-    def __init__(self, chemical_composition : dict = None) -> None:
+    def __init__(self, chemical_composition : dict[str, float] = None) -> None:
         self.chemical_composition = chemical_composition
+
+    def to_dict(self) -> dict:
+        return self.__dict__
+
+    @classmethod
+    def load_json(cls, physical_properties_json : dict):
+        physical_properties = PhysicalProperties()
+        physical_properties.chemical_composition = physical_properties_json.get("chemical_composition", None)
+        return physical_properties
 
 class Material():
     def __init__(self, name : str, category : LowerCategory, mat_id : int, source : str, designation : str, heat_treatment : str, 
@@ -67,7 +129,52 @@ class Material():
         self.mechanical_properties = mechanical_properties
         self.physical_properties = physical_properties
 
+    def __str__(self) -> str:
+        return f"Material {self.id}: {self.name}"
+
+    def to_json(self) -> str:
+        material_json = self.__dict__
+        material_json["category"] = self.category.id
+        material_json["thermal_properties"] = self.thermal_properties.to_dict()
+        material_json["mechanical_properties"] = self.mechanical_properties.to_dict()
+        material_json["physical_properties"] = self.physical_properties.to_dict()
+        return json.dumps(material_json, indent=2)
+
+    @classmethod
+    def load_json(cls, material_json : dict):
+        id = material_json["id"]
+        name = material_json["name"]
+        upper_category = UpperCategory(material_json["upper_category"])
+        upper_category.id = material_json["upper_category_id"]
+        middle_category = MiddleCategory(upper_category, material_json["middle_category"])
+        middle_category.id = material_json["middle_category_id"]
+        category = LowerCategory(middle_category, material_json["lower_category"])
+        category.id = material_json["category"]
+        mat_id = material_json["mat_id"]
+        source = material_json["source"]
+        designation = material_json["designation"]
+        heat_treatment = material_json["heat_treatment"]
+        description = material_json.get("description", None)
+        thermal_properties = ThermalProperties.load_json(material_json["thermal_properties"]) if "thermal_properties" in material_json else None
+        physical_properties = PhysicalProperties.load_json(material_json["physical_properties"]) if "physical_properties" in material_json else None
+        mechanical_properties = MechanicalProperties.load_json(material_json["mechanical_properties"]) if "mechanical_properties" in material_json else None
+        
+        material = Material(name, category, mat_id, source, designation, heat_treatment, description, thermal_properties, mechanical_properties, physical_properties)
+        material.id = id
+        return material
+    
 def authenticate(username : str, password : str) -> str:
+    """Login with existing user credentials and retrieve an authentication token.
+
+    Parameters
+    ----------
+    username : str
+        The username of the user
+    password : str
+        The password of the user
+    
+    """
+
     json_req_body = {
         "username" : username,
         "password" : password
@@ -79,43 +186,130 @@ def authenticate(username : str, password : str) -> str:
     
     token = login.json()["token"]
 
+    print("authenticate: Authentication successful.")
+
     return token
 
-
-
-def register_user(username : str, password : str, first_name : str, last_name : str, email : str) -> str:
-    """A function to register a new user on the MaterialAPI.
+def get_materials(page : int = 1, page_size : int = 10, ordering : MaterialOrderings = MaterialOrderings.Id, ascending : bool = True, search : str = None) -> list[Material]:
+    """Retrieve a page of materials.
 
     Parameters
     ----------
-    username : str
-        The username of the new user, must not have been previously registered
-    password : str
-        The password of the new user, used for future logins
-    first_name : str
-        The first name of the new user
-    first_name : str
-        The last name of the new user
-    email : str
-        The email of the new user, must not have been previously registered
+    page (optional) : int
+        Page number
+    page_size (optional) : int
+        Number of materials per page
+    ordering (optional) : MaterialOrderings
+        Ordering of the material list (available orderings: id, date, mat_id, name)
+    ascending (optional) : bool
+        Defines ordering direction
+    search (optional) : str
+        Filters materials by inclusion of the specified string in the material name or description
     
     """
-    json_req_body = {
-        "username" : username,
-        "password" : password,
-        "first_name" : first_name,
-        "last_name" : last_name,
-        "email" : email
-    }
-
-    req = requests.post(f"{URL}/users/register/", json=json_req_body)
-
-    if req.status_code != 200:
-        raise 
     
-    return f"Registration of user {username} successful!"
+    url = f"{URL}/materials/?page={page}&page_size={page_size}&ordering={'' if ascending else '-'}{ordering.value}{'&search='+search if search else ''}"
+
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        raise APIFailedRequest(response)
+    
+    results = response.json()["results"]
+
+    materials = list[Material]()
+    for material_json in results:
+        materials.append(Material.load_json(material_json))
+
+    print(f"get_materials: Successfully retrieved {len(materials)} materials.")
+
+    return materials
+
+def get_categories(mode : CategoriesDisplayModes = CategoriesDisplayModes.List):
+    """Retrieve all categories.
+    
+    Parameters
+    ----------
+    mod (optional) : CategoriesDisplayModes
+        Either return the categories in a tree-like object or return three list for each type of category (upper, middle, lower)
+
+    """
+
+    response = requests.get(f"{URL}/categories/upper/")
+
+    if response.status_code != 200:
+        raise APIFailedRequest(response)
+    
+    json_data = response.json()
+
+    if mode == CategoriesDisplayModes.List:
+        result = dict()
+        result["upper"] = list()
+        result["middle"] = list()
+        result["lower"] = list()
+        for upper_category in json_data:
+            id = upper_category["id"]
+            name = upper_category["category"]
+            up_category = UpperCategory(name)
+            up_category.id = id
+            result["upper"].append(up_category)
+            for middle_category in upper_category["mid_categories"]:
+                id = middle_category["id"]
+                name = middle_category["category"]
+                mid_category = MiddleCategory(up_category, name)
+                mid_category.id = id
+                result["middle"].append(mid_category)
+                for lower_category in middle_category["lower_categories"]:
+                    id = lower_category["id"]
+                    name = lower_category["category"]
+                    category = LowerCategory(mid_category, name)
+                    category.id = id
+                    result["lower"].append(category)
+    elif mode == CategoriesDisplayModes.Tree:
+        result = dict()
+        for upper_category in json_data:
+            id = upper_category["id"]
+            name = upper_category["category"]
+            up_category = UpperCategory(name)
+            up_category.id = id
+            result[up_category] = dict()
+            for middle_category in upper_category["mid_categories"]:
+                id = middle_category["id"]
+                name = middle_category["category"]
+                mid_category = MiddleCategory(up_category, name)
+                mid_category.id = id
+                result[up_category][mid_category] = list()
+                for lower_category in middle_category["lower_categories"]:
+                    id = lower_category["id"]
+                    name = lower_category["category"]
+                    low_category = LowerCategory(mid_category, name)
+                    low_category.id = id
+                    result[up_category][mid_category].append(low_category)
+
+    return result
+
+def register_material(login_token : str, material : Material):
+    """Save a material to the database.
+
+    Parameters
+    ----------
+    material : Material
+        The material to be saved (name and mat_id must be unique)
+    login_token : str
+        The log-in token that can be retrieved from the authenticate function
+    
+    """
+
+    response = requests.post(f"{URL}/materials/", headers={"Authentication": f"Token {login_token}"})
+
+    if response.status_code != 201:
+        raise APIFailedRequest(response)
+    
+    print(response.json())
+
 
 def login_user(username, password):
+    
     json_req_body = {
         "username" : username,
         "password" : password
@@ -197,3 +391,11 @@ def upload_test_data(username, password, test_id, files, stage_metadata, format=
 
 def get_profile(username, password):
     return requests.get(f"{URL}/users/profile/", auth=(username,password)).json()
+
+
+# username_teresa = "teresa123"
+# password_teresa = "aseret321_"
+
+# x = create_test(username_teresa, password_teresa, "TESTTESTEST", 1, dict(), dict())
+# print(x.status_code)
+
