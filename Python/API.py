@@ -1,6 +1,7 @@
 import requests
-import json
+from dataclasses import dataclass, field
 from enum import Enum
+from typing import Union
 
 #URL = 'http://afonsocampos100.pythonanywhere.com/'
 URL = 'http://127.0.0.1:8000'
@@ -14,6 +15,11 @@ class MaterialOrderings(Enum):
 class CategoriesDisplayModes(Enum):
     Tree = "tree"
     List = "list"
+
+class CategoryLevel(Enum):
+    Upper = "upper"
+    Middle = "middle"
+    Lower = "lower"
 
 class APIFailedRequest(Exception):
     def __init__(self, response : requests.Response) -> None:
@@ -135,14 +141,26 @@ class Material():
     def to_json(self) -> str:
         material_json = self.__dict__
         material_json["category"] = self.category.id
-        material_json["thermal_properties"] = self.thermal_properties.to_dict()
-        material_json["mechanical_properties"] = self.mechanical_properties.to_dict()
-        material_json["physical_properties"] = self.physical_properties.to_dict()
-        return json.dumps(material_json, indent=2)
+
+        if self.thermal_properties:
+            material_json["thermal_properties"] = self.thermal_properties.to_dict()
+        else:
+            material_json.pop("thermal_properties")
+
+        if self.mechanical_properties:
+            material_json["mechanical_properties"] = self.mechanical_properties.to_dict()
+        else:
+            material_json.pop("Mechanical_properties")
+
+        if self.physical_properties:
+            material_json["physical_properties"] = self.physical_properties.to_dict()
+        else:
+            material_json.pop("physical_properties")
+
+        return material_json
 
     @classmethod
     def load_json(cls, material_json : dict):
-        id = material_json["id"]
         name = material_json["name"]
         upper_category = UpperCategory(material_json["upper_category"])
         upper_category.id = material_json["upper_category_id"]
@@ -160,8 +178,24 @@ class Material():
         mechanical_properties = MechanicalProperties.load_json(material_json["mechanical_properties"]) if "mechanical_properties" in material_json else None
         
         material = Material(name, category, mat_id, source, designation, heat_treatment, description, thermal_properties, mechanical_properties, physical_properties)
-        material.id = id
+        if "id" in material_json: 
+            material.id = material_json["id"]
         return material
+    
+@dataclass
+class Test():
+    material : Material
+    name : str
+    metadata : dict[str, Union[str, int, float]]
+    id : int = field(init=False, default=None)
+    submitted_by : int = field(init=False, default=None)
+
+    def to_json(self):
+        test_json = self.__dict__
+        
+        return test_json
+
+# Authentication    
     
 def authenticate(username : str, password : str) -> str:
     """Login with existing user credentials and retrieve an authentication token.
@@ -189,6 +223,8 @@ def authenticate(username : str, password : str) -> str:
     print("authenticate: Authentication successful.")
 
     return token
+
+# Materials   
 
 def get_materials(page : int = 1, page_size : int = 10, ordering : MaterialOrderings = MaterialOrderings.Id, ascending : bool = True, search : str = None) -> list[Material]:
     """Retrieve a page of materials.
@@ -225,13 +261,57 @@ def get_materials(page : int = 1, page_size : int = 10, ordering : MaterialOrder
 
     return materials
 
+def get_material(material_id : int) -> Material:
+    """Retrieve a material by id.
+    
+    Parameters
+    ----------
+    material_id : int
+        The id of the category to be fetched
+    """
+
+    url = f"{URL}/materials/{material_id}/"
+
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        raise APIFailedRequest(response)
+    
+    material_data = response.json()
+
+    return Material.load_json(material_data)
+
+def register_material(login_token : str, material : Material):
+    """Save a material to the database.
+
+    Parameters
+    ----------
+    material : Material
+        The material to be saved (name and mat_id must be unique)
+    login_token : str
+        The log-in token that can be retrieved from the authenticate function
+    
+    """
+
+    headers = {"Authorization": f"Token {login_token}"}
+
+    response = requests.post(f"{URL}/materials/", headers=headers, json=material.to_json())
+
+    if response.status_code != 201:
+        raise APIFailedRequest(response)
+    
+    material.id = response.json()["id"]
+    return material
+
+# Categories
+
 def get_categories(mode : CategoriesDisplayModes = CategoriesDisplayModes.List):
     """Retrieve all categories.
     
     Parameters
     ----------
-    mod (optional) : CategoriesDisplayModes
-        Either return the categories in a tree-like object or return three list for each type of category (upper, middle, lower)
+    mode (optional) : CategoriesDisplayModes
+        Either return the categories in a tree-like object or return three lists for each type of category (upper, middle, lower)
 
     """
 
@@ -288,24 +368,82 @@ def get_categories(mode : CategoriesDisplayModes = CategoriesDisplayModes.List):
 
     return result
 
-def register_material(login_token : str, material : Material):
-    """Save a material to the database.
+def get_category(category_id : int, level : CategoryLevel = CategoryLevel.Lower):
+    """Retrieve a category by id.
+    
+    Parameters
+    ----------
+    category_id : int
+        The id of the category to be fetched
+    level (optional) : CategoryLevel
+        The level of the category to be fetched (by default, lower)
+    """
+
+    url = f"{URL}/categories/{level.value}/{category_id}/"
+
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        raise APIFailedRequest(response)
+    
+    category_data = response.json()
+
+    if level == CategoryLevel.Lower:
+        upper_id = category_data["upper_category"]
+        upper_name = category_data["upper_name"]
+        upper = UpperCategory(upper_name)
+        upper.id = upper_id
+        middle_id = category_data["middle_category"]
+        middle_name = category_data["middle_name"]
+        middle = MiddleCategory(upper, middle_name)
+        middle.id = middle_id
+        lower_id = category_data["id"]
+        lower_name = category_data["category"]
+        lower = LowerCategory(middle, lower_name)
+        lower.id = lower_id
+        return lower
+    elif level == CategoryLevel.Middle:
+        upper_id = category_data["upper_category"]
+        upper_name = category_data["upper_name"]
+        upper = UpperCategory(upper_name)
+        upper.id = upper_id
+        middle_id = category_data["id"]
+        middle_name = category_data["category"]
+        middle = MiddleCategory(upper, middle_name)
+        middle.id = middle_id
+        return middle
+    elif level == CategoryLevel.Upper:
+        upper_id = category_data["id"]
+        upper_name = category_data["category"]
+        upper = UpperCategory(upper_name)
+        upper.id = upper_id
+        return upper
+    
+# Tests
+
+def register_test(login_token : str, test : Test):
+    """Save a test to the database.
 
     Parameters
     ----------
-    material : Material
-        The material to be saved (name and mat_id must be unique)
+    test : Test
+        The test to be saved (name must be unique within the material tests)
     login_token : str
         The log-in token that can be retrieved from the authenticate function
     
     """
 
-    response = requests.post(f"{URL}/materials/", headers={"Authentication": f"Token {login_token}"})
+    headers = {"Authorization": f"Token {login_token}"}
+
+    response = requests.post(f"{URL}/materials/", headers=headers, json=test.to_json())
 
     if response.status_code != 201:
         raise APIFailedRequest(response)
     
-    print(response.json())
+    test.id = response.json()["id"]
+    return test
+
+
 
 
 def login_user(username, password):

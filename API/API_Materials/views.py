@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate, login
-from rest_framework import generics, permissions, viewsets, filters
+from rest_framework import generics, permissions, viewsets, filters, mixins
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User
 from django_filters import rest_framework as filters2
@@ -19,24 +19,6 @@ from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter
 from .utils import process_test_data
 from .pagination import DICDataPagination
-from .model_scripts.yield_code import run_yld2000
-from .model_scripts.YieldLocus import main
-
-
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def test(request):
-    data = request.data
-
-    arguments = data.get("arguments", None)
-
-    print(arguments)
-
-    img = main(arguments)
-
-    print(img)
-
-    return Response(status=200, data=img)
 
 
 @api_view(['POST'])
@@ -87,7 +69,7 @@ def profile(request):
             return Response(status=404)
 
 
-class RegisterUserAPIView(generics.CreateAPIView):
+class RegisterUserAPIView(generics.CreateAPIView): # TODO destroy
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
 
@@ -98,7 +80,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
     serializer_class = MaterialSerializer
     filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
     ordering = ("id",)
-    ordering_fields = ('name', 'mat_id', 'entry_date', 'id')
+    ordering_fields = ('name', 'mat_id', 'entry_date', 'id', 'upper_category', 'middle_category', 'lower_category', 'submitted_by')
     search_fields = ('name', 'description',)
 
     def perform_create(self, serializer: MaterialSerializer):
@@ -134,12 +116,12 @@ class DICDataViewSet(viewsets.ModelViewSet):
     pagination_class = DICDataPagination
 
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
+class UserViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.DestroyModelMixin):
     permission_classes = [permissions.IsAdminUser]
     queryset = User.objects.all()
     serializer_class = UserSerializer
     filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter)
-    ordering = ("id",)
+    ordering = ("id", "username", "first_name", "last_name", "email")
     ordering_fields = ('username', 'id')
 
 
@@ -167,7 +149,6 @@ class CategoriesUpperList(viewsets.ModelViewSet):
     ordering = ("category",)
     ordering_fields = ('category', 'id')
     filterset_class = CategoryUpperFilter
-    pagination_class = None
 
 
 class CategoriesMiddleList(viewsets.ModelViewSet):
@@ -178,7 +159,6 @@ class CategoriesMiddleList(viewsets.ModelViewSet):
     ordering = ("category",)
     ordering_fields = ('category', 'id')
     filterset_class = CategoryMiddleFilter
-    pagination_class = None
 
 
 class CategoriesLowerList(viewsets.ModelViewSet):
@@ -189,7 +169,6 @@ class CategoriesLowerList(viewsets.ModelViewSet):
     ordering = ("category",)
     ordering_fields = ('category', 'id')
     filterset_class = CategoryLowerFilter
-    pagination_class = None
 
 
 class MaterialList(generics.ListAPIView):

@@ -4,7 +4,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.validators import UniqueValidator
 
 from .models import Material, MaterialCategory3, MaterialCategory2, MaterialCategory1, Test, ThermalProperties, \
-    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model, MaterialModelParams
+    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model
 from django.contrib.auth.models import User
 
 
@@ -14,14 +14,24 @@ class ModelSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class StageListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DICStage
+        fields = ["id", "stage_num"]
+
+
 class TestSerializer(serializers.ModelSerializer):
     submitted_by = serializers.SlugRelatedField(many=False, read_only=True, slug_field='username')
     material = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Material.objects.all())
-    stages = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    stages = serializers.SerializerMethodField()
 
     class Meta:
         model = Test
         fields = '__all__'
+
+    def get_stages(self, instance):
+        stages = instance.stages.all().order_by('stage_num')
+        return StageListSerializer(stages, many=True, read_only=True).data
 
 
 class DICStageSerializer(serializers.ModelSerializer):

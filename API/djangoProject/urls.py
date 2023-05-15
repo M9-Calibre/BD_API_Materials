@@ -57,6 +57,5 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('tests/<int:pk>/upload/', views.upload_test_data),
     path('tests/<int:pk>/delete/', views.delete_test_data),
-    path('lucius/', views.test),
     path('', include(router.urls))
 ]
