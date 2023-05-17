@@ -9,6 +9,12 @@ from django.contrib.auth.models import User
 
 
 class ModelSerializer(serializers.ModelSerializer):
+    def validate_input(self, value):
+        if isinstance(value, list):
+            return value
+        else:
+            raise serializers.ValidationError("Input is not a list.")
+
     class Meta:
         model = Model
         fields = '__all__'
