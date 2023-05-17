@@ -22,10 +22,10 @@ pymysql.install_as_MySQLdb()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 with open(os.path.join(BASE_DIR, 'secrets.json'), "rb") as secrets_file:
-    secrets = json.loads(secrets_file.read())
+    secrets_content = json.loads(secrets_file.read())
 
 
-def get_secret(setting, secrets=secrets):
+def get_secret(setting, secrets=secrets_content):
     try:
         return secrets[setting]
     except KeyError:
@@ -125,13 +125,6 @@ DATABASES = {
         }
     }
 }
-
-"""
-'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-"""
 
 
 # Password validation

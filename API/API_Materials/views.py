@@ -6,15 +6,15 @@ from django_filters import rest_framework as filters2
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from rest_framework.response import Response
-from django.http import HttpResponseForbidden, HttpResponseNotFound, HttpResponse
+from django.http import HttpResponseForbidden, HttpResponseNotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
 
 from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCategory3, Supplier, Laboratory, Test, \
-    DICStage, DICDatapoint, Model, MaterialModelParams
+    DICStage, DICDatapoint, Model, ModelParams
 from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
     Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer, \
-    DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer
+    DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer, ModelSerializer
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter
 from .utils import process_test_data
@@ -67,6 +67,15 @@ def profile(request):
                 return Response(status=400)
         else:
             return Response(status=404)
+
+
+class ModelViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+    queryset = Model.objects.all()
+    serializer_class = ModelSerializer
+    filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter)
+    ordering = ("name",)
+    ordering_fields = ('name', 'tag', 'id')
 
 
 class RegisterUserAPIView(generics.CreateAPIView): # TODO destroy

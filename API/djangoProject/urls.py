@@ -45,6 +45,7 @@ router.register(r'DICdata', views.DICDataViewSet, basename='DICdata')
 router.register(r'categories/upper', views.CategoriesUpperList, basename='categories_upper')
 router.register(r'categories/middle', views.CategoriesMiddleList, basename='categories_middle')
 router.register(r'categories/lower', views.CategoriesLowerList, basename='categories_lower')
+router.register(r'models', views.ModelViewSet, basename='models')
 
 urlpatterns = [
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),

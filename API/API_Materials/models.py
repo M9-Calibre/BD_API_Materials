@@ -78,7 +78,7 @@ class Model(models.Model):
     input = models.JSONField()  # {"x" : default, "y": default}
 
 
-class MaterialModelParams(models.Model):
+class ModelParams(models.Model):
     test = models.ForeignKey(Test, models.CASCADE, related_name='params')
     model = models.ForeignKey(Model, models.CASCADE, related_name='params')
     submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='params')

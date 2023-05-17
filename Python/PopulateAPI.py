@@ -43,19 +43,19 @@ dic_params_example = {
 # print(test_id)
 # print(f"Test -> ID: {test_id}, Owner: {x.json()['submitted_by']}, Material: {x.json()['material']}")
 
-test_id = 14
+# test_id = 14
 
-f = []
-for (dirpath, dirnames, filenames) in os.walk("./90deg"):
-    f.extend(filenames)
-    break
+# f = []
+# for (dirpath, dirnames, filenames) in os.walk("./90deg"):
+#     f.extend(filenames)
+#     break
 
-files = {str(k) : open(f"./90deg/{f}", "rb") for k, f in enumerate(f)}
+# files = {str(k) : open(f"./90deg/{f}", "rb") for k, f in enumerate(f)}
 
-print(files)
+# print(files)
 
-tik = time.time()
+# tik = time.time()
 
-x = upload_test_data(username_bob, password_bob, test_id, files, open("stage_metadata.csv", "rb"), "matchid", True, False)
-print(f"Bob submits test data: {x.status_code} {x.json()}")
+# x = upload_test_data(username_bob, password_bob, test_id, files, open("stage_metadata.csv", "rb"), "aramis", True, False)
+# print(f"Bob submits test data: {x.status_code} {x.json()}")
 

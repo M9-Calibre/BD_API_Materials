@@ -204,7 +204,8 @@ class MaterialSerializer(serializers.ModelSerializer):
         model = Material
         fields = ['id', 'name', 'category', 'description', 'submitted_by', 'user', 'mat_id', 'entry_date', 'source',
                   'designation', 'heat_treatment', 'thermal_properties', 'mechanical_properties', 'physical_properties',
-                  'tests', 'upper_category', 'middle_category', 'lower_category', "upper_category_id", "middle_category_id"]
+                  'tests', 'upper_category', 'middle_category', 'lower_category', "upper_category_id",
+                  "middle_category_id"]
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -243,7 +244,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 class Category3Serializer(serializers.ModelSerializer):
     materials = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     middle_category = serializers.PrimaryKeyRelatedField(many=False, read_only=False,
-                                                        queryset=MaterialCategory2.objects.all())
+                                                         queryset=MaterialCategory2.objects.all())
     upper_category = serializers.ReadOnlyField(source="middle_category.upper_category.id")
     upper_name = serializers.ReadOnlyField(source="middle_category.upper_category.category")
     middle_name = serializers.ReadOnlyField(source="middle_category.category")
