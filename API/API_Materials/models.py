@@ -9,21 +9,12 @@ class MaterialCategory1(models.Model):
 
 class MaterialCategory2(models.Model):
     upper_category = models.ForeignKey(MaterialCategory1, models.CASCADE, related_name='mid_categories')
-    category = models.CharField(max_length=25)
-
-    class Meta:
-        unique_together = ('upper_category', 'category')
+    category = models.CharField(max_length=25, unique=True)
 
 
 class MaterialCategory3(models.Model):
     middle_category = models.ForeignKey(MaterialCategory2, models.CASCADE, related_name='lower_categories')
     category = models.CharField(max_length=25, unique=True)
-
-    class Meta:
-        unique_together = ('middle_category', 'category')
-
-    def __str__(self):
-        return f"{self.upper_category.upper_category.category}->{self.upper_category.category}->{self.category}"
 
 
 class ThermalProperties(models.Model):

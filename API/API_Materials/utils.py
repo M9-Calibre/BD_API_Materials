@@ -23,8 +23,13 @@ def process_test_data(files: FileDict, file_format="aramis", _3d=False):
     skipped_files = list()
     read_stages = list()
     stages = dict()
-    metadata = pd.read_csv(files["stage_metadata.csv"], delimiter=",", header=None,
-                           names=["stage_num", "ts_def", "load"])
+
+    try:
+        metadata = pd.read_csv(files["stage_metadata.csv"], delimiter=",", header=None,
+                               names=["stage_num", "ts_def", "load"])
+    except:
+        return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
+
     for file_name, file in files.items():
         if file_name == "stage_metadata.csv":
             continue
@@ -36,7 +41,7 @@ def process_test_data(files: FileDict, file_format="aramis", _3d=False):
         if stage in read_stages:  # duplicate
             duplicated_stages.append(stage)
             continue
-        stage_metadata = metadata[metadata["stage_num"] == stage]
+        stage_metadata = metadata.loc[metadata["stage_num"] == stage]
         if stage_metadata.empty:
             if stage == 0:
                 ts_def = 0
@@ -44,6 +49,13 @@ def process_test_data(files: FileDict, file_format="aramis", _3d=False):
             else:
                 not_in_metadata.append(file_name)
                 continue
+        elif stage_metadata.shape[0] != 1:
+            duplicated_stages = list()
+            bad_format = list()
+            not_in_metadata = list()
+            skipped_files = list()
+            stages = dict()
+            return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
         else:
             ts_def = float(stage_metadata["ts_def"].iloc[0])
             load = float(stage_metadata["load"].iloc[0])
@@ -64,7 +76,7 @@ def process_test_data(files: FileDict, file_format="aramis", _3d=False):
                         else:
                             data[name] = None
                     datapoints.append(data)
-        elif file_format == "matchid":  # TODO
+        elif file_format == "matchid":
             try:
                 content = pd.read_csv(file, delimiter=',')
             except:

@@ -179,3 +179,8 @@ REST_FRAMEWORK = {
 }
 
 DATA_UPLOAD_MAX_NUMBER_FILES = 400
+
+GRAPH_MODELS ={
+    'all_applications': True,
+    'graph_models': True,
+}

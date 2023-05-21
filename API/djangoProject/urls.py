@@ -39,6 +39,7 @@ router.register(r'materials', views.MaterialViewSet, basename="materials")
 router.register(r'users', views.UserViewSet, basename="users")
 router.register(r'suppliers', views.SupplierViewSet, basename='suppliers')
 router.register(r'labs', views.LaboratoryViewSet, basename='labs')
+router.register(r'tests/params', views.ModelParamsViewSet, basename='tests_params')
 router.register(r'tests', views.TestViewSet, basename='tests')
 router.register(r'DICstages', views.DICStageViewSet, basename='DICstages')
 router.register(r'DICdata', views.DICDataViewSet, basename='DICdata')
@@ -57,6 +58,7 @@ urlpatterns = [
     path('materials/list/', views.MaterialList.as_view()),
     path('api-auth/', include('rest_framework.urls')),
     path('tests/<int:pk>/upload/', views.upload_test_data),
+    path('tests/<int:pk>/download/', views.get_test_data),
     path('tests/<int:pk>/delete/', views.delete_test_data),
     path('', include(router.urls))
 ]

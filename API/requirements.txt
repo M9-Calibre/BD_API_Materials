@@ -12,6 +12,3 @@ mysql_connector
 numpy
 pandas
 matplotlib
-
-
-

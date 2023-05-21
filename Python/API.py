@@ -1,10 +1,18 @@
 import requests
-from dataclasses import dataclass, field
+import shutil
 from enum import Enum
-from typing import Union
+from typing import Union, Any
+from copy import deepcopy
+from time import time
 
-#URL = 'http://afonsocampos100.pythonanywhere.com/'
 URL = 'http://127.0.0.1:8000'
+
+class APIFailedRequest(Exception):
+    def __init__(self, response : requests.Response) -> None:
+        self.status_code = response.status_code
+        self.reason = response.reason
+        self.message = f'Invalid request. (Status Code {self.status_code}: {self.reason})'
+        super().__init__(self.message)
 
 class MaterialOrderings(Enum):
     Id = "id"
@@ -21,14 +29,16 @@ class CategoryLevel(Enum):
     Middle = "middle"
     Lower = "lower"
 
-class APIFailedRequest(Exception):
-    def __init__(self, response : requests.Response) -> None:
-        self.status_code = response.status_code
-        self.reason = response.reason
-        self.message = f'Invalid request. (Status Code {self.status_code}: {self.reason})'
-        super().__init__(self.message)
+class UploadFileFormat(Enum):
+    MatchId = "matchid"
+    Aramis = "aramis"
 
-class UpperCategory():
+class Category():
+    def __init__(self, name : str) -> None:
+        self.id = None
+        self.name = name
+
+class UpperCategory(Category):
     def __init__(self, name : str) -> None:
         self.id = None
         self.name = name
@@ -36,7 +46,7 @@ class UpperCategory():
     def __str__(self) -> str:
         return f"Upper Category {self.id}: {self.name}"
 
-class MiddleCategory():
+class MiddleCategory(Category):
     def __init__(self, upper : UpperCategory, name : str) -> None:
         self.id = None
         self.upper = upper
@@ -45,7 +55,7 @@ class MiddleCategory():
     def __str__(self) -> str:
         return f"Middle Category {self.id}: {self.name}"
 
-class LowerCategory():
+class LowerCategory(Category):
     def __init__(self, middle : MiddleCategory, name : str) -> None:
         self.id = None
         self.middle = middle
@@ -61,7 +71,7 @@ class ThermalProperties():
         self.thermal_conductivity = thermal_conductivity
 
     def to_dict(self) -> dict:
-        json_data = self.__dict__
+        json_data = deepcopy(self.__dict__)
         json_data["thermal_conductivity_tp"] = json_data.pop("thermal_conductivity")
         return json_data
 
@@ -87,7 +97,7 @@ class MechanicalProperties():
         self.yield_strength = yield_strength
 
     def to_dict(self) -> dict:
-        json_data = self.__dict__
+        json_data = deepcopy(self.__dict__)
         json_data["thermal_conductivity_mp"] = json_data.pop("thermal_conductivity")
         return json_data
 
@@ -109,7 +119,7 @@ class PhysicalProperties():
         self.chemical_composition = chemical_composition
 
     def to_dict(self) -> dict:
-        return self.__dict__
+        return deepcopy(self.__dict__)
 
     @classmethod
     def load_json(cls, physical_properties_json : dict):
@@ -123,6 +133,7 @@ class Material():
                  physical_properties : PhysicalProperties = None) -> None:
         self.id = None
         self.submitted_by = None
+        self.user = None
         self.date = None
         self.name = name
         self.category = category
@@ -139,7 +150,7 @@ class Material():
         return f"Material {self.id}: {self.name}"
 
     def to_json(self) -> str:
-        material_json = self.__dict__
+        material_json = deepcopy(self.__dict__)
         material_json["category"] = self.category.id
 
         if self.thermal_properties:
@@ -150,7 +161,7 @@ class Material():
         if self.mechanical_properties:
             material_json["mechanical_properties"] = self.mechanical_properties.to_dict()
         else:
-            material_json.pop("Mechanical_properties")
+            material_json.pop("mechanical_properties")
 
         if self.physical_properties:
             material_json["physical_properties"] = self.physical_properties.to_dict()
@@ -173,29 +184,141 @@ class Material():
         designation = material_json["designation"]
         heat_treatment = material_json["heat_treatment"]
         description = material_json.get("description", None)
-        thermal_properties = ThermalProperties.load_json(material_json["thermal_properties"]) if "thermal_properties" in material_json else None
-        physical_properties = PhysicalProperties.load_json(material_json["physical_properties"]) if "physical_properties" in material_json else None
-        mechanical_properties = MechanicalProperties.load_json(material_json["mechanical_properties"]) if "mechanical_properties" in material_json else None
+        thermal_properties = ThermalProperties.load_json(material_json["thermal_properties"]) if "thermal_properties" in material_json and material_json["thermal_properties"] else None
+        physical_properties = PhysicalProperties.load_json(material_json["physical_properties"]) if "physical_properties" in material_json and material_json["physical_properties"] else None
+        mechanical_properties = MechanicalProperties.load_json(material_json["mechanical_properties"]) if "mechanical_properties" in material_json and material_json["mechanical_properties"] else None
         
         material = Material(name, category, mat_id, source, designation, heat_treatment, description, thermal_properties, mechanical_properties, physical_properties)
-        if "id" in material_json: 
-            material.id = material_json["id"]
+        material.id = material_json.get("id", None)
+        material.submitted_by = material_json.get("submitted_by", None)
+        material.user = material_json.get("user", None)
+        material.date = material_json.get("entry_date", None)
         return material
     
-@dataclass
 class Test():
-    material : Material
-    name : str
-    metadata : dict[str, Union[str, int, float]]
-    id : int = field(init=False, default=None)
-    submitted_by : int = field(init=False, default=None)
+    def __init__(self, material : Material, name : str, metadata : dict[str, Union[str, int, float]]) -> None:
+        self.material = material
+        self.name = name
+        self.metadata = metadata
+        self.id = None
+        self.submitted_by = None
+
+    def upload_test_data(self, login_token : str, file_mapping : dict[str, Any], file_format : UploadFileFormat = UploadFileFormat.MatchId, _3d : bool = False, override : bool = False):
+        """Upload experimental data (as DIC files) to this test.
+
+        Parameters
+        ----------
+        login_token : str
+            The log-in token that can be retrieved from the authenticate function (must be test creator)
+        file_mapping : dict[str, File]
+            A dictionary with the file names as keys and file contents as values
+            A "stage_metadata" file must be uploaded in order to specify stage's load and timestamp
+            Consult the upload manual to verify file naming and content formatting
+        file_format : UploadFileFormat
+            Specifies the file's formatting (matchid or aramis)
+            Consult the upload manual to verify file naming and content formatting
+        _3d : bool
+            Specifies the dimensionality of the DIC files being uploaded, if false 2-dimensional files are assumed
+            Consult the upload manual to verify file naming and content formatting
+        override : bool
+            If set to true the uploaded data will override any existing db data if there is overlap
+            Consult the upload manual to verify file naming and content formatting
+        
+        """
+        
+        if not self.id:
+            print("upload_test_data: object not yet registered.")
+            return
+        
+        headers = {"Authorization": f"Token {login_token}"}
+        
+        url = f"{URL}/tests/{self.id}/upload/?3d={_3d}&file_format={file_format.value}&override={override}"
+
+        tik = time()
+
+        if override:
+            response = requests.put(url, files=file_mapping, headers=headers)
+        else:
+            response = requests.post(url, files=file_mapping, headers=headers)
+
+        tok = time()
+
+        if response.status_code != 200:
+            print(response.json())
+            raise APIFailedRequest(response)
+        
+        created_stages = response.json()["created_stages"]
+        overridden_stages = response.json().get("overriden_stages", None)
+        skipped_files = response.json()["skipped_files"]
+        
+        print(f"upload_test_data: data successfully uploaded. Elapsed time: {round(tok-tik,2)}")
+        print(f"upload_test_data: created stages {created_stages}")
+        print(f"upload_test_data: overriden stages {overridden_stages}")
+        print(f"upload_test_data: skipped files {skipped_files}")
+
+    def download_test_data(self, _3d : bool = False):
+        """
+        Downloads the test's experimental data as a zip of DIC files
+
+        Parameters
+        ----------
+        _3d : bool
+            Specifies the dimensionality of the DIC files being downloaded, if false 2-dimensional files are assumed
+        """
+
+        if not self.id:
+            print("upload_test_data: object not yet registered.")
+            return
+        
+        url = f"{URL}/tests/{self.id}/download/?3d={_3d}"
+
+        response = requests.get(url, stream=True)
+
+        if response.status_code != 200:
+            raise APIFailedRequest(response)
+        
+        with open(f"test_{self.id}_data.zip", "wb") as f:
+            shutil.copyfileobj(response.raw, f)
+
+        print("download_test_data: data successfully downloaded")   
+
+    def delete_test_data(self, login_token : str):
+        """Clears existing experimental data from this test.
+
+        Parameters
+        ----------
+        login_token : str
+            The log-in token that can be retrieved from the authenticate function (must be test creator)
+        
+        """
+
+        headers = {"Authorization": f"Token {login_token}"}
+        url = f"{URL}/tests/{self.id}/delete/"
+
+        response = requests.delete(url, headers=headers)
+
+        if response != 204:
+            raise APIFailedRequest(response)
+        
+        print("delete_test_data: data successfully deleted")
 
     def to_json(self):
-        test_json = self.__dict__
-        
+        test_json = deepcopy(self.__dict__)
+        test_json["material"] = self.material.id
+        test_json["DIC_params"] = test_json.pop("metadata")
         return test_json
+    
+    @classmethod
+    def load_json(cls, test_json):
+        material = get_material(test_json["material"])
+        name = test_json["name"]
+        metadata = test_json["DIC_params"]
+        test = Test(material, name, metadata)
+        test.id = test_json.get("id", None)
+        test.submitted_by = test_json.get("submitted_by", None)
+        return test
 
-# Authentication    
+# Authentication
     
 def authenticate(username : str, password : str) -> str:
     """Login with existing user credentials and retrieve an authentication token.
@@ -267,7 +390,7 @@ def get_material(material_id : int) -> Material:
     Parameters
     ----------
     material_id : int
-        The id of the category to be fetched
+        The id of the material to be fetched
     """
 
     url = f"{URL}/materials/{material_id}/"
@@ -301,6 +424,9 @@ def register_material(login_token : str, material : Material):
         raise APIFailedRequest(response)
     
     material.id = response.json()["id"]
+    material.submitted_by = response.json()["submitted_by"]
+    material.user = response.json()["user"]
+    material.date = response.json()["entry_date"]
     return material
 
 # Categories
@@ -315,12 +441,19 @@ def get_categories(mode : CategoriesDisplayModes = CategoriesDisplayModes.List):
 
     """
 
-    response = requests.get(f"{URL}/categories/upper/")
+    first_call = requests.get(f"{URL}/categories/upper/")
+
+    if first_call.status_code != 200:
+        raise APIFailedRequest(first_call)
+    
+    count = first_call.json()["count"]
+
+    response = requests.get(f"{URL}/categories/upper/?page_size={count}")
 
     if response.status_code != 200:
         raise APIFailedRequest(response)
     
-    json_data = response.json()
+    json_data = response.json()["results"]
 
     if mode == CategoriesDisplayModes.List:
         result = dict()
@@ -419,6 +552,130 @@ def get_category(category_id : int, level : CategoryLevel = CategoryLevel.Lower)
         upper.id = upper_id
         return upper
     
+def get_category_by_name(category_name : str, level : CategoryLevel = CategoryLevel.Lower):
+    """Retrieve a category by name.
+    
+    Parameters
+    ----------
+    category_name : str
+        The name of the category to be fetched
+    level (optional) : CategoryLevel
+        The level of the category to be fetched (by default, lower)
+    """
+
+    search_field = f"{level.value}_" if level != CategoryLevel.Lower else ""
+
+    url = f"{URL}/categories/{level.value}/?{search_field}category={category_name}"
+
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        raise APIFailedRequest(response)
+    
+    category_data = response.json()["results"]
+
+    if len(category_data) > 1 or len(category_data) == 0:
+        return
+
+    category_data = category_data[0]
+
+    if level == CategoryLevel.Lower:
+        upper_id = category_data["upper_category"]
+        upper_name = category_data["upper_name"]
+        upper = UpperCategory(upper_name)
+        upper.id = upper_id
+        middle_id = category_data["middle_category"]
+        middle_name = category_data["middle_name"]
+        middle = MiddleCategory(upper, middle_name)
+        middle.id = middle_id
+        lower_id = category_data["id"]
+        lower_name = category_data["category"]
+        lower = LowerCategory(middle, lower_name)
+        lower.id = lower_id
+        return lower
+    elif level == CategoryLevel.Middle:
+        upper_id = category_data["upper_category"]
+        upper_name = category_data["upper_name"]
+        upper = UpperCategory(upper_name)
+        upper.id = upper_id
+        middle_id = category_data["id"]
+        middle_name = category_data["category"]
+        middle = MiddleCategory(upper, middle_name)
+        middle.id = middle_id
+        return middle
+    elif level == CategoryLevel.Upper:
+        upper_id = category_data["id"]
+        upper_name = category_data["category"]
+        upper = UpperCategory(upper_name)
+        upper.id = upper_id
+        return upper
+
+def register_category(admin_token : str, category : Category):
+    """Save a category to the database.
+
+    Parameters
+    ----------
+    admin_token : str
+        The log-in token that can be retrieved from the authenticate function (must be admin)
+    category : Category
+        The category to be saved 
+    
+    """
+
+    headers = {"Authorization": f"Token {admin_token}"}
+
+    if isinstance(category, UpperCategory):
+        url = f"{URL}/categories/upper/"
+        body = {"category": category.name}
+        response = requests.post(url, json=body, headers=headers)
+
+        if response.status_code != 201:
+            raise APIFailedRequest(response)
+        else:
+            category.id = response.json()["id"]
+            return category
+    elif isinstance(category, MiddleCategory):
+        if not category.upper.id:
+            try:
+                upper = get_category_by_name(category.upper.name, CategoryLevel.Upper)
+            except APIFailedRequest:
+                category.upper = register_category(admin_token, category.upper)
+            else:
+                if upper: category.upper = upper
+                else: category.upper = register_category(admin_token, category.upper)
+        
+        url = f"{URL}/categories/middle/"
+        body = {"category": category.name, "upper_category": category.upper.id}
+        response = requests.post(url, json=body, headers=headers)
+
+        if response.status_code != 201:
+            raise APIFailedRequest(response)
+        else:
+            category.id = response.json()["id"]
+            return category
+    elif isinstance(category, LowerCategory):
+        if not category.middle.id:
+            try:
+                middle = get_category_by_name(category.middle.name, CategoryLevel.Middle)
+            except APIFailedRequest:
+                category.middle = register_category(admin_token, category.middle)
+            else:
+                if middle: category.middle = middle
+                else: category.middle = register_category(admin_token, category.middle)
+
+        url = f"{URL}/categories/lower/"
+        body = {"category": category.name, "middle_category": category.middle.id}
+        response = requests.post(url, json=body, headers=headers)
+
+        if response.status_code != 201:
+            raise APIFailedRequest(response)
+        else:
+            category.id = response.json()["id"]
+            return category
+    else:
+        print("register_category: Must specify category level (upper/middle/lower).")
+        return
+    
 # Tests
 
 def register_test(login_token : str, test : Test):
@@ -426,114 +683,75 @@ def register_test(login_token : str, test : Test):
 
     Parameters
     ----------
-    test : Test
-        The test to be saved (name must be unique within the material tests)
     login_token : str
         The log-in token that can be retrieved from the authenticate function
+    test : Test
+        The test to be saved (name must be unique within the material's tests)
     
     """
 
     headers = {"Authorization": f"Token {login_token}"}
 
-    response = requests.post(f"{URL}/materials/", headers=headers, json=test.to_json())
+    response = requests.post(f"{URL}/tests/", headers=headers, json=test.to_json())
 
     if response.status_code != 201:
         raise APIFailedRequest(response)
     
     test.id = response.json()["id"]
+    test.submitted_by = response.json()["submitted_by"]
     return test
 
+def get_tests(page : int = 1, page_size : int = 10, material : int = None, submitted_by : int = None) -> list[Test]:
+    """Retrieve a page of tests.
 
-
-
-def login_user(username, password):
+    Parameters
+    ----------
+    page (optional) : int
+        Page number
+    page_size (optional) : int
+        Number of tests per page
+    material (optional) : int
+        Filter by material (id)
+    submitted_by (optional) : int
+        Filter by user (id)    
     
-    json_req_body = {
-        "username" : username,
-        "password" : password
-    }
+    """
+    
+    url = f"{URL}/tests/?page={page}&page_size={page_size}{'&material='+material if material else ''}{'&submitted_by='+submitted_by if submitted_by else ''}"
 
-    return requests.post(f"{URL}/users/login/", json=json_req_body)
+    response = requests.get(url)
 
-# Can only be performed by a superuser
-# Steps to create superuser in the README.md
-def get_user_list(username, password):
-    return requests.get(f"{URL}/users/?format=json", auth=(username,password)).json()
+    if response.status_code != 200:
+        raise APIFailedRequest(response)
+    
+    results = response.json()["results"]
 
-# Can only be performed by a superuser
-# Steps to create superuser in the README.md
-def create_upper_category(username, password, category_name):
-    return requests.post(f"{URL}/categories/upper/", auth=(username,password), json={"category":category_name})
+    test = list[Test]()
+    for test_json in results:
+        test.append(Test.load_json(test_json))
 
-# Can only be performed by a superuser
-# An upper category must already be created to link to
-def create_middle_category(username, password, upper_category, category_name):
-    upper_category_id = get_upper_category_id(username, password, upper_category)
-    return requests.post(f"{URL}/categories/middle/", auth=(username,password), json={"category":category_name,"upper_category":upper_category_id})
+    print(f"get_tests: Successfully retrieved {len(test)} tests.")
 
-# Can only be performed by a superuser
-# A middle category must already be created to link to
-def create_lower_category(username, password, upper_category, middle_category, category_name):
-    middle_category_id = get_middle_category_id(username, password, upper_category, middle_category)
-    return requests.post(f"{URL}/categories/lower/", auth=(username,password), json={"category":category_name,"upper_category":middle_category_id})
+    return test
 
-def get_category_tree(username, password):
-    return requests.get(f"{URL}/categories/upper/?format=json", auth=(username,password)).json()['results']
+def get_test(test_id : int):
+    """Retrieve a test by id.
+    
+    Parameters
+    ----------
+    test_id : int
+        The id of the test to be fetched
+    """
 
-def get_upper_category_id(username, password, upper_category):
-    results = requests.get(f"{URL}/categories/upper/?upper_category={upper_category}&format=json", 
-                            auth=(username,password)).json()['results']
-    if len(results) != 1:
-        return None
-    return results[0]['id']
+    url = f"{URL}/tests/{test_id}/"
 
-def get_middle_category_id(username, password, upper_category, middle_category):
-    results = requests.get(f"{URL}/categories/middle/?upper_category={upper_category}&middle_category={middle_category}&format=json", 
-                            auth=(username,password)).json()['results']
-    if len(results) != 1:
-        return None
-    return results[0]['id']
+    response = requests.get(url)
 
-def get_lower_category_id(username, password, upper_category, middle_category, category):
-    results = requests.get(f"{URL}/categories/lower/?upper_category={upper_category}&middle_category={middle_category}&category={category}&format=json",
-                            auth=(username,password)).json()['results']
-    if len(results) != 1:
-        return None
-    return results[0]['id']
+    if response.status_code != 200:
+        raise APIFailedRequest(response)
+    
+    test_data = response.json()
 
-# Example material in material.json
-# Can only be performed by an authenticated user
-# "category" parameter must be the id (primary key) of a lower category object (which can be checked at GET /categories/upper/)
-def create_material(username, password, material_json : dict, upper_cat="Other", middle_cat="Other", cat="Other"):
-    if not material_json.get("category"):
-        lower_category_id = get_lower_category_id(username, password, upper_cat, middle_cat, cat)
-        material_json["category"] = lower_category_id
-    return requests.post(f"{URL}/materials/?format=json", auth=(username,password), json=material_json)
+    return Test.load_json(test_data)
 
-def get_material_list():
-    return requests.get(f"{URL}/materials/?format=json").json()['results']
-
-# Any authenticated user, does not need to be material owner
-def create_test(username, password, test_name, material_id, DIC_params : dict, thermog_params : dict):
-    test_json = {
-        "material": material_id,
-        "name": test_name,
-        "DIC_params": DIC_params,
-        "thermog_params": thermog_params
-    }
-    return requests.post(f"{URL}/tests/?format=json", auth=(username,password), json=test_json)
-
-def upload_test_data(username, password, test_id, files, stage_metadata, format="aramis", _3d=False, override=False):
-    files["stage_metadata.csv"] = stage_metadata
-    return requests.post(f"{URL}/tests/{test_id}/upload/?file_format={format}&3d={_3d}&override={override}", files=files, auth=(username,password))
-
-def get_profile(username, password):
-    return requests.get(f"{URL}/users/profile/", auth=(username,password)).json()
-
-
-# username_teresa = "teresa123"
-# password_teresa = "aseret321_"
-
-# x = create_test(username_teresa, password_teresa, "TESTTESTEST", 1, dict(), dict())
-# print(x.status_code)
 

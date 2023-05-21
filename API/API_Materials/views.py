@@ -1,24 +1,29 @@
+import io
+import zipfile
+import os
+
+import pandas as pd
 from django.contrib.auth import authenticate, login
-from rest_framework import generics, permissions, viewsets, filters, mixins
-from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User
-from django_filters import rest_framework as filters2
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from rest_framework.response import Response
-from django.http import HttpResponseForbidden, HttpResponseNotFound
-from rest_framework.permissions import AllowAny
+from django.http import HttpResponseForbidden, HttpResponseNotFound, HttpResponse
+from django_filters import rest_framework as filters2
+from rest_framework import generics, permissions, viewsets, filters, mixins
 from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
+from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter
 from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCategory3, Supplier, Laboratory, Test, \
     DICStage, DICDatapoint, Model, ModelParams
+from .pagination import DICDataPagination
+from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
     Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer, \
-    DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer, ModelSerializer
-from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
-from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter
+    DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer, ModelSerializer, ModelParamsSerializer
 from .utils import process_test_data
-from .pagination import DICDataPagination
 
 
 @api_view(['POST'])
@@ -78,7 +83,15 @@ class ModelViewSet(viewsets.ModelViewSet):
     ordering_fields = ('name', 'tag', 'id')
 
 
-class RegisterUserAPIView(generics.CreateAPIView): # TODO destroy
+class ModelParamsViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    queryset = ModelParams.objects.all()
+    serializer_class = ModelParamsSerializer
+    filter_backends = (filters2.DjangoFilterBackend,)
+    filterset_fields = ["model", "submitted_by", "test"]
+
+
+class RegisterUserAPIView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
 
@@ -89,7 +102,8 @@ class MaterialViewSet(viewsets.ModelViewSet):
     serializer_class = MaterialSerializer
     filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
     ordering = ("id",)
-    ordering_fields = ('name', 'mat_id', 'entry_date', 'id', 'upper_category', 'middle_category', 'lower_category', 'submitted_by')
+    ordering_fields = (
+    'name', 'mat_id', 'entry_date', 'id', 'upper_category', 'middle_category', 'lower_category', 'submitted_by')
     search_fields = ('name', 'description',)
 
     def perform_create(self, serializer: MaterialSerializer):
@@ -106,7 +120,7 @@ class TestViewSet(viewsets.ModelViewSet):
         serializer.save(submitted_by=self.request.user)
 
 
-class DICStageViewSet(viewsets.ModelViewSet):
+class DICStageViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = DICStage.objects.all()
     serializer_class = DICStageSerializer
@@ -115,7 +129,7 @@ class DICStageViewSet(viewsets.ModelViewSet):
     filterset_class = DICStageFilter
 
 
-class DICDataViewSet(viewsets.ModelViewSet):
+class DICDataViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = DICDatapoint.objects.all()
     serializer_class = DICDataSerializer
@@ -248,11 +262,16 @@ def upload_test_data(request, pk):
         data = {"message": "No stage metadata file provided."}
         return Response(status=400, data=data)
 
-    if not (files-{"stage_metadata.csv"}):
+    if not (files - {"stage_metadata.csv"}):
         data = {"message": "Cannot POST/PUT test data, as no DIC files were uploaded."}
         return Response(status=400, data=data)
 
-    stages, bad_format, duplicated_stages, not_in_metadata, skipped_files = process_test_data(test_data, file_format, _3d)
+    stages, bad_format, duplicated_stages, not_in_metadata, skipped_files = process_test_data(test_data, file_format,
+                                                                                              _3d)
+
+    if not not_in_metadata and not bad_format and not duplicated_stages and not stages and not skipped_files:
+        data = {"message": "Bad format of metadata file."}
+        return Response(status=400, data=data)
 
     if not_in_metadata:
         data = {"message": "Missings metadata for files.", "no_metadata": not_in_metadata}
@@ -299,3 +318,70 @@ def upload_test_data(request, pk):
             "skipped_files": skipped_files if skipped_files else None}
 
     return Response(data=data)
+
+
+@api_view(['GET'])
+def get_test_data(request, pk):
+    try:
+        test = Test.objects.get(pk=pk)
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound()
+
+    existing_stages = {stage.stage_num for stage in test.stages.all()}
+    if request.method == 'GET':
+        if not existing_stages:
+            data = {"message": "Cannot GET test data as it doesn't exist."}
+            return Response(status=404, data=data)
+
+    _3d = request.query_params.get("3d", False)
+    if _3d:
+        _3d = _3d.lower() in ["true", "1"]
+
+    files = ['stage_metadata.csv']
+    with open('stage_metadata.csv', 'w') as metadata:
+        for stage in test.stages.all():
+            stage: DICStage
+            metadata.write(f'{stage.stage_num},{stage.timestamp_def},{stage.load}\n')
+            if _3d:
+                headers = ['coor.X [mm]', 'coor.Y [mm]', 'coor.Z [mm]', 'disp.Horizontal Displacement U [mm]',
+                           'disp.Vertical Displacement V [mm]', 'disp.Out-Of-Plane: W [mm]',
+                           'strain.Strain-global frame: Exx [ ]', 'strain.Strain-global frame: Eyy [ ]',
+                           'strain.Strain-global frame: Exy [ ]', 'strain.Strain-major: E1 [ ]',
+                           'strain.Strain-minor: E2 [ ]', 'deltaThick: dThick [ ]']
+                datapoint: DICDatapoint
+                data = [
+                    [datapoint.x, datapoint.y, datapoint.z, datapoint.displacement_x, datapoint.displacement_y,
+                     datapoint.displacement_z, datapoint.strain_x, datapoint.strain_y, datapoint.strain_xy,
+                     datapoint.strain_major, datapoint.strain_minor, datapoint.thickness_reduction]
+                    for datapoint in stage.dicdatapoint_set.all()]
+            else:
+                headers = ['coor.X [mm]', 'coor.Y [mm]', 'disp.Horizontal Displacement U [mm]',
+                           'disp.Vertical Displacement V [mm]', 'strain.Strain-global frame: Exx [ ]',
+                           'strain.Strain-global frame: Eyy [ ]', 'strain.Strain-global frame: Exy [ ]',
+                           'strain.Strain-major: E1 [ ]', 'strain.Strain-minor: E2 [ ]', 'deltaThick: dThick [ ]']
+                datapoint: DICDatapoint
+                data = [
+                    [datapoint.x, datapoint.y, datapoint.displacement_x, datapoint.displacement_y, datapoint.strain_x,
+                     datapoint.strain_y, datapoint.strain_xy, datapoint.strain_major, datapoint.strain_minor,
+                     datapoint.thickness_reduction]
+                    for datapoint in stage.dicdatapoint_set.all()]
+
+            df = pd.DataFrame(data, columns=headers)
+            file_name = f'stage_{stage.stage_num}.csv'
+            df.to_csv(file_name, index=False)
+            files.append(file_name)
+
+    buffer = io.BytesIO()
+    zip_file = zipfile.ZipFile(buffer, 'w')
+    for file in files:
+        zip_file.write(file, compress_type=zipfile.ZIP_DEFLATED)
+        os.remove(file)
+    zip_file.close()
+
+    response = HttpResponse(buffer.getvalue())
+    response['Content-Type'] = 'application/x-zip-compressed'
+    response['Content-Disposition'] = f'attachment; filename=test_{test.id}_data.zip'
+    return response
+
+
+
