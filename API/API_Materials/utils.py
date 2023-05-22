@@ -3,6 +3,8 @@ import pandas as pd
 import re
 from typing import Dict
 
+from .models_scripts import yield_code, YieldLocus
+
 FileDict = Dict[str, _io.BufferedReader]
 
 # Aramis: idx_x, idx_y, x, y, z, dis_x, dis_y, dis_z, str_x, str_y, str_major, str_minor, thick_red
@@ -110,3 +112,12 @@ def process_test_data(files: FileDict, file_format="aramis", _3d=False):
         stages[(stage, ts_def, load)] = datapoints
         read_stages.append(stage)
     return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
+
+
+def run_model(params, tag):
+    if tag == "YLD2000":
+        return yield_code.run_yld2000(params)
+    elif tag == "YLD2004":
+        return yield_code.run_yld2004(params)
+    elif tag == "YLDLOC":
+        return YieldLocus.main(params)

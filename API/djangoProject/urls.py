@@ -47,6 +47,7 @@ router.register(r'categories/upper', views.CategoriesUpperList, basename='catego
 router.register(r'categories/middle', views.CategoriesMiddleList, basename='categories_middle')
 router.register(r'categories/lower', views.CategoriesLowerList, basename='categories_lower')
 router.register(r'models', views.ModelViewSet, basename='models')
+router.register(r'modelparams', views.ModelParamsViewSet, basename='modelparams')
 
 urlpatterns = [
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
@@ -60,5 +61,6 @@ urlpatterns = [
     path('tests/<int:pk>/upload/', views.upload_test_data),
     path('tests/<int:pk>/download/', views.get_test_data),
     path('tests/<int:pk>/delete/', views.delete_test_data),
+    path('modelparams/<int:pk>/graph/', views.get_model_graph),
     path('', include(router.urls))
 ]

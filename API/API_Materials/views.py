@@ -23,7 +23,7 @@ from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
     Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer, \
     DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer, ModelSerializer, ModelParamsSerializer
-from .utils import process_test_data
+from .utils import process_test_data, run_model
 
 
 @api_view(['POST'])
@@ -89,6 +89,9 @@ class ModelParamsViewSet(viewsets.ModelViewSet):
     serializer_class = ModelParamsSerializer
     filter_backends = (filters2.DjangoFilterBackend,)
     filterset_fields = ["model", "submitted_by", "test"]
+
+    def perform_create(self, serializer: ModelParamsSerializer):
+        serializer.save(submitted_by=self.request.user)
 
 
 class RegisterUserAPIView(generics.CreateAPIView):
@@ -384,4 +387,19 @@ def get_test_data(request, pk):
     return response
 
 
+@api_view(['GET'])
+def get_model_graph(request, pk):
+    try:
+        params = ModelParams.objects.get(pk=pk)
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound()
 
+    model = params.model
+
+    model: Model
+
+    img_data = run_model(params.params, model.tag)
+
+    data = {'base64_img': img_data}
+
+    return Response(status=200, data=data, content_type="image/png")

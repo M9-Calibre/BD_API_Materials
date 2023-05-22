@@ -7,6 +7,8 @@ from .models import Material, MaterialCategory3, MaterialCategory2, MaterialCate
     MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model, ModelParams
 from django.contrib.auth.models import User
 
+from typing import Dict
+
 
 class ModelSerializer(serializers.ModelSerializer):
     def validate_input(self, value):
@@ -21,6 +23,23 @@ class ModelSerializer(serializers.ModelSerializer):
 
 
 class ModelParamsSerializer(serializers.ModelSerializer):
+    test = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Test.objects.all())
+    user = serializers.SlugRelatedField(many=False, read_only=True, slug_field='username')
+    submitted_by = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+
+    def validate(self, data):
+        linked_obj = data['test']
+        if linked_obj.submitted_by == self.context['request'].user:
+            return data
+        else:
+            raise PermissionDenied(detail=None, code=None)
+
+    def validate_params(self, value):
+        if isinstance(value, dict):
+            return value
+        else:
+            raise serializers.ValidationError("Params is not a dictionary.")
+
     class Meta:
         model = ModelParams
         fields = '__all__'
