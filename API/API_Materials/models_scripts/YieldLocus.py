@@ -24,7 +24,6 @@ def main(arguments):
 
     #Yield Locus processing data
     #Retrieving material parameters
-    print(arguments)
 
     F = arguments["F"]
     H = arguments["H"]
@@ -35,10 +34,10 @@ def main(arguments):
     n_swift = arguments["n_swift"]
 
     cwd = os.getcwd()
-    path_to_save_Results = os.path.join(cwd,'API_Materials/model_scripts/Results/FEA_results/')
+    path_to_save_Results = os.path.join(cwd,'API_Materials\\models_scripts\\Results\\FEA_results\\')
 
     #Reading the number of data points per load step
-    with open(path_to_save_Results + 'Strain_Stress_'+ test_config + '.csv', 'r') as csv_file:
+    with open(path_to_save_Results + 'Strain_Stress_' + test_config + '.csv', 'r') as csv_file:
         reader_aux = list(csv.reader(csv_file, delimiter=','))
         n_points_load = len(reader_aux[2:-1])+1
 

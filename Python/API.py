@@ -362,7 +362,7 @@ class ModelParams():
 
         url = f"{URL}/modelparams/{self.id}/graph/"
 
-        response = requests.get(url, stream=True)
+        response = requests.get(url)
 
         if response.status_code != 200:
             raise APIFailedRequest(response)
@@ -904,7 +904,6 @@ def register_model_params(login_token : str, modelp : ModelParams):
     if response.status_code != 201:
         raise APIFailedRequest(response)
     else:
-        print(response.json())
         modelp.id = response.json()["id"]
         modelp.submitted_by = response.json()["submitted_by"]
         #modelp.user = response.json()["user"]

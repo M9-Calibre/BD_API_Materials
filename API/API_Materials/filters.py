@@ -20,8 +20,8 @@ class DICStageFilter(filters.FilterSet):
 
 
 class CategoryLowerFilter(filters.FilterSet):
-    upper_category = filters.CharFilter(field_name="upper_category__upper_category__category", label="upper_category")
-    middle_category = filters.CharFilter(field_name="upper_category__category", label="middle_category")
+    upper_category = filters.CharFilter(field_name="upper_category__middle_category__category", label="upper_category")
+    middle_category = filters.CharFilter(field_name="middle_category__category", label="middle_category")
     category = filters.CharFilter(field_name="category", label="category")
 
     class Meta:
@@ -44,6 +44,3 @@ class CategoryUpperFilter(filters.FilterSet):
     class Meta:
         model = MaterialCategory1
         fields = ["upper_category"]
-
-
-

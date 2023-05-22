@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
+from django.db.models import F
 from django.http import HttpResponseForbidden, HttpResponseNotFound, HttpResponse
 from django_filters import rest_framework as filters2
 from rest_framework import generics, permissions, viewsets, filters, mixins
@@ -105,12 +106,18 @@ class MaterialViewSet(viewsets.ModelViewSet):
     serializer_class = MaterialSerializer
     filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
     ordering = ("id",)
-    ordering_fields = (
-    'name', 'mat_id', 'entry_date', 'id', 'upper_category', 'middle_category', 'lower_category', 'submitted_by')
+    ordering_fields = ('name', 'mat_id', 'entry_date', 'id', 'upper_category', 'middle_category', 'lower_category',
+                       'submitted_by')
     search_fields = ('name', 'description',)
 
     def perform_create(self, serializer: MaterialSerializer):
         serializer.save(submitted_by=self.request.user)
+
+    def get_queryset(self):
+        query = super().get_queryset().annotate(upper_category=F('category__middle_category__upper_category__category'),
+                                                middle_category=F('category__middle_category__category'),
+                                                lower_category=F('category__category'))
+        return query
 
 
 class TestViewSet(viewsets.ModelViewSet):

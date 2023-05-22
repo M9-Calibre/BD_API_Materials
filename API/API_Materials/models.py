@@ -66,7 +66,7 @@ class Test(models.Model):
 class Model(models.Model):
     name = models.CharField(max_length=50)
     tag = models.CharField(max_length=30)
-    input = models.JSONField()  # {"x" : default, "y": default}
+    input = models.JSONField()
 
 
 class ModelParams(models.Model):

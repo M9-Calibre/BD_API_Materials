@@ -12,8 +12,8 @@ for (dirpath, dirnames, filenames) in os.walk(dir):
 
 file_mappings = {name : open(dir+name, "rb") for name in f}
 
-test = get_test(5)
+test = get_test(11)
 
-#test.upload_test_data(token, file_mappings)
+test.upload_test_data(token, file_mappings)
 
 test.download_test_data()

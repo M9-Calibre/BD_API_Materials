@@ -35,10 +35,20 @@ class ModelParamsSerializer(serializers.ModelSerializer):
             raise PermissionDenied(detail=None, code=None)
 
     def validate_params(self, value):
-        if isinstance(value, dict):
-            return value
-        else:
+        if not isinstance(value, dict):
             raise serializers.ValidationError("Params is not a dictionary.")
+
+        model_id = self.initial_data.get("model", None)
+        if not model_id:
+            raise serializers.ValidationError("Not a valid model.")
+        model = Model.objects.get(pk=model_id)
+
+        keys = value.keys()
+        required = set(model.input)
+
+        if keys == required:
+            return value
+        raise serializers.ValidationError("Given params don't match model input.")
 
     class Meta:
         model = ModelParams
@@ -335,7 +345,6 @@ class SupplierSerializer(serializers.ModelSerializer):
         if locations:
             for location in locations:
                 location_obj = Location(supplier=supplier, **location)
-                print(location_obj.supplier)
                 objs.append(location_obj)
 
         supplier.save()
