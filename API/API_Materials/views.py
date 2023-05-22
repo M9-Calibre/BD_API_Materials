@@ -402,4 +402,4 @@ def get_model_graph(request, pk):
 
     data = {'base64_img': img_data}
 
-    return Response(status=200, data=data, content_type="image/png")
+    return Response(status=200, data=data)
