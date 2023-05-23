@@ -1,5 +1,9 @@
 import requests
 import shutil
+import json
+import pandas as pd
+import zipfile
+import io
 from enum import Enum
 from typing import Union, Any
 from copy import deepcopy
@@ -11,14 +15,21 @@ class APIFailedRequest(Exception):
     def __init__(self, response : requests.Response) -> None:
         self.status_code = response.status_code
         self.reason = response.reason
+        try:
+            self.json_body = response.json()
+        except:
+            self.json_body = None
         self.message = f'Invalid request. (Status Code {self.status_code}: {self.reason})'
+        if self.json_body: self.message += "\n"+json.dumps(self.json_body, indent=2)
         super().__init__(self.message)
 
 class MaterialOrderings(Enum):
     Id = "id"
     Date = "entry_date"
-    Mat_Id = "mat_id"
     Name = "name"
+    UpperC = "upper_category"
+    MiddleC = "middle_category"
+    LowerC = "lower_category"
 
 class CategoriesDisplayModes(Enum):
     Tree = "tree"
@@ -37,6 +48,10 @@ class Category():
     def __init__(self, name : str) -> None:
         self.id = None
         self.name = name
+
+    def register(self, admin_token : str):
+        self = register_category(admin_token, self)
+        return self
 
 class UpperCategory(Category):
     def __init__(self, name : str) -> None:
@@ -128,7 +143,7 @@ class PhysicalProperties():
         return physical_properties
 
 class Material():
-    def __init__(self, name : str, category : LowerCategory, mat_id : int, source : str, designation : str, heat_treatment : str, 
+    def __init__(self, name : str, category : LowerCategory, source : str, designation : str, heat_treatment : str, 
                  description : str = None, thermal_properties : ThermalProperties = None, mechanical_properties : MechanicalProperties = None, 
                  physical_properties : PhysicalProperties = None) -> None:
         self.id = None
@@ -137,7 +152,6 @@ class Material():
         self.date = None
         self.name = name
         self.category = category
-        self.mat_id = mat_id
         self.source = source
         self.designation = designation
         self.heat_treatment = heat_treatment
@@ -169,6 +183,10 @@ class Material():
             material_json.pop("physical_properties")
 
         return material_json
+    
+    def register(self, login_token : str):
+        self = register_material(login_token, self)
+        return self
 
     @classmethod
     def load_json(cls, material_json : dict):
@@ -179,7 +197,6 @@ class Material():
         middle_category.id = material_json["middle_category_id"]
         category = LowerCategory(middle_category, material_json["lower_category"])
         category.id = material_json["category"]
-        mat_id = material_json["mat_id"]
         source = material_json["source"]
         designation = material_json["designation"]
         heat_treatment = material_json["heat_treatment"]
@@ -188,7 +205,7 @@ class Material():
         physical_properties = PhysicalProperties.load_json(material_json["physical_properties"]) if "physical_properties" in material_json and material_json["physical_properties"] else None
         mechanical_properties = MechanicalProperties.load_json(material_json["mechanical_properties"]) if "mechanical_properties" in material_json and material_json["mechanical_properties"] else None
         
-        material = Material(name, category, mat_id, source, designation, heat_treatment, description, thermal_properties, mechanical_properties, physical_properties)
+        material = Material(name, category, source, designation, heat_treatment, description, thermal_properties, mechanical_properties, physical_properties)
         material.id = material_json.get("id", None)
         material.submitted_by = material_json.get("submitted_by", None)
         material.user = material_json.get("user", None)
@@ -227,7 +244,7 @@ class Test():
         """
         
         if not self.id:
-            print("upload_test_data: object not yet registered.")
+            print("upload_test_data: Object not yet registered.")
             return
         
         headers = {"Authorization": f"Token {login_token}"}
@@ -244,21 +261,20 @@ class Test():
         tok = time()
 
         if response.status_code != 200:
-            print(response.json())
             raise APIFailedRequest(response)
         
         created_stages = response.json()["created_stages"]
         overridden_stages = response.json().get("overriden_stages", None)
         skipped_files = response.json()["skipped_files"]
         
-        print(f"upload_test_data: data successfully uploaded. Elapsed time: {round(tok-tik,2)}")
-        print(f"upload_test_data: created stages {created_stages}")
-        print(f"upload_test_data: overriden stages {overridden_stages}")
-        print(f"upload_test_data: skipped files {skipped_files}")
+        print(f"upload_test_data: Data successfully uploaded. Elapsed time: {round(tok-tik,2)}")
+        print(f"upload_test_data: Created stages {created_stages}")
+        print(f"upload_test_data: Overriden stages {overridden_stages}")
+        print(f"upload_test_data: Skipped files {skipped_files}")
 
-    def download_test_data(self, _3d : bool = False):
+    def load_test_data(self, _3d : bool = False):
         """
-        Downloads the test's experimental data as a zip of DIC files
+        Loads the test's experimental data into a dictionary of pandas' dataframes.
 
         Parameters
         ----------
@@ -267,12 +283,55 @@ class Test():
         """
 
         if not self.id:
-            print("download_test_data: object not yet registered.")
+            print("load_test_data: Object not yet registered.")
             return
         
         url = f"{URL}/tests/{self.id}/download/?3d={_3d}"
 
+        tik = time()
+
         response = requests.get(url, stream=True)
+
+        tok = time()
+
+        if response.status_code != 200:
+            raise APIFailedRequest(response)
+        
+        data = dict()
+        with zipfile.ZipFile(io.BytesIO(response.content), "r") as zip:
+            for name in zip.namelist():
+                file = io.BytesIO(zip.read(name))
+                if name == "stage_metadata.csv":
+                    data["metadata"] = pd.read_csv(file)
+                else:
+                    stage = int(name.replace("stage_","").replace(".csv",""))
+                    data[stage] = pd.read_csv(file)
+
+        print(f"load_test_data: Data successfully loaded. Elapsed time: {round(tok-tik,2)}") 
+
+        return data
+
+    def download_test_data(self, _3d : bool = False):
+        """
+        Downloads the test's experimental data as a zip of DIC files.
+
+        Parameters
+        ----------
+        _3d : bool
+            Specifies the dimensionality of the DIC files being downloaded, if false 2-dimensional files are assumed
+        """
+
+        if not self.id:
+            print("download_test_data: Object not yet registered.")
+            return
+        
+        url = f"{URL}/tests/{self.id}/download/?3d={_3d}"
+
+        tik = time()
+
+        response = requests.get(url, stream=True)
+
+        tok = time()
 
         if response.status_code != 200:
             raise APIFailedRequest(response)
@@ -280,7 +339,7 @@ class Test():
         with open(f"test_{self.id}_data.zip", "wb") as f:
             shutil.copyfileobj(response.raw, f)
 
-        print("download_test_data: data successfully downloaded")   
+        print(f"download_test_data: Data successfully downloaded. Elapsed time: {round(tok-tik,2)}")   
 
     def delete_test_data(self, login_token : str):
         """Clears existing experimental data from this test.
@@ -293,7 +352,7 @@ class Test():
         """
 
         if not self.id:
-            print("delete_test_data: object not yet registered.")
+            print("delete_test_data: Object not yet registered.")
             return
 
         headers = {"Authorization": f"Token {login_token}"}
@@ -304,13 +363,17 @@ class Test():
         if response.status_code != 204:
             raise APIFailedRequest(response)
         
-        print("delete_test_data: data successfully deleted")
+        print("delete_test_data: Data successfully deleted.")
 
     def to_json(self):
         test_json = deepcopy(self.__dict__)
         test_json["material"] = self.material.id
         test_json["DIC_params"] = test_json.pop("metadata")
         return test_json
+    
+    def register(self, login_token : str):
+        self = register_test(login_token, self)
+        return self
     
     @classmethod
     def load_json(cls, test_json):
@@ -408,6 +471,32 @@ def authenticate(username : str, password : str) -> str:
 
     return token
 
+def authenticate_from_json(file_path : str) -> str:
+    """Login with existing user credentials and retrieve an authentication token.
+
+    Parameters
+    ----------
+    username : str
+        The username of the user
+    password : str
+        The password of the user
+    
+    """
+
+    with open(file_path, "r") as f:
+        json_req_body = json.loads(f.read())
+
+    login = requests.post(f"{URL}/users/login/", json=json_req_body)
+
+    if login.status_code != 200:
+        raise APIFailedRequest(login)
+    
+    token = login.json()["token"]
+
+    print("authenticate: Authentication successful.")
+
+    return token
+
 # Materials   
 
 def get_materials(page : int = 1, page_size : int = 10, ordering : MaterialOrderings = MaterialOrderings.Id, ascending : bool = True, search : str = None) -> list[Material]:
@@ -420,7 +509,7 @@ def get_materials(page : int = 1, page_size : int = 10, ordering : MaterialOrder
     page_size (optional) : int
         Number of materials per page
     ordering (optional) : MaterialOrderings
-        Ordering of the material list (available orderings: id, date, mat_id, name)
+        Ordering of the material list (available orderings: id, date, name, upper/middle/lower_category)
     ascending (optional) : bool
         Defines ordering direction
     search (optional) : str
@@ -462,8 +551,11 @@ def get_material(material_id : int) -> Material:
         raise APIFailedRequest(response)
     
     material_data = response.json()
+    material = Material.load_json(material_data)
 
-    return Material.load_json(material_data)
+    print(f"get_material: Successfully fetched material {material.name} with id {material.id}.")
+
+    return material
 
 def register_material(login_token : str, material : Material):
     """Save a material to the database.
@@ -471,7 +563,7 @@ def register_material(login_token : str, material : Material):
     Parameters
     ----------
     material : Material
-        The material to be saved (name and mat_id must be unique)
+        The material to be saved (name must be unique)
     login_token : str
         The log-in token that can be retrieved from the authenticate function
     
@@ -488,6 +580,7 @@ def register_material(login_token : str, material : Material):
     material.submitted_by = response.json()["submitted_by"]
     material.user = response.json()["user"]
     material.date = response.json()["entry_date"]
+    print(f"register_material: Material {material.name} successfully registered with id {material.id}.")
     return material
 
 # Categories
@@ -528,12 +621,14 @@ def get_categories(mode : CategoriesDisplayModes = CategoriesDisplayModes.List):
             up_category.id = id
             result["upper"].append(up_category)
             for middle_category in upper_category["mid_categories"]:
+                count += 1
                 id = middle_category["id"]
                 name = middle_category["category"]
                 mid_category = MiddleCategory(up_category, name)
                 mid_category.id = id
                 result["middle"].append(mid_category)
                 for lower_category in middle_category["lower_categories"]:
+                    count += 1
                     id = lower_category["id"]
                     name = lower_category["category"]
                     category = LowerCategory(mid_category, name)
@@ -548,17 +643,21 @@ def get_categories(mode : CategoriesDisplayModes = CategoriesDisplayModes.List):
             up_category.id = id
             result[up_category] = dict()
             for middle_category in upper_category["mid_categories"]:
+                count += 1
                 id = middle_category["id"]
                 name = middle_category["category"]
                 mid_category = MiddleCategory(up_category, name)
                 mid_category.id = id
                 result[up_category][mid_category] = list()
                 for lower_category in middle_category["lower_categories"]:
+                    count += 1
                     id = lower_category["id"]
                     name = lower_category["category"]
                     low_category = LowerCategory(mid_category, name)
                     low_category.id = id
                     result[up_category][mid_category].append(low_category)
+
+    print(f"get_categories: Successfully fetched {count} categories. Format {mode.value}.")
 
     return result
 
@@ -595,6 +694,7 @@ def get_category(category_id : int, level : CategoryLevel = CategoryLevel.Lower)
         lower_name = category_data["category"]
         lower = LowerCategory(middle, lower_name)
         lower.id = lower_id
+        print(f"get_category: Successfully fetched lower category {lower.name} with id {lower.id}.")
         return lower
     elif level == CategoryLevel.Middle:
         upper_id = category_data["upper_category"]
@@ -605,12 +705,14 @@ def get_category(category_id : int, level : CategoryLevel = CategoryLevel.Lower)
         middle_name = category_data["category"]
         middle = MiddleCategory(upper, middle_name)
         middle.id = middle_id
+        print(f"get_category: Successfully fetched middle category {middle.name} with id {middle.id}.")
         return middle
     elif level == CategoryLevel.Upper:
         upper_id = category_data["id"]
         upper_name = category_data["category"]
         upper = UpperCategory(upper_name)
         upper.id = upper_id
+        print(f"get_category: Successfully fetched upper category {upper.name} with id {upper.id}.")
         return upper
     
 def get_category_by_name(category_name : str, level : CategoryLevel = CategoryLevel.Lower):
@@ -653,6 +755,7 @@ def get_category_by_name(category_name : str, level : CategoryLevel = CategoryLe
         lower_name = category_data["category"]
         lower = LowerCategory(middle, lower_name)
         lower.id = lower_id
+        print(f"get_category_by_name: Successfully fetched lower category {lower.name} with id {lower.id}.")
         return lower
     elif level == CategoryLevel.Middle:
         upper_id = category_data["upper_category"]
@@ -663,12 +766,14 @@ def get_category_by_name(category_name : str, level : CategoryLevel = CategoryLe
         middle_name = category_data["category"]
         middle = MiddleCategory(upper, middle_name)
         middle.id = middle_id
+        print(f"get_category_by_name: Successfully fetched middle category {middle.name} with id {middle.id}.")
         return middle
     elif level == CategoryLevel.Upper:
         upper_id = category_data["id"]
         upper_name = category_data["category"]
         upper = UpperCategory(upper_name)
         upper.id = upper_id
+        print(f"get_category_by_name: Successfully fetched upper category {upper.name} with id {upper.id}.")
         return upper
 
 def register_category(admin_token : str, category : Category):
@@ -694,6 +799,7 @@ def register_category(admin_token : str, category : Category):
             raise APIFailedRequest(response)
         else:
             category.id = response.json()["id"]
+            print(f"register_category: Upper category {category.name} succesfully registered with id {category.id}.")
             return category
     elif isinstance(category, MiddleCategory):
         if not category.upper.id:
@@ -713,6 +819,7 @@ def register_category(admin_token : str, category : Category):
             raise APIFailedRequest(response)
         else:
             category.id = response.json()["id"]
+            print(f"register_category: Middle category {category.name} succesfully registered with id {category.id}.")
             return category
     elif isinstance(category, LowerCategory):
         if not category.middle.id:
@@ -732,6 +839,7 @@ def register_category(admin_token : str, category : Category):
             raise APIFailedRequest(response)
         else:
             category.id = response.json()["id"]
+            print(f"register_category: Lower category {category.name} succesfully registered with id {category.id}.")
             return category
     else:
         print("register_category: Must specify category level (upper/middle/lower).")
@@ -760,6 +868,9 @@ def register_test(login_token : str, test : Test):
     
     test.id = response.json()["id"]
     test.submitted_by = response.json()["submitted_by"]
+    
+    print(f"register_test: Successfully registered test {test.name} with id {test.id}.")
+
     return test
 
 def get_tests(page : int = 1, page_size : int = 10, material : int = None, submitted_by : int = None) -> list[Test]:
@@ -812,8 +923,11 @@ def get_test(test_id : int):
         raise APIFailedRequest(response)
     
     test_data = response.json()
+    test = Test.load_json(test_data)
 
-    return Test.load_json(test_data)
+    print(f"get_test: Successfully fetched test {test.name} with id {test.id}.")
+
+    return test
 
 # Models
 

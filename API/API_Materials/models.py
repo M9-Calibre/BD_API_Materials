@@ -43,7 +43,6 @@ class Material(models.Model):
     category = models.ForeignKey(MaterialCategory3, models.CASCADE, related_name='materials')
     description = models.TextField(null=True, blank=True)
     submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='materials')
-    mat_id = models.IntegerField(unique=True)
     entry_date = models.DateField(auto_now_add=True)
     source = models.CharField(max_length=150)
     designation = models.CharField(max_length=50)

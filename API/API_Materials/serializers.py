@@ -182,7 +182,6 @@ class MaterialSerializer(serializers.ModelSerializer):
         instance.name = validated_data.get('name', instance.name)
         instance.category = validated_data.get('category', instance.category)
         instance.description = validated_data.get('description', instance.description)
-        instance.mat_id = validated_data.get('mat_id', instance.mat_id)
         instance.source = validated_data.get('source', instance.source)
         instance.designation = validated_data.get('designation', instance.designation)
         instance.heat_treatment = validated_data.get('heat_treatment', instance.heat_treatment)
@@ -243,7 +242,7 @@ class MaterialSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Material
-        fields = ['id', 'name', 'category', 'description', 'submitted_by', 'user', 'mat_id', 'entry_date', 'source',
+        fields = ['id', 'name', 'category', 'description', 'submitted_by', 'user', 'entry_date', 'source',
                   'designation', 'heat_treatment', 'thermal_properties', 'mechanical_properties', 'physical_properties',
                   'tests', 'upper_category', 'middle_category', 'lower_category', "upper_category_id",
                   "middle_category_id"]

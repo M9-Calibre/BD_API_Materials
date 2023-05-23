@@ -106,8 +106,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
     serializer_class = MaterialSerializer
     filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
     ordering = ("id",)
-    ordering_fields = ('name', 'mat_id', 'entry_date', 'id', 'upper_category', 'middle_category', 'lower_category',
-                       'submitted_by')
+    ordering_fields = ('name', 'entry_date', 'id', 'upper_category', 'middle_category', 'lower_category', 'submitted_by')
     search_fields = ('name', 'description',)
 
     def perform_create(self, serializer: MaterialSerializer):
