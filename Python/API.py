@@ -99,8 +99,8 @@ class ThermalProperties():
         return thermal_properties
 
 class MechanicalProperties():
-    def __init__(self, tensile_strength : int = None, thermal_conductivity : float = None, reduction_of_area : float = None, 
-                 cyclic_yield_strength : int = None, elastic_modulus : dict[str, float] = None, poissons_ratio : dict[str, float] = None, shear_modulus : dict[str, float] = None, 
+    def __init__(self, tensile_strength : float = None, thermal_conductivity : float = None, reduction_of_area : float = None, 
+                 cyclic_yield_strength : float = None, elastic_modulus : dict[str, float] = None, poissons_ratio : dict[str, float] = None, shear_modulus : dict[str, float] = None, 
                  yield_strength : dict[str, float] = None) -> None:
         self.tensile_strength = tensile_strength
         self.thermal_conductivity = thermal_conductivity

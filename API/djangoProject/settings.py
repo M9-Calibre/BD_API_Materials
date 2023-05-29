@@ -39,7 +39,7 @@ def get_secret(setting, secrets=secrets_content):
 SECRET_KEY = get_secret("API_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True  # change
 
 ALLOWED_HOSTS = ['.localhost', '127.0.0.1', '[::1]']
 
@@ -75,15 +75,18 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware'
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
+
 ]
+
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 ROOT_URLCONF = 'djangoProject.urls'
 
@@ -183,3 +186,16 @@ GRAPH_MODELS ={
     'all_applications': True,
     'graph_models': True,
 }
+
+# SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_SECONDS = 3600  # change
+
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+SECURE_SSL_REDIRECT = False  # change
+
+SECURE_HSTS_PRELOAD = False  # change
+
+SESSION_COOKIE_SECURE = True
+
+CSRF_COOKIE_SECURE = True

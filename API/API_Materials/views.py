@@ -106,7 +106,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
     serializer_class = MaterialSerializer
     filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
     ordering = ("id",)
-    ordering_fields = ('name', 'entry_date', 'id', 'upper_category', 'middle_category', 'lower_category', 'submitted_by')
+    ordering_fields = ('name', 'entry_date', 'id', 'upper_category', 'middle_category', 'lower_category', 'user')
     search_fields = ('name', 'description',)
 
     def perform_create(self, serializer: MaterialSerializer):
@@ -115,7 +115,8 @@ class MaterialViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         query = super().get_queryset().annotate(upper_category=F('category__middle_category__upper_category__category'),
                                                 middle_category=F('category__middle_category__category'),
-                                                lower_category=F('category__category'))
+                                                lower_category=F('category__category'),
+                                                user=F('submitted_by__username'))
         return query
 
 

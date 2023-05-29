@@ -24,10 +24,10 @@ class ThermalProperties(models.Model):
 
 
 class MechanicalProperties(models.Model):
-    tensile_strength = models.IntegerField(null=True)
-    thermal_conductivity_mp = models.DecimalField(null=True, decimal_places=2, max_digits=6)
-    reduction_of_area = models.DecimalField(null=True, decimal_places=2, max_digits=5)  # percentage
-    cyclic_yield_strength = models.IntegerField(null=True)
+    tensile_strength = models.FloatField()
+    thermal_conductivity_mp = models.FloatField()
+    reduction_of_area = models.FloatField()
+    cyclic_yield_strength = models.FloatField()
     elastic_modulus = models.JSONField(null=True)
     poissons_ratio = models.JSONField(null=True)
     shear_modulus = models.JSONField(null=True)

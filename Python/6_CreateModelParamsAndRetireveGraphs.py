@@ -3,9 +3,9 @@ from API import *
 token = authenticate("afonso", "1234")
 
 yld2000 = get_model(2)
-yield_locus = get_model(6)
+yield_locus = get_model(4)
 
-test = get_test(8)
+test = get_test(1)
 
 yld_params = {"alpha1": 1.011, "alpha2": 0.964, "alpha3": 1.191, "alpha4": 0.995, "alpha5": 1.010, "alpha6": 1.018, "alpha7": 0.977,
               "alpha8": 0.935, "a": 6}
