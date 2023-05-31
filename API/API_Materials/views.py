@@ -80,7 +80,7 @@ class ModelViewSet(viewsets.ModelViewSet):
     queryset = Model.objects.all()
     serializer_class = ModelSerializer
     filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter)
-    ordering = ("name",)
+    ordering = ("-name",)
     ordering_fields = ('name', 'tag', 'id')
 
 
