@@ -394,18 +394,20 @@ def get_test_data(request, pk):
     return response
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def get_model_graph(request, pk):
     try:
         params = ModelParams.objects.get(pk=pk)
     except ObjectDoesNotExist:
         return HttpResponseNotFound()
 
+    data = request.data
+    arguments = data.get("arguments", None)
     model = params.model
 
     model: Model
 
-    img_data = run_model(params.params, model.tag)
+    img_data = run_model(arguments, model.tag)
 
     data = {'base64_img': img_data}
 

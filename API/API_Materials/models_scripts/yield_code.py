@@ -59,12 +59,10 @@ def run_model(arguments: Dict[str, float], model: str = "yld2000"):
             l = l + 1
         h = h + 1
 
+    plt.clf()
     c1 = plt.contour(x11 / s0, x22 / s0, yyi / s0, 0, linestyles='-', linewidths=0.9, colors='k')
 
     np.set_printoptions(suppress=True, formatter={'float_kind': '{:f}'.format}, threshold=sys.maxsize)
-
-    with open("y_output.txt", "w") as f:
-        f.write(str((yyi / s0).tolist()))
 
     # Legend settings
     h1, l1 = c1.legend_elements()
