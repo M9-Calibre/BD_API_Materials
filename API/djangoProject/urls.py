@@ -61,6 +61,7 @@ urlpatterns = [
     path('tests/<int:pk>/upload/', views.upload_test_data),
     path('tests/<int:pk>/download/', views.get_test_data),
     path('tests/<int:pk>/delete/', views.delete_test_data),
-    path('modelparams/<int:pk>/graph/', views.get_model_graph),
+    # path('modelparams/<int:pk>/graph/', views.get_model_graph),
+    path("tests", views.get_model_graph),
     path('', include(router.urls))
 ]

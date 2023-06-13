@@ -7,6 +7,7 @@ from typing import Any
 def generate_points(hardening_args: dict[str, Any], yield_args: dict[str, float], elastic_args: dict[str, float],
                     hardening_func: str, yield_func: str, elastic_func: str,
                     minimum=0, maximum=1, step=0.01) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Given the arguments for each function, it will generate the points for each one and return them as a tuple"""
     inpt = np.arange(minimum, maximum, step)
     hardening_args["inpt"] = inpt
     elastic_args["inpt"] = inpt
@@ -116,6 +117,7 @@ if __name__ == '__main__':
                                                             hard_func, yld_func, elstc_func,
                                                             minimum_value, maximum_value, step_value)
 
+    # Print Output
     # print(hard_points)
     # print(yld_points)
     # print(elstc_points)
