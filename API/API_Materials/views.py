@@ -24,8 +24,8 @@ from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
     Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer, \
     DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer, ModelSerializer, ModelParamsSerializer
-from .utils import process_test_data, run_model
-
+from .utils import process_test_data
+from .models_scripts.points_generation import generate_points
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -395,20 +395,33 @@ def get_test_data(request, pk):
 
 
 @api_view(['POST'])
-def get_model_graph(request, pk):
-    try:
-        params = ModelParams.objects.get(pk=pk)
-    except ObjectDoesNotExist:
-        return HttpResponseNotFound()
+def get_model_graph(request):
+    # try:
+    #     params = ModelParams.objects.get(pk=pk)
+    # except ObjectDoesNotExist:
+    #     return HttpResponseNotFound()
 
     data = request.data
-    arguments = data.get("arguments", None)
-    model = params.model
+    hardening_args = data.get("hardening_arguments", {})
+    hardening_function = data.get("hardening_function", "")
+    yield_args = data.get("yield_arguments", {})
+    yield_function = data.get("yield_function", "")
+    elastic_args = data.get("elastic_arguments", {})
+    elastic_function = data.get("elastic_function", "")
+    # model = params.model # TODO: model is useless here, remove it from the model params?
 
     model: Model
 
-    img_data = run_model(arguments, model.tag)
+    # img_data = run_model(arguments, model.tag)
 
-    data = {'base64_img': img_data}
+    hardening_points, yield_points, elastic_points = generate_points(hardening_args, yield_args, elastic_args,
+                                                                     hardening_function, yield_function,
+                                                                     elastic_function)
+
+    data = {
+        "hardening_points": hardening_points,
+        "yield_points": yield_points,
+        "elastic_points": elastic_points
+    }
 
     return Response(status=200, data=data)
