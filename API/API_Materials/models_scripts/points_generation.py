@@ -2,8 +2,6 @@ import numpy as np
 from typing import Any
 
 
-# TODO: One single endpoint, but with 3 arguments section (Hardening, Yield and Elastic)
-
 def generate_points(hardening_args: dict[str, Any], yield_args: dict[str, float], elastic_args: dict[str, float],
                     hardening_func: str, yield_func: str, elastic_func: str,
                     minimum=0, maximum=1, step=0.01) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -42,7 +40,7 @@ def calculate_yield(func_name: str, **kwargs) -> np.ndarray:
     return YIELD_FUNCTIONS[func_name](**kwargs)
 
 
-def calculate_sample_yield(h: float, g: float, f: float, n: float, shear: float) -> np.ndarray:
+def calculate_sample_yield(h: float, g: float, f: float, n: float, shear: float) -> tuple[np.ndarray, Any, Any]:
     # TODO: Not sure if this beginning setup is exclusive to this function or not
     # Creating mesh points for populating the equations
     x_min = -10
@@ -51,8 +49,14 @@ def calculate_sample_yield(h: float, g: float, f: float, n: float, shear: float)
     y_max = 10
 
     x1, x2 = np.meshgrid(np.arange(x_min, x_max, 0.1), np.arange(y_min, y_max, 0.1))
+    z = h * (x1 - x2) ** 2 + g * (x1 ** 2) + f * (x2 ** 2) + 2 * n * (shear ** 2)
+    dic = {
+        "z": z,
+        "x": np.linspace(x_min, x_max, z[0].size),
+        "y": np.linspace(y_min, y_max, z[0].size)
+    }
 
-    return h * (x1 - x2) ** 2 + g * (x1 ** 2) + f * (x2 ** 2) + 2 * n * (shear ** 2)
+    return dic
 
 
 # ------------- Elastic functions -------------
@@ -61,7 +65,7 @@ def calculate_elastic(func_name: str, **kwargs) -> np.ndarray:
 
 
 def calculate_sample_elastic(inpt: np.ndarray) -> np.ndarray:
-    return np.array([x for x in range(len(inpt)) if inpt[x] == 0])
+    return np.arange(0, len(inpt), 1)
 
 
 # ------------- SETUP ----------------
