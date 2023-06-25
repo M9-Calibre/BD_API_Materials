@@ -26,6 +26,8 @@ class ModelParamsSerializer(serializers.ModelSerializer):
     test = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Test.objects.all())
     user = serializers.SlugRelatedField(many=False, read_only=True, slug_field='username')
     submitted_by = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    name = serializers.CharField(source='model.name', read_only=True)
+    function_name = serializers.CharField(source='model.function_name', read_only=True)
 
     def validate(self, data):
         linked_obj = data['test']
