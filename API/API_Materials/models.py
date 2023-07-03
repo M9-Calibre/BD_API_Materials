@@ -65,6 +65,8 @@ class Test(models.Model):
 class Model(models.Model):
     name = models.CharField(max_length=50)
     tag = models.CharField(max_length=30)
+    category = models.CharField(max_length=15)
+    function_name = models.CharField(max_length=50)
     input = models.JSONField()
 
 
