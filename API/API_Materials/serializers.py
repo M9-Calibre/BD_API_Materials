@@ -205,7 +205,8 @@ class MaterialSerializer(serializers.ModelSerializer):
                                                                                    thermal_props.specific_heat_capacity)
             else:
                 thermal_props = ThermalProperties.objects.create(material=instance, **validated_thermal_props)
-                instance.thermal_properties = thermal_props
+            thermal_props.save()
+            instance.thermal_properties = thermal_props
 
         if validated_physical_props:
             if physical_props:
@@ -213,7 +214,8 @@ class MaterialSerializer(serializers.ModelSerializer):
                                                                                    physical_props.chemical_composition)
             else:
                 physical_props = PhysicalProperties.objects.create(material=instance, **validated_physical_props)
-                instance.physical_properties = physical_props
+            physical_props.save()
+            instance.physical_properties = physical_props
 
         if validated_mechanical_props:
             if mechanical_props:
@@ -235,7 +237,8 @@ class MaterialSerializer(serializers.ModelSerializer):
                                                                                  mechanical_props.yield_strength)
             else:
                 mechanical_props = MechanicalProperties.objects.create(material=instance, **validated_mechanical_props)
-                instance.mechanical_properties = mechanical_props
+            mechanical_props.save()
+            instance.mechanical_properties = mechanical_props
 
         instance.save()
         return instance
