@@ -82,8 +82,6 @@ class ModelViewSet(viewsets.ModelViewSet):
     filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter)
     ordering = ("-name",)
     ordering_fields = ('name', 'tag', 'id')
-    # # filter_backends = (filters2.DjangoFilterBackend,)
-    filterset_fields = ["test"]
 
 
 class ModelParamsViewSet(viewsets.ModelViewSet):
@@ -398,11 +396,6 @@ def get_test_data(request, pk):
 
 @api_view(['POST'])
 def get_model_graph(request):
-    # try:
-    #     params = ModelParams.objects.get(pk=pk)
-    # except ObjectDoesNotExist:
-    #     return HttpResponseNotFound()
-
     data = request.data
     hardening_args = data.get("hardening_arguments", {})
     hardening_function = data.get("hardening_function", "")
@@ -410,11 +403,6 @@ def get_model_graph(request):
     yield_function = data.get("yield_function", "")
     elastic_args = data.get("elastic_arguments", {})
     elastic_function = data.get("elastic_function", "")
-    # model = params.model # TODO: model is useless here, remove it from the model params?
-
-    model: Model
-
-    # img_data = run_model(arguments, model.tag)
 
     hardening_points, yield_points, elastic_points = generate_points(hardening_args, yield_args, elastic_args,
                                                                      hardening_function, yield_function,
