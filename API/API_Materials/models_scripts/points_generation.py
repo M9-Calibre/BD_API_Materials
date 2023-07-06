@@ -4,11 +4,13 @@ from typing import Any
 
 def generate_points(hardening_args: dict[str, Any], yield_args: dict[str, float], elastic_args: dict[str, float],
                     hardening_func: str, yield_func: str, elastic_func: str,
-                    minimum=0, maximum=1, step=0.01) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+                    minimum=0, maximum=1, step=0.01, min_elastic=0, max_elastic=0.02, step_elastic=0.001) -> \
+        tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Given the arguments for each function, it will generate the points for each one and return them as a tuple"""
-    inpt = np.arange(minimum, maximum, step)
-    hardening_args["inpt"] = inpt
-    elastic_args["inpt"] = inpt
+    hardening_inpt = np.arange(minimum, maximum, step)
+    elastic_inpt = np.arange(min_elastic, max_elastic, step_elastic)
+    hardening_args["inpt"] = hardening_inpt
+    elastic_args["inpt"] = elastic_inpt
 
     # Calculating Hardening law
     hardening_points = calculate_hardening(hardening_func, **hardening_args)
@@ -19,10 +21,11 @@ def generate_points(hardening_args: dict[str, Any], yield_args: dict[str, float]
     # Calculating Elastic locus
     elastic_points = calculate_elastic(elastic_func, **elastic_args)
 
+
     # TODO: Merge points to get final graph (i don't know if it is just a merge for instance)
     ...
 
-    return hardening_points, yield_points, elastic_points
+    return hardening_points, yield_points, elastic_points, hardening_inpt, elastic_inpt
 
 
 # ------------- Hardening functions ----------------

@@ -83,7 +83,7 @@ class ModelViewSet(viewsets.ModelViewSet):
     ordering = ("-name",)
     ordering_fields = ('name', 'tag', 'id')
     # # filter_backends = (filters2.DjangoFilterBackend,)
-    filterset_fields = ["test"]
+    # filterset_fields = ["test"]
 
 
 class ModelParamsViewSet(viewsets.ModelViewSet):
@@ -416,14 +416,16 @@ def get_model_graph(request):
 
     # img_data = run_model(arguments, model.tag)
 
-    hardening_points, yield_points, elastic_points = generate_points(hardening_args, yield_args, elastic_args,
+    hardening_points, yield_points, elastic_points, hardening_x, elastic_x = generate_points(hardening_args, yield_args, elastic_args,
                                                                      hardening_function, yield_function,
                                                                      elastic_function)
 
     data = {
         "hardening_points": hardening_points,
         "yield_points": yield_points,
-        "elastic_points": elastic_points
+        "elastic_points": elastic_points,
+        "hardening_x": hardening_x,
+        "elastic_x": elastic_x
     }
 
     return Response(status=200, data=data)
