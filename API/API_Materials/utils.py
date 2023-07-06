@@ -91,12 +91,15 @@ def process_test_data(files: FileDict, file_format="aramis", _3d=False):
         elif file_format == "matchid":
             try:
                 content = pd.read_csv(file, delimiter=',')
+                if content.shape[1] < 4:
+                    file.seek(0, 0)
+                    content = pd.read_csv(file, delim_whitespace=True)
+                    if content.shape[1] < 4:
+                        bad_format.append(file_name)
+                        continue
             except:
-                try:
-                    content = pd.read_csv(file, delimiter=' ')
-                except:
-                    bad_format.append(file_name)
-                    continue
+                bad_format.append(file_name)
+                continue
             if _3d:
                 required = {'coor.X.mm', 'coor.Y.mm', 'coor.Z.mm', 'disp.Horizontal.Displacement.U.mm',
                             'disp.Vertical.Displacement.V.mm', 'disp.Out-Of-Plane.W.mm'}
