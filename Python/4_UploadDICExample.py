@@ -1,9 +1,13 @@
 from API import *
 import os
 
-token = authenticate("afonso", "1234")
+token = authenticate("tester", "secretPass1234")
 
-dir = "0deg_matchid_2d\\"
+# Directory where the DIC files and load data are stored, consult the user manual for formatting and naming of the files
+dir = "test_data\\" 
+
+# ID of the test we wish to populate
+test_id = 1
 
 f = []
 for (dirpath, dirnames, filenames) in os.walk(dir):
@@ -12,12 +16,15 @@ for (dirpath, dirnames, filenames) in os.walk(dir):
 
 file_mappings = {name : open(dir+name, "rb") for name in f}
 
-test = get_test(1)
+test = get_test(test_id)
 
+# Upload the data
 test.upload_test_data(token, file_mappings, file_format=UploadFileFormat.MatchId, _3d=False)
 
+# Download the data as a ZIP file
 test.download_test_data()
 
+# Download the data as a pandas dataframe
 stages_df = test.load_test_data()
 
 print(stages_df.keys())
