@@ -4,10 +4,10 @@ import os
 token = authenticate("tester", "secretPass1234")
 
 # Directory where the DIC files and load data are stored, consult the user manual for formatting and naming of the files
-dir = "test_data\\" 
+dir = "test\\" 
 
 # ID of the test we wish to populate
-test_id = 1
+test_id = 3
 
 f = []
 for (dirpath, dirnames, filenames) in os.walk(dir):

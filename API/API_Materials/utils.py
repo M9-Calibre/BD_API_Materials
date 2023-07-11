@@ -28,8 +28,7 @@ def process_test_data(files: FileDict, file_format="aramis", _3d=False):
 
     # Read csv file with load information
     try:
-        metadata = pd.read_csv(files["stage_metadata.csv"], delimiter=",", header=None,
-                               names=["stage_num", "ts_def", "load"])
+        metadata = pd.read_csv(files["stage_metadata.csv"], delimiter=";")
     except:
         return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
 
@@ -50,7 +49,7 @@ def process_test_data(files: FileDict, file_format="aramis", _3d=False):
             duplicated_stages.append(stage)
             continue
         # Get load and timestamp of the stage
-        stage_metadata = metadata.loc[metadata["stage_num"] == stage]
+        stage_metadata = metadata.loc[metadata["Time"] == stage]
         # Stage not in load file
         if stage_metadata.empty:
             # If stage 0, assume no load
@@ -69,10 +68,10 @@ def process_test_data(files: FileDict, file_format="aramis", _3d=False):
             stages = dict()
             return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
         else:
-            ts_def = float(stage_metadata["ts_def"].iloc[0])
-            load = float(stage_metadata["load"].iloc[0])
+            ts_def = float(stage_metadata["TimeStamp"].iloc[0])
+            load = float(stage_metadata[" Force [N]"].iloc[0])
         datapoints = list()
-        if file_format == "aramis":  # Todo 2D aramis? If not verify
+        if file_format == "aramis":  # TODO 2D aramis? If not verify
             for line in file:
                 line = line.decode()
                 if not line.startswith("#"):  # get datapoint

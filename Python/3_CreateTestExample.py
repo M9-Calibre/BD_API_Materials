@@ -6,7 +6,7 @@ token = authenticate("tester", "secretPass1234")
 # Creating a test
 
 # ID of the material which the new test refers to
-material = get_material(1)
+material = get_material(3)
 
 # Test metadata
 metadata = {
