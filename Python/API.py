@@ -384,20 +384,22 @@ class Test():
         test.id = test_json.get("id", None)
         test.submitted_by = test_json.get("submitted_by", None)
         return test
-    
+
 class Model():
-    def __init__(self, name : str, tag : str, input : list) -> None:
+    def __init__(self, name : str, tag : str, function_name: str, input : list, category: str) -> None:
         self.id = None
         self.name = name
         self.tag = tag
+        self.function_name = function_name
         self.input = input
+        self.category = category
 
     def to_json(self):
         return deepcopy(self.__dict__)
     
     @classmethod
     def load_json(cls, model_json : dict):
-        model = Model(model_json["name"], model_json["tag"], model_json["input"])
+        model = Model(model_json["name"], model_json["tag"], model_json["function_name"], model_json["input"], model_json["category"])
         model.id = model_json.get('id', None)
         return model
     
@@ -1020,5 +1022,6 @@ def register_model_params(login_token : str, modelp : ModelParams):
     else:
         modelp.id = response.json()["id"]
         modelp.submitted_by = response.json()["submitted_by"]
-        #modelp.user = response.json()["user"]
         return modelp
+
+

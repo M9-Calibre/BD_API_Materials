@@ -2,8 +2,12 @@ from API import *
 
 token = authenticate("afonso", "1234")
 
-yld2000 = Model("Yield Code 2000", "YLD2000", ["alpha1", "alpha2", "alpha3", "alpha4", "alpha5", "alpha6", "alpha7", "alpha8", "a"])
-yield_locus = Model("Yeild Locus", "YLDLOC", ["F", "H", "N", "K", "eps0", "n_swift"])
 
-yld2000 = register_model(token, yld2000)
+yield_locus = Model("Yeild Locus", "YLDLOC", "sample", ["f", "h", "g", "n"], "yield")
+hard = Model("Swift Hardening", "SWIFT", "swift", ["k", "eps0", "swift_n"], "hardening")
+elastic = Model("Elastic", "ELASTIC", "sample", [], "elastic")
+
+
 yield_locus = register_model(token, yield_locus)
+hard = register_model(token, hard)
+elastic = register_model(token, elastic)
