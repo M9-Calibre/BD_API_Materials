@@ -1,6 +1,8 @@
 from API import *
 
-token = authenticate("afonso", "1234")
+token = authenticate("tester", "secretPass1234")
+
+# Creating a material
 
 thermal_expansion_coef = {
     "20": 1.15,
@@ -76,11 +78,15 @@ material = Material(name="EN 10028-2 Grade 10CrMo9-10 normalized and tempered (+
                     designation="DIN 10 CrMo 9 10", heat_treatment="Normalized & tempered, 950°C/30min air, 750°C/2h air", 
                     thermal_properties=tp, mechanical_properties=mp, physical_properties=pp).register(token)
 
+# Another material
+
 category = get_category_by_name("Other")
 
 material2 = Material("Example Material", category=category, source="The source of the material.",
                      heat_treatment="The heat treatment of the material.", description="Material description.",
                      designation="ABCDEFG").register(token)
+
+# Fetching the stored materials
 
 for material in get_materials():
     print(material.id, material.name, material.submitted_by, material.date, material.user)

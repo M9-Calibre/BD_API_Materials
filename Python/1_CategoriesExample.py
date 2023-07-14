@@ -1,9 +1,9 @@
 from API import *
 
-token = authenticate("afonso", "1234")
+token = authenticate("tester", "secretPass1234")
 token = authenticate_from_json("secret_credentials.json")
 
-# Category creating restricted to admin users
+# Category creating restricted to admin users, i.e. only credentials with admnistrator priviledges will be able to run these commands
 
 cat1 = LowerCategory(MiddleCategory(UpperCategory("Metal"), "Steel"), "Alloy Steel").register(token)
 cat2 = LowerCategory(cat1.middle, "Another Steel").register(token)
@@ -11,7 +11,7 @@ cat3 = LowerCategory(MiddleCategory(cat1.middle.upper, "Aluminium"), "Special Al
 cat4 = LowerCategory(MiddleCategory(UpperCategory("Other"), "Other"), "Other").register(token)
 cat5 = LowerCategory(MiddleCategory(cat4.middle.upper, "Middle Example"), "Lower Example").register(token)
 
-# Category fetching is available without any kind of authentication
+# Category fetching is available without any kind of authentication (any user can run this)
 
 categories_tree = get_categories(CategoriesDisplayModes.Tree)
 
