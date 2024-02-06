@@ -12,3 +12,5 @@ mysql_connector
 numpy
 pandas
 matplotlib
+dj-rest-auth
+django-rest-auth[with_social]

@@ -3,6 +3,7 @@ import zipfile
 import os
 
 import pandas as pd
+from dj_rest_auth.views import PasswordResetView
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
@@ -23,9 +24,11 @@ from .pagination import DICDataPagination
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
     Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer, \
-    DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer, ModelSerializer, ModelParamsSerializer
+    DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer, ModelSerializer, ModelParamsSerializer, \
+    CustomPasswordResetSerializer
 from .utils import process_test_data
 from .models_scripts.points_generation import generate_points
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -404,9 +407,11 @@ def get_model_graph(request):
     elastic_args = data.get("elastic_arguments", {})
     elastic_function = data.get("elastic_function", "")
 
-    hardening_points, yield_points, elastic_points, hardening_x, elastic_x = generate_points(hardening_args, yield_args, elastic_args,
-                                                                     hardening_function, yield_function,
-                                                                     elastic_function)
+    hardening_points, yield_points, elastic_points, hardening_x, elastic_x = generate_points(hardening_args, yield_args,
+                                                                                             elastic_args,
+                                                                                             hardening_function,
+                                                                                             yield_function,
+                                                                                             elastic_function)
 
     data = {
         "hardening_points": hardening_points,
@@ -417,3 +422,8 @@ def get_model_graph(request):
     }
 
     return Response(status=200, data=data)
+
+
+## Password Reset
+class CustomPasswordResetView(PasswordResetView):
+    serializer_class = CustomPasswordResetSerializer

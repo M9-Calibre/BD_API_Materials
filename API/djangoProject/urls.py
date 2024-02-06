@@ -19,7 +19,14 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
 
+# Password reset
+# from dj_rest_auth.views import PasswordResetView, PasswordResetConfirmView
 from API_Materials import views
+from django.contrib.auth import views as auth_views
+from django.contrib import admin
+# Password reset
+from dj_rest_auth.views import PasswordResetView, PasswordResetConfirmView
+from dj_rest_auth.registration.views import VerifyEmailView
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -63,5 +70,30 @@ urlpatterns = [
     path('tests/<int:pk>/delete/', views.delete_test_data),
     path('models/points/', views.get_model_graph),
     path("tests", views.get_model_graph),
+
+    # Password reset
+    # path('users/password/reset/', PasswordResetView.as_view()),
+    # path('users/password/reset/confirm/<uidb64>/<token>', PasswordResetConfirmView.as_view()),
+
+
+    path('user/verify-email/',
+         VerifyEmailView.as_view(),
+         name='rest_verify_email'
+         ),
+
+    # Password reset
+    path('user/password/reset/',
+         views.CustomPasswordResetView.as_view(),
+         name='rest_password_reset'
+         ),
+
+    path('user/password/reset/confirm/<uidb64>/<token>/',
+         PasswordResetConfirmView.as_view(),
+         name='password_reset_confirm'),
+    # path('admin/', admin.site.urls),
+    # path('password_reset/', auth_views.PasswordResetView.as_view(), name="password_reset"),
+    # path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name="password_reset_done"),
+    # path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    # path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('', include(router.urls))
 ]
