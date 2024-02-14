@@ -7,7 +7,7 @@ from rest_framework.validators import UniqueValidator
 
 from .models import Material, MaterialCategory3, MaterialCategory2, MaterialCategory1, Test, ThermalProperties, \
     MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model, \
-    ModelParams, Institution
+    ModelParams, Institution, InstitutionUser
 from django.contrib.auth.models import User
 
 from typing import Dict
@@ -307,9 +307,13 @@ class RegisterSerializer(serializers.ModelSerializer):
             last_name=validated_data['last_name']
         )
         print(f"{validated_data=}")
-        return user
         user.set_password(validated_data['password'])
         user.save()
+        if "institution" in validated_data:
+            institution_user = InstitutionUser(
+                user=user,
+                institution=validated_data.get('institution', None))
+            institution_user.save()
         return user
 
 
@@ -424,6 +428,16 @@ class InstitutionSerializer(serializers.ModelSerializer):
         model = Institution
         fields = '__all__'
 
+
+class InstitutionUserSerializer(serializers.ModelSerializer):
+    institution = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Institution.objects.all())
+    user = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=User.objects.all())
+
+    class Meta:
+        model = InstitutionUser
+        fields = '__all__'  # ['id', 'username', 'email', 'first_name', 'last_name', 'institution']
+
+
 ## -- Password Reset -- ##
 
 class CustomPasswordResetSerializer(PasswordResetSerializer):
@@ -474,5 +488,3 @@ class CustomAllAuthPasswordResetForm(AllAuthPasswordResetForm):
                 'templates/password_reset', email, context
             )
         return self.cleaned_data['email']
-
-
