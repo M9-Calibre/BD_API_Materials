@@ -51,4 +51,4 @@ class InstitutionUserFilter(filters.FilterSet):
 
     class Meta:
         model = InstitutionUser
-        fields = ["institution", "user"]
+        fields = ["institution", "user", "has_active_institution"]
