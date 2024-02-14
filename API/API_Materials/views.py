@@ -19,13 +19,13 @@ from rest_framework.response import Response
 
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter
 from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCategory3, Supplier, Laboratory, Test, \
-    DICStage, DICDatapoint, Model, ModelParams
+    DICStage, DICDatapoint, Model, ModelParams, Institution
 from .pagination import DICDataPagination
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
     Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer, \
     DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer, ModelSerializer, ModelParamsSerializer, \
-    CustomPasswordResetSerializer
+    CustomPasswordResetSerializer, InstitutionSerializer
 from .utils import process_test_data
 from .models_scripts.points_generation import generate_points
 
@@ -101,6 +101,17 @@ class ModelParamsViewSet(viewsets.ModelViewSet):
 class RegisterUserAPIView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
+
+
+class InstitutionViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+    queryset = Institution.objects.all()
+    serializer_class = InstitutionSerializer
+    # filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter)
+    ordering = ("name",)
+    #
+    # def perform_create(self, serializer: InstitutionSerializer):
+    #     serializer.save(submitted_by=self.request.user)
 
 
 class MaterialViewSet(viewsets.ModelViewSet):

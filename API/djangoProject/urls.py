@@ -44,6 +44,7 @@ schema_view = get_schema_view(
 router = DefaultRouter()
 router.register(r'materials', views.MaterialViewSet, basename="materials")
 router.register(r'users', views.UserViewSet, basename="users")
+router.register(r'institutions', views.InstitutionViewSet, basename='institutions')
 router.register(r'suppliers', views.SupplierViewSet, basename='suppliers')
 router.register(r'labs', views.LaboratoryViewSet, basename='labs')
 router.register(r'tests/params', views.ModelParamsViewSet, basename='tests_params')
@@ -83,7 +84,7 @@ urlpatterns = [
 
     # Password reset
     path('user/password/reset/',
-         views.CustomPasswordResetView.as_view(),
+         views.PasswordResetView.as_view(), #CustomPasswordResetView.as_view(),
          name='rest_password_reset'
          ),
 

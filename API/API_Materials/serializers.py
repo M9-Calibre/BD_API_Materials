@@ -1,12 +1,13 @@
 from dj_rest_auth.forms import AllAuthPasswordResetForm
 from dj_rest_auth.serializers import PasswordResetSerializer
 from django.contrib.auth.password_validation import validate_password
-from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
+from rest_framework import serializers, permissions
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.validators import UniqueValidator
 
 from .models import Material, MaterialCategory3, MaterialCategory2, MaterialCategory1, Test, ThermalProperties, \
-    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model, ModelParams
+    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model, \
+    ModelParams, Institution
 from django.contrib.auth.models import User
 
 from typing import Dict
@@ -24,6 +25,7 @@ from allauth.account.utils import user_pk_to_url_str, user_username
 from allauth.utils import build_absolute_uri
 from dj_rest_auth.forms import AllAuthPasswordResetForm, default_url_generator
 from dj_rest_auth.serializers import PasswordResetSerializer
+
 
 class ModelSerializer(serializers.ModelSerializer):
     def validate_input(self, value):
@@ -280,14 +282,22 @@ class UserSerializer(serializers.ModelSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    institution = serializers.IntegerField(required=False)
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'email', 'first_name', 'last_name')
+        fields = ('username', 'password', 'email', 'first_name', 'last_name', 'institution')
         extra_kwargs = {
             'first_name': {'required': True},
-            'last_name': {'required': True}
+            'last_name': {'required': True},
+            'institution': {'required': False},
         }
+
+    def validate_institution(self, value):
+        institution = Institution.objects.filter(pk=value).first()
+        if not institution:
+            raise ValidationError("Given Institution does not exist.")
+        return institution
 
     def create(self, validated_data):
         user = User.objects.create(
@@ -296,6 +306,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name']
         )
+        print(f"{validated_data=}")
+        return user
         user.set_password(validated_data['password'])
         user.save()
         return user
@@ -405,6 +417,13 @@ class SupplierSerializer(serializers.ModelSerializer):
         return instance
 
 
+class InstitutionSerializer(serializers.ModelSerializer):
+    users = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+    class Meta:
+        model = Institution
+        fields = '__all__'
+
 ## -- Password Reset -- ##
 
 class CustomPasswordResetSerializer(PasswordResetSerializer):
@@ -420,6 +439,7 @@ class CustomPasswordResetSerializer(PasswordResetSerializer):
     #         #     'pass_reset_obj': self.your_extra_reset_obj
     #         # }
     #     }
+
 
 class CustomAllAuthPasswordResetForm(AllAuthPasswordResetForm):
     def save(self, request, **kwargs):
@@ -454,3 +474,5 @@ class CustomAllAuthPasswordResetForm(AllAuthPasswordResetForm):
                 'templates/password_reset', email, context
             )
         return self.cleaned_data['email']
+
+
