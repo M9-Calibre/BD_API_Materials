@@ -72,8 +72,8 @@ def calculate_elastic(func_name: str, **kwargs) -> np.ndarray:
     return ELASTIC_FUNCTIONS[func_name](**kwargs)
 
 
-def calculate_sample_elastic(inpt: np.ndarray) -> np.ndarray:
-    return np.arange(0, len(inpt), 1)
+def calculate_sample_elastic(multiplier: float, inpt: np.ndarray) -> np.ndarray:
+    return np.arange(0, len(inpt) * multiplier, 1 * multiplier)
 
 
 # ------------- SETUP ----------------
