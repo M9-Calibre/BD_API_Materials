@@ -12,3 +12,4 @@ mysql_connector
 numpy
 pandas
 matplotlib
+mod_wsgi

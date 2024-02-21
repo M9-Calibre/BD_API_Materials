@@ -39,9 +39,9 @@ def get_secret(setting, secrets=secrets_content):
 SECRET_KEY = get_secret("API_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  # change
+DEBUG = False  # change
 
-ALLOWED_HOSTS = ['.localhost', '127.0.0.1', '[::1]']
+ALLOWED_HOSTS = ['.localhost', '193.137.84.5']
 
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -56,9 +56,23 @@ CORS_ALLOW_HEADERS = [
     'access-control-allow-origin'
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_PRIVATE_NETWORK = True
+
+CORS_ALLOW_METHODS = (
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+)
+
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -71,7 +85,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'drf_yasg',
     'django_filters',
-    'corsheaders'
+    'cryptographic_fields'
 ]
 
 MIDDLEWARE = [
@@ -86,11 +100,14 @@ MIDDLEWARE = [
 
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://193.137.84.5",
+    "http://localhost"
+]
+
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 ROOT_URLCONF = 'djangoProject.urls'
-
-CORS_ORIGIN_ALLOW_ALL = True
 
 TEMPLATES = [
     {
@@ -118,10 +135,10 @@ WSGI_APPLICATION = 'djangoProject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dem-vx',
-        'USER': 'dem-vxs-dbo',
+        'NAME': 'API_Materials',
+        'USER': 'API',
         'PASSWORD': get_secret("DB_KEY"),
-        'HOST': 'mysql-hosting.ua.pt',
+        'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
@@ -164,7 +181,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static_api/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -187,15 +204,27 @@ GRAPH_MODELS ={
     'graph_models': True,
 }
 
-# SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_SECONDS = 3600  # change
+LOG_FILE_PATH = os.path.join(BASE_DIR, "log.txt")
 
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-
-SECURE_SSL_REDIRECT = False  # change
-
-SECURE_HSTS_PRELOAD = False  # change
-
-SESSION_COOKIE_SECURE = True
-
-CSRF_COOKIE_SECURE = True
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',  # Set the desired log level (DEBUG, INFO, ERROR, etc.)
+            'class': 'logging.FileHandler',
+            'filename': LOG_FILE_PATH,
+            'formatter': 'verbose',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
+    'root': {
+        'handlers': ['file'],
+        'level': 'DEBUG',  # Set the desired log level for the root logger
+    },
+}

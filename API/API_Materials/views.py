@@ -27,6 +27,10 @@ from .serializers import MaterialSerializer, UserSerializer, Category1Serializer
 from .utils import process_test_data
 from .models_scripts.points_generation import generate_points
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):
