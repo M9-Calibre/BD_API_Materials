@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-from .models import MaterialCategory3, MaterialCategory2, MaterialCategory1, DICDatapoint, DICStage
+from .models import MaterialCategory3, MaterialCategory2, MaterialCategory1, DICDatapoint, DICStage, InstitutionUser
 
 
 class DICDataFilter(filters.FilterSet):
@@ -44,3 +44,11 @@ class CategoryUpperFilter(filters.FilterSet):
     class Meta:
         model = MaterialCategory1
         fields = ["upper_category"]
+
+class InstitutionUserFilter(filters.FilterSet):
+    institution = filters.NumberFilter(field_name="institution", label="institution")
+    user = filters.NumberFilter(field_name="user", label="user")
+
+    class Meta:
+        model = InstitutionUser
+        fields = ["institution", "user", "has_active_institution"]

@@ -43,7 +43,7 @@ def calculate_yield(func_name: str, **kwargs) -> np.ndarray:
     return YIELD_FUNCTIONS[func_name](**kwargs)
 
 
-def calculate_sample_yield(h: float, g: float, f: float, n: float, shear: float) -> tuple[np.ndarray, Any, Any]:
+def calculate_sample_yield(h: float, g: float, f: float, n: float) -> dict:
     # TODO: Not sure if this beginning setup is exclusive to this function or not
     # Creating mesh points for populating the equations
     x_min = -10
@@ -52,12 +52,17 @@ def calculate_sample_yield(h: float, g: float, f: float, n: float, shear: float)
     y_max = 10
 
     x1, x2 = np.meshgrid(np.arange(x_min, x_max, 0.1), np.arange(y_min, y_max, 0.1))
-    z = h * (x1 - x2) ** 2 + g * (x1 ** 2) + f * (x2 ** 2) + 2 * n * (shear ** 2)
+
+    z0 = h * (x1 - x2) ** 2 + g * (x1 ** 2) + f * (x2 ** 2) + 2 * n * (0 ** 2)
     dic = {
-        "z": z,
-        "x": np.linspace(x_min, x_max, z[0].size),
-        "y": np.linspace(y_min, y_max, z[0].size)
+        "z0": z0,
+        "x": np.linspace(x_min, x_max, z0[0].size),
+        "y": np.linspace(y_min, y_max, z0[0].size)
     }
+
+    for idx, val in enumerate(np.arange(0.2, 0.6, 0.2)):
+        z = h * (x1 - x2) ** 2 + g * (x1 ** 2) + f * (x2 ** 2) + 2 * n * (val ** 2)
+        dic[f"z{idx+1}"] = z
 
     return dic
 
@@ -67,8 +72,8 @@ def calculate_elastic(func_name: str, **kwargs) -> np.ndarray:
     return ELASTIC_FUNCTIONS[func_name](**kwargs)
 
 
-def calculate_sample_elastic(inpt: np.ndarray) -> np.ndarray:
-    return np.arange(0, len(inpt), 1)
+def calculate_sample_elastic(multiplier: float, inpt: np.ndarray) -> np.ndarray:
+    return np.arange(0, len(inpt) * multiplier, 1 * multiplier)
 
 
 # ------------- SETUP ----------------

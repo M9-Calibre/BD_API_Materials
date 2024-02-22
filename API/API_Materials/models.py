@@ -3,6 +3,18 @@ from django.contrib.auth.models import User
 
 
 # Create your models here.
+
+class Institution(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    country = models.CharField(max_length=50)
+
+
+class InstitutionUser(models.Model):
+    institution = models.ForeignKey(Institution, models.CASCADE, related_name='users', blank=True, null=True)
+    user = models.OneToOneField(User, models.CASCADE, related_name='institution_user')
+    has_active_institution = models.BooleanField(default=False)
+
+
 class MaterialCategory1(models.Model):
     category = models.CharField(max_length=25, unique=True)
 

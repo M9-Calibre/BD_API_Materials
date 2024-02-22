@@ -19,7 +19,7 @@ def run_model(arguments: Dict[str, float], model: str = "yld2000"):
     ensure_matplotlib_patch()
 
     arg_keys = ["alpha1", "alpha2", "alpha3", "alpha4", "alpha5", "alpha6", "alpha7", "alpha8", "a"]
-    cp = [355] + [arguments[name] for name in arg_keys]
+    cp = [355.] + [arguments[name] for name in arg_keys]
 
     if model == 'yld2000':
         yld = 1

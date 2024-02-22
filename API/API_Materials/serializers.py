@@ -4,7 +4,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.validators import UniqueValidator
 
 from .models import Material, MaterialCategory3, MaterialCategory2, MaterialCategory1, Test, ThermalProperties, \
-    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model, ModelParams
+    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model, ModelParams, Institution, InstitutionUser
 from django.contrib.auth.models import User
 
 from typing import Dict
@@ -265,14 +265,22 @@ class UserSerializer(serializers.ModelSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    institution = serializers.IntegerField(required=False)
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'email', 'first_name', 'last_name')
+        fields = ('username', 'password', 'email', 'first_name', 'last_name', 'institution')
         extra_kwargs = {
             'first_name': {'required': True},
-            'last_name': {'required': True}
+            'last_name': {'required': True},
+            'institution': {'required': False},
         }
+
+    def validate_institution(self, value):
+        institution = Institution.objects.filter(pk=value).first()
+        if not institution:
+            raise ValidationError("Given Institution does not exist.")
+        return institution
 
     def create(self, validated_data):
         user = User.objects.create(
@@ -281,9 +289,16 @@ class RegisterSerializer(serializers.ModelSerializer):
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name']
         )
+        print(f"{validated_data=}")
         user.set_password(validated_data['password'])
         user.save()
+        if "institution" in validated_data:
+            institution_user = InstitutionUser(
+                user=user,
+                institution=validated_data.get('institution', None))
+            institution_user.save()
         return user
+
 
 
 class Category3Serializer(serializers.ModelSerializer):
@@ -388,3 +403,21 @@ class SupplierSerializer(serializers.ModelSerializer):
             location.save()
 
         return instance
+
+
+class InstitutionSerializer(serializers.ModelSerializer):
+    users = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+    class Meta:
+        model = Institution
+        fields = '__all__'
+
+
+class InstitutionUserSerializer(serializers.ModelSerializer):
+    institution = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Institution.objects.all())
+    user = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=User.objects.all())
+
+    class Meta:
+        model = InstitutionUser
+        fields = '__all__'  # ['id', 'username', 'email', 'first_name', 'last_name', 'institution']
+

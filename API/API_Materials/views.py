@@ -16,14 +16,17 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter
+from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter, \
+    InstitutionUserFilter
 from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCategory3, Supplier, Laboratory, Test, \
-    DICStage, DICDatapoint, Model, ModelParams
+    DICStage, DICDatapoint, Model, ModelParams, Institution, InstitutionUser
 from .pagination import DICDataPagination
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
     Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer, \
-    DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer, ModelSerializer, ModelParamsSerializer
+    DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer, ModelSerializer, ModelParamsSerializer, \
+    InstitutionSerializer, InstitutionUserSerializer
+
 from .utils import process_test_data
 from .models_scripts.points_generation import generate_points
 
@@ -102,6 +105,25 @@ class ModelParamsViewSet(viewsets.ModelViewSet):
 class RegisterUserAPIView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
+
+
+class InstitutionViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+    queryset = Institution.objects.all()
+    serializer_class = InstitutionSerializer
+
+
+class InstitutionUserViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+    queryset = InstitutionUser.objects.all()
+    serializer_class = InstitutionUserSerializer
+    filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
+    ordering = ("id",)
+    ordering_fields = ('id',)
+    # search_fields = ('name', 'country')
+    filterset_class = InstitutionUserFilter
+    # filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
+    # ordering = ("name",)
 
 
 class MaterialViewSet(viewsets.ModelViewSet):
