@@ -9,7 +9,8 @@ from typing import Union, Any
 from copy import deepcopy
 from time import time
 
-URL = 'http://127.0.0.1:8000'
+# URL = 'http://127.0.0.1:8000'
+URL = 'http://193.137.84.5/api'
 
 class APIFailedRequest(Exception):
     def __init__(self, response : requests.Response) -> None:
@@ -443,6 +444,21 @@ class ModelParams():
         modelp.user = modelp_json.get('user', None)
         modelp.submitted_by = modelp_json.get('submitted_by', None)
         return modelp
+
+class Institution():
+    def __init__(self, name : str, country : str) -> None:
+        self.id = None
+        self.name = name
+        self.country = country
+
+    def to_json(self):
+        return deepcopy(self.__dict__)
+    
+    @classmethod
+    def load_json(cls, model_json : dict):
+        model = Model(model_json["name"], model_json["country"])
+        model.id = model_json.get('id', None)
+        return model
 
 # Authentication
     
@@ -1024,4 +1040,27 @@ def register_model_params(login_token : str, modelp : ModelParams):
         modelp.submitted_by = response.json()["submitted_by"]
         return modelp
 
+def register_institution(login_token : str, modelp : Institution):
+    """Save model parameters to the database.
+
+    Parameters
+    ----------
+    login_token : str
+        The log-in token that can be retrieved from the authenticate function
+    modelp : ModelParams
+        The model parameters to be saved 
+    
+    """
+
+    headers = {"Authorization": f"Token {login_token}"}
+
+    url = f"{URL}/institutions/"
+    body = modelp.to_json()
+    response = requests.post(url, json=body, headers=headers)
+
+    if response.status_code != 201:
+        raise APIFailedRequest(response)
+    else:
+        modelp.id = response.json()["id"]
+        return modelp
 
