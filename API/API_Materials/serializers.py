@@ -7,7 +7,7 @@ from rest_framework.validators import UniqueValidator
 
 from .models import Material, MaterialCategory3, MaterialCategory2, MaterialCategory1, Test, ThermalProperties, \
     MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model, \
-    ModelParams, Institution, InstitutionUser
+    ModelParams, Institution, InstitutionUser, MaterialParams
 from django.contrib.auth.models import User
 
 from typing import Dict
@@ -40,7 +40,7 @@ class ModelSerializer(serializers.ModelSerializer):
 
 
 class ModelParamsSerializer(serializers.ModelSerializer):
-    test = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Test.objects.all())
+    # test = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Test.objects.all())
     user = serializers.SlugRelatedField(many=False, read_only=True, slug_field='username')
     submitted_by = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     name = serializers.CharField(source='model.name', read_only=True)
@@ -73,6 +73,16 @@ class ModelParamsSerializer(serializers.ModelSerializer):
         model = ModelParams
         fields = '__all__'
 
+class MaterialParamsSerializer(serializers.ModelSerializer):
+    submitted_by = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    material = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Material.objects.all())
+    hardening_model_params = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=ModelParams.objects.all())
+    elastic_model_params = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=ModelParams.objects.all())
+    yield_model_params = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=ModelParams.objects.all())
+
+    class Meta:
+        model = MaterialParams
+        fields = '__all__'
 
 class StageListSerializer(serializers.ModelSerializer):
     class Meta:

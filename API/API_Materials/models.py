@@ -83,13 +83,22 @@ class Model(models.Model):
 
 
 class ModelParams(models.Model):
-    test = models.ForeignKey(Test, models.CASCADE, related_name='params')
+    # test = models.ForeignKey(Test, models.CASCADE, related_name='params')
     model = models.ForeignKey(Model, models.CASCADE, related_name='params')
     submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='params')
     params = models.JSONField()  # {"x": 10, "z": 40, "output_do_outro" : 30} // {"input": [12, 1, 3.4], "output":}
 
-    class Meta:
-        unique_together = ("test", "model", "submitted_by")
+    # class Meta:
+    #     unique_together = ("model", "submitted_by")
+
+
+class MaterialParams(models.Model):
+    material = models.ForeignKey(Material, models.CASCADE, related_name='params')
+    name = models.CharField(max_length=50)
+    submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='material_params')
+    hardening_model_params = models.ForeignKey(ModelParams, models.CASCADE, related_name='hardening_material_params')
+    elastic_model_params = models.ForeignKey(ModelParams, models.CASCADE, related_name='elastic_material_params')
+    yield_model_params = models.ForeignKey(ModelParams, models.CASCADE, related_name='yield_material_params')
 
 
 class DICStage(models.Model):

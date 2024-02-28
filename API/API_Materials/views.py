@@ -21,13 +21,13 @@ from rest_framework.response import Response
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter, \
     InstitutionUserFilter
 from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCategory3, Supplier, Laboratory, Test, \
-    DICStage, DICDatapoint, Model, ModelParams, Institution, InstitutionUser
+    DICStage, DICDatapoint, Model, ModelParams, Institution, InstitutionUser, MaterialParams
 from .pagination import DICDataPagination
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
     Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer, \
     DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer, ModelSerializer, ModelParamsSerializer, \
-    CustomPasswordResetSerializer, InstitutionSerializer, InstitutionUserSerializer
+    CustomPasswordResetSerializer, InstitutionSerializer, InstitutionUserSerializer, MaterialParamsSerializer
 from .utils import process_test_data
 from .models_scripts.points_generation import generate_points
 
@@ -100,6 +100,12 @@ class ModelParamsViewSet(viewsets.ModelViewSet):
         serializer.save(submitted_by=self.request.user)
 
 
+class MaterialParamsViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsOwnerOrReadOnly, permissions.IsAdminUser]
+    queryset = MaterialParams.objects.all()
+    serializer_class = MaterialParamsSerializer
+
+
 class RegisterUserAPIView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
@@ -109,7 +115,6 @@ class InstitutionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     queryset = Institution.objects.all()
     serializer_class = InstitutionSerializer
-
 
 
 class InstitutionUserViewSet(viewsets.ModelViewSet):

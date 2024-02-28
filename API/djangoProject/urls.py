@@ -57,6 +57,7 @@ router.register(r'categories/middle', views.CategoriesMiddleList, basename='cate
 router.register(r'categories/lower', views.CategoriesLowerList, basename='categories_lower')
 router.register(r'models', views.ModelViewSet, basename='models')
 router.register(r'modelparams', views.ModelParamsViewSet, basename='modelparams')
+router.register(r'materialparams', views.MaterialParamsViewSet, basename='materialparams')
 
 urlpatterns = [
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
@@ -85,7 +86,8 @@ urlpatterns = [
 
     # Password reset
     path('user/password/reset/',
-         views.PasswordResetView.as_view(), #CustomPasswordResetView.as_view(),
+         # views.CustomPasswordResetView.as_view(), #views.PasswordResetView.as_view(),
+         views.PasswordResetView.as_view(), # views.CustomPasswordResetView.as_view(),
          name='rest_password_reset'
          ),
 

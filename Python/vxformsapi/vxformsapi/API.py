@@ -1040,6 +1040,9 @@ def register_model_params(login_token : str, modelp : ModelParams):
         modelp.submitted_by = response.json()["submitted_by"]
         return modelp
 
+
+# Institution
+
 def register_institution(login_token : str, modelp : Institution):
     """Save model parameters to the database.
 
