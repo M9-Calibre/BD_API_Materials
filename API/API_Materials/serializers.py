@@ -46,12 +46,12 @@ class ModelParamsSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='model.name', read_only=True)
     function_name = serializers.CharField(source='model.function_name', read_only=True)
 
-    def validate(self, data):
-        linked_obj = data['test']
-        if linked_obj.submitted_by == self.context['request'].user:
-            return data
-        else:
-            raise PermissionDenied(detail=None, code=None)
+    # def validate(self, data):
+    #     linked_obj = data['test']
+    #     if linked_obj.submitted_by == self.context['request'].user:
+    #         return data
+    #     else:
+    #         raise PermissionDenied(detail=None, code=None)
 
     def validate_params(self, value):
         if not isinstance(value, dict):

@@ -83,13 +83,10 @@ class Model(models.Model):
 
 
 class ModelParams(models.Model):
-    # test = models.ForeignKey(Test, models.CASCADE, related_name='params')
     model = models.ForeignKey(Model, models.CASCADE, related_name='params')
     submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='params')
     params = models.JSONField()  # {"x": 10, "z": 40, "output_do_outro" : 30} // {"input": [12, 1, 3.4], "output":}
 
-    # class Meta:
-    #     unique_together = ("model", "submitted_by")
 
 
 class MaterialParams(models.Model):

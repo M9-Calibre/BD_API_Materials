@@ -9,8 +9,8 @@ from typing import Union, Any
 from copy import deepcopy
 from time import time
 
-# URL = 'http://127.0.0.1:8000'
-URL = 'http://193.137.84.5/api'
+URL = 'http://127.0.0.1:8000'
+# URL = 'http://193.137.84.5/api'
 
 class APIFailedRequest(Exception):
     def __init__(self, response : requests.Response) -> None:
@@ -405,17 +405,15 @@ class Model():
         return model
     
 class ModelParams():
-    def __init__(self, test : Test, model : Model, params : dict) -> None:
+    def __init__(self, model : Model, params : dict) -> None:
         self.id = None
         self.submitted_by = None
-        self.user = None
-        self.test = test
+        # self.user = None
         self.model = model
         self.params = params
 
     def to_json(self):
         modelp_json = deepcopy(self.__dict__)
-        modelp_json["test"] = self.test.id
         modelp_json["model"] = self.model.id
         return modelp_json
     
@@ -441,7 +439,7 @@ class ModelParams():
     def load_json(cls, modelp_json : dict):
         modelp = ModelParams(get_test(modelp_json["test"]), get_model(modelp_json["model"]), modelp_json["params"])
         modelp.id = modelp_json.get('id', None)
-        modelp.user = modelp_json.get('user', None)
+        # modelp.user = modelp_json.get('user', None)
         modelp.submitted_by = modelp_json.get('submitted_by', None)
         return modelp
 
