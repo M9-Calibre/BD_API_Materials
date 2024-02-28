@@ -76,9 +76,6 @@ class ModelParamsSerializer(serializers.ModelSerializer):
 class MaterialParamsSerializer(serializers.ModelSerializer):
     submitted_by = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     material = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Material.objects.all())
-    hardening_model_params = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=ModelParams.objects.all())
-    elastic_model_params = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=ModelParams.objects.all())
-    yield_model_params = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=ModelParams.objects.all())
 
     class Meta:
         model = MaterialParams

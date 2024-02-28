@@ -403,18 +403,36 @@ class Model():
         model = Model(model_json["name"], model_json["tag"], model_json["function_name"], model_json["input"], model_json["category"])
         model.id = model_json.get('id', None)
         return model
+
+class MaterialParam():
+    def __init__(self, name : str, material : Material) -> None:
+        self.id = None
+        self.name = name
+        self.submitted_by = None
+        self.material = material
+
+    def to_json(self):
+        return deepcopy(self.__dict__)
+    
+    @classmethod
+    def load_json(cls, materialp_json : dict):
+        material_param = MaterialParam(materialp_json["name"], get_material(materialp_json["material"]))
+        material_param.id = materialp_json.get('id', None)
+        material_param.submitted_by = materialp_json.get('submitted_by', None)
+        return material_param
     
 class ModelParams():
-    def __init__(self, model : Model, params : dict) -> None:
+    def __init__(self, model : Model, material_param : MaterialParam, params : dict) -> None:
         self.id = None
         self.submitted_by = None
-        # self.user = None
+        self.material_param = material_param
         self.model = model
         self.params = params
 
     def to_json(self):
         modelp_json = deepcopy(self.__dict__)
         modelp_json["model"] = self.model.id
+        modelp_json["material_param"] = self.material_param.id
         return modelp_json
     
     def get_graph(self):
@@ -437,7 +455,7 @@ class ModelParams():
     
     @classmethod
     def load_json(cls, modelp_json : dict):
-        modelp = ModelParams(get_test(modelp_json["test"]), get_model(modelp_json["model"]), modelp_json["params"])
+        modelp = ModelParams(get_test(modelp_json["test"]), get_model(modelp_json["model"]), get_material_param(modelp_json["material_param"]), modelp_json["params"])
         modelp.id = modelp_json.get('id', None)
         # modelp.user = modelp_json.get('user', None)
         modelp.submitted_by = modelp_json.get('submitted_by', None)
@@ -1038,6 +1056,25 @@ def register_model_params(login_token : str, modelp : ModelParams):
         modelp.submitted_by = response.json()["submitted_by"]
         return modelp
 
+def get_material_param(materialp_id : int):
+    """Retrieve material parameters by id.
+    
+    Parameters
+    ----------
+    materialp_id : int
+        The id of the material parameters to be fetched
+    """
+
+    url = f"{URL}/materialparams/{materialp_id}/"
+
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        raise APIFailedRequest(response)
+    
+    materialp_data = response.json()
+
+    return MaterialParam.load_json(materialp_data)
 
 # Institution
 
