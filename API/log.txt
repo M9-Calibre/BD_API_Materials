@@ -3602,3 +3602,634 @@ RuntimeError: 'cryptography' package is required for sha256_password or caching_
 2024-01-21 02:25:07 [WARNING] django.request: Not Found: /api/.env
 2024-01-22 22:55:55 [WARNING] django.request: Not Found: /api/session/properties
 2024-01-23 03:56:27 [WARNING] django.request: Not Found: /api/.env
+2024-01-27 02:57:28 [WARNING] django.request: Not Found: /api/.env
+2024-01-30 19:52:49 [WARNING] django.request: Not Found: /api/sonicos/tfa
+2024-01-30 19:52:49 [WARNING] django.request: Not Found: /api/sonicos/auth
+2024-02-03 13:40:33 [WARNING] django.request: Not Found: /api/session/properties
+2024-02-05 01:32:13 [WARNING] django.request: Not Found: /api/.env
+2024-02-05 12:04:06 [WARNING] django.request: Not Found: /api/.env
+2024-02-09 09:49:06 [WARNING] django.request: Not Found: /api/session/properties
+2024-02-13 12:06:20 [WARNING] django.request: Not Found: /api/.env
+2024-02-13 12:06:21 [WARNING] django.request: Not Found: /api/.env
+2024-02-14 00:56:09 [WARNING] django.request: Not Found: /api/.env
+2024-02-21 18:59:16 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-21 18:59:16 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-21 18:59:16 [DEBUG] matplotlib: interactive is False
+2024-02-21 18:59:16 [DEBUG] matplotlib: platform is win32
+2024-02-21 18:59:16 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-21 18:59:16 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-21 18:59:29 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-21 18:59:29 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-21 18:59:29 [DEBUG] matplotlib: interactive is False
+2024-02-21 18:59:29 [DEBUG] matplotlib: platform is win32
+2024-02-21 18:59:29 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-21 18:59:29 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-21 20:15:12 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-21 20:15:12 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-21 20:15:12 [DEBUG] matplotlib: interactive is False
+2024-02-21 20:15:12 [DEBUG] matplotlib: platform is win32
+2024-02-21 20:15:12 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-21 20:15:12 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-21 20:15:21 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-21 20:15:21 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-21 20:15:21 [DEBUG] matplotlib: interactive is False
+2024-02-21 20:15:21 [DEBUG] matplotlib: platform is win32
+2024-02-21 20:15:21 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-21 20:15:21 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-21 20:15:52 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-21 20:15:52 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-21 20:15:52 [DEBUG] matplotlib: interactive is False
+2024-02-21 20:15:52 [DEBUG] matplotlib: platform is win32
+2024-02-21 20:15:53 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-21 20:15:53 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 04:14:13 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:14:13 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:14:13 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:14:13 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:14:13 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:14:13 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 04:19:25 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:19:25 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:19:25 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:19:25 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:19:25 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:19:25 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 04:26:22 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:26:22 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:26:22 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:26:22 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:26:22 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:26:22 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 04:28:23 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:28:23 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:28:23 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:28:23 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:28:23 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:28:23 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 04:29:43 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:29:43 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:29:43 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:29:43 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:29:43 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:29:43 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 04:31:04 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:31:04 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:31:04 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:31:04 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:31:05 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:31:05 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 04:35:33 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:35:33 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 04:35:33 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:35:33 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:35:33 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 04:35:33 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-22 04:37:07 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:37:07 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:37:07 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:37:07 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:37:07 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:37:07 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 04:38:32 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:38:32 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:38:32 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:38:32 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:38:32 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:38:32 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 04:39:37 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:39:37 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:39:37 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:39:37 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:39:37 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:39:37 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 04:40:37 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:40:37 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:40:37 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:40:37 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:40:37 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:40:37 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 04:42:42 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:42:42 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:42:42 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:42:42 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:42:42 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:42:42 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 04:43:10 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:43:10 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 04:43:10 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:43:10 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:43:10 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 04:43:10 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-22 04:44:17 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:44:17 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:44:17 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:44:17 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:44:17 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:44:17 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 04:45:30 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:45:30 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:45:30 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:45:30 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:45:30 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 04:45:30 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 04:52:55 [ERROR] django.request: Internal Server Error: /api/institutions/
+Traceback (most recent call last):
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.ProgrammingError: (1146, "Table 'api_materials.api_materials_institution' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\generics.py", line 171, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\pagination.py", line 204, in paginate_queryset
+    self.page = paginator.page(page_number)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\paginator.py", line 72, in page
+    number = self.validate_number(number)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\paginator.py", line 53, in validate_number
+    if number > self.num_pages:
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\utils\functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\paginator.py", line 99, in num_pages
+    if self.count == 0 and not self.allow_empty_first_page:
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\utils\functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\paginator.py", line 93, in count
+    return c()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\models\query.py", line 608, in count
+    return self.query.get_count(using=self.db)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\models\sql\query.py", line 539, in get_count
+    return obj.get_aggregation(using, {"__count": Count("*")})["__count"]
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\models\sql\query.py", line 525, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1560, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+django.db.utils.ProgrammingError: (1146, "Table 'api_materials.api_materials_institution' doesn't exist")
+2024-02-22 04:53:32 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:53:32 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 04:53:32 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:53:32 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:53:32 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 04:53:32 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-22 04:53:40 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:53:40 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 04:53:40 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:53:40 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:53:40 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 04:53:40 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-22 04:53:50 [ERROR] django.request: Internal Server Error: /api/institutions/
+Traceback (most recent call last):
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.ProgrammingError: (1146, "Table 'api_materials.api_materials_institution' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\generics.py", line 171, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\pagination.py", line 204, in paginate_queryset
+    self.page = paginator.page(page_number)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\paginator.py", line 72, in page
+    number = self.validate_number(number)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\paginator.py", line 53, in validate_number
+    if number > self.num_pages:
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\utils\functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\paginator.py", line 99, in num_pages
+    if self.count == 0 and not self.allow_empty_first_page:
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\utils\functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\paginator.py", line 93, in count
+    return c()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\models\query.py", line 608, in count
+    return self.query.get_count(using=self.db)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\models\sql\query.py", line 539, in get_count
+    return obj.get_aggregation(using, {"__count": Count("*")})["__count"]
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\models\sql\query.py", line 525, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1560, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+django.db.utils.ProgrammingError: (1146, "Table 'api_materials.api_materials_institution' doesn't exist")
+2024-02-22 04:54:19 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:54:19 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 04:54:19 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:54:19 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:54:19 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 04:54:19 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-22 04:58:19 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:58:19 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 04:58:19 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:58:19 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:58:20 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 04:58:20 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-22 04:59:09 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-22 04:59:09 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 04:59:09 [DEBUG] matplotlib: interactive is False
+2024-02-22 04:59:09 [DEBUG] matplotlib: platform is win32
+2024-02-22 04:59:09 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 04:59:09 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-22 05:01:52 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-22 05:01:52 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 05:01:52 [DEBUG] matplotlib: interactive is False
+2024-02-22 05:01:52 [DEBUG] matplotlib: platform is win32
+2024-02-22 05:01:53 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 05:01:53 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 05:01:58 [ERROR] django.request: Internal Server Error: /api/institutions/
+Traceback (most recent call last):
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.ProgrammingError: (1146, "Table 'api_materials.api_materials_institution' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\generics.py", line 171, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\rest_framework\pagination.py", line 204, in paginate_queryset
+    self.page = paginator.page(page_number)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\paginator.py", line 72, in page
+    number = self.validate_number(number)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\paginator.py", line 53, in validate_number
+    if number > self.num_pages:
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\utils\functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\paginator.py", line 99, in num_pages
+    if self.count == 0 and not self.allow_empty_first_page:
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\utils\functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\paginator.py", line 93, in count
+    return c()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\models\query.py", line 608, in count
+    return self.query.get_count(using=self.db)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\models\sql\query.py", line 539, in get_count
+    return obj.get_aggregation(using, {"__count": Count("*")})["__count"]
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\models\sql\query.py", line 525, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1560, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+django.db.utils.ProgrammingError: (1146, "Table 'api_materials.api_materials_institution' doesn't exist")
+2024-02-22 05:05:20 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-22 05:05:20 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:05:20 [DEBUG] matplotlib: interactive is False
+2024-02-22 05:05:20 [DEBUG] matplotlib: platform is win32
+2024-02-22 05:05:20 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:05:20 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-22 05:07:01 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-22 05:07:01 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:07:01 [DEBUG] matplotlib: interactive is False
+2024-02-22 05:07:01 [DEBUG] matplotlib: platform is win32
+2024-02-22 05:07:01 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:07:01 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-22 05:07:39 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-22 05:07:39 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:07:39 [DEBUG] matplotlib: interactive is False
+2024-02-22 05:07:39 [DEBUG] matplotlib: platform is win32
+2024-02-22 05:07:39 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:07:39 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-22 05:07:54 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-22 05:07:54 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:07:54 [DEBUG] matplotlib: interactive is False
+2024-02-22 05:07:54 [DEBUG] matplotlib: platform is win32
+2024-02-22 05:07:54 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:07:54 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-22 05:08:00 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-22 05:08:00 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:08:00 [DEBUG] matplotlib: interactive is False
+2024-02-22 05:08:00 [DEBUG] matplotlib: platform is win32
+2024-02-22 05:08:00 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:08:00 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-22 05:26:59 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-22 05:26:59 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:26:59 [DEBUG] matplotlib: interactive is False
+2024-02-22 05:26:59 [DEBUG] matplotlib: platform is win32
+2024-02-22 05:26:59 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:26:59 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-22 05:27:21 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-22 05:27:21 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:27:21 [DEBUG] matplotlib: interactive is False
+2024-02-22 05:27:21 [DEBUG] matplotlib: platform is win32
+2024-02-22 05:27:21 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:27:21 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-22 05:29:25 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-22 05:29:25 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:29:25 [DEBUG] matplotlib: interactive is False
+2024-02-22 05:29:25 [DEBUG] matplotlib: platform is win32
+2024-02-22 05:29:25 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:29:25 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-22 05:29:40 [DEBUG] matplotlib: matplotlib data path: C:\Users\afonso.campos\Desktop\BD_API_Materials\API\venv\lib\site-packages\matplotlib\mpl-data
+2024-02-22 05:29:40 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:29:40 [DEBUG] matplotlib: interactive is False
+2024-02-22 05:29:40 [DEBUG] matplotlib: platform is win32
+2024-02-22 05:29:40 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-02-22 05:29:40 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-02-22 05:30:10 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-22 05:30:10 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 05:30:10 [DEBUG] matplotlib: interactive is False
+2024-02-22 05:30:10 [DEBUG] matplotlib: platform is win32
+2024-02-22 05:30:10 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 05:30:10 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 06:01:32 [DEBUG] matplotlib: matplotlib data path: C:\API\BD_API_Materials\API\venv\Lib\site-packages\matplotlib\mpl-data
+2024-02-22 06:01:32 [DEBUG] matplotlib: CONFIGDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 06:01:32 [DEBUG] matplotlib: interactive is False
+2024-02-22 06:01:32 [DEBUG] matplotlib: platform is win32
+2024-02-22 06:01:32 [DEBUG] matplotlib: CACHEDIR=C:\Windows\system32\config\systemprofile\.matplotlib
+2024-02-22 06:01:32 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Windows\system32\config\systemprofile\.matplotlib\fontlist-v330.json
+2024-02-22 06:02:06 [WARNING] django.request: Bad Request: /api/users/register/
+2024-02-22 06:09:54 [WARNING] django.request: Forbidden: /api/modelparams/
+2024-02-22 06:10:16 [WARNING] django.request: Not Found: /api/models_params/
+2024-02-22 06:10:19 [WARNING] django.request: Not Found: /api/model_params/
+2024-02-22 06:11:18 [WARNING] django.request: Forbidden: /api/modelparams/
+2024-02-24 17:32:31 [WARNING] django.request: Not Found: /api/.env
+2024-02-24 17:33:28 [WARNING] django.request: Not Found: /api/src/.env
+2024-02-25 10:29:03 [WARNING] django.request: Not Found: /api/.env
+2024-02-25 10:29:23 [WARNING] django.request: Not Found: /api/src/.env
+2024-02-27 19:36:18 [ERROR] django.security.DisallowedHost: Invalid HTTP_HOST header: 'tema-xsteels.ua.pt'. You may need to add 'tema-xsteels.ua.pt' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'tema-xsteels.ua.pt'. You may need to add 'tema-xsteels.ua.pt' to ALLOWED_HOSTS.
+2024-02-27 19:36:18 [WARNING] django.request: Bad Request: /api/
+2024-02-27 19:36:23 [ERROR] django.security.DisallowedHost: Invalid HTTP_HOST header: 'tema-xsteels.ua.pt'. You may need to add 'tema-xsteels.ua.pt' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'tema-xsteels.ua.pt'. You may need to add 'tema-xsteels.ua.pt' to ALLOWED_HOSTS.
+2024-02-27 19:36:24 [WARNING] django.request: Bad Request: /api/swagger
+2024-02-27 19:36:24 [ERROR] django.security.DisallowedHost: Invalid HTTP_HOST header: 'tema-xsteels.ua.pt'. You may need to add 'tema-xsteels.ua.pt' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'tema-xsteels.ua.pt'. You may need to add 'tema-xsteels.ua.pt' to ALLOWED_HOSTS.
+2024-02-27 19:36:24 [WARNING] django.request: Bad Request: /api/~@fontsource/roboto/400.css
+2024-02-27 19:36:24 [ERROR] django.security.DisallowedHost: Invalid HTTP_HOST header: 'tema-xsteels.ua.pt'. You may need to add 'tema-xsteels.ua.pt' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'tema-xsteels.ua.pt'. You may need to add 'tema-xsteels.ua.pt' to ALLOWED_HOSTS.
+2024-02-27 19:36:24 [WARNING] django.request: Bad Request: /api/~@fontsource/roboto/700.css
+2024-02-27 19:36:24 [ERROR] django.security.DisallowedHost: Invalid HTTP_HOST header: 'tema-xsteels.ua.pt'. You may need to add 'tema-xsteels.ua.pt' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'tema-xsteels.ua.pt'. You may need to add 'tema-xsteels.ua.pt' to ALLOWED_HOSTS.
+2024-02-27 19:36:24 [WARNING] django.request: Bad Request: /api/assets/images/clockify_logo_dark.svg
+2024-02-27 19:36:47 [ERROR] django.security.DisallowedHost: Invalid HTTP_HOST header: 'tema-xsteels.ua.pt'. You may need to add 'tema-xsteels.ua.pt' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\API\BD_API_Materials\API\venv\Lib\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'tema-xsteels.ua.pt'. You may need to add 'tema-xsteels.ua.pt' to ALLOWED_HOSTS.
+2024-02-27 19:36:47 [WARNING] django.request: Bad Request: /api/materials
+2024-03-14 06:14:01 [DEBUG] matplotlib: matplotlib data path: C:\Program Files\Python310\lib\site-packages\matplotlib\mpl-data
+2024-03-14 06:14:01 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-03-14 06:14:01 [DEBUG] matplotlib: interactive is False
+2024-03-14 06:14:01 [DEBUG] matplotlib: platform is win32
+2024-03-14 06:14:01 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-03-14 06:14:01 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-03-14 06:14:28 [DEBUG] matplotlib: matplotlib data path: C:\Program Files\Python310\lib\site-packages\matplotlib\mpl-data
+2024-03-14 06:14:28 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-03-14 06:14:28 [DEBUG] matplotlib: interactive is False
+2024-03-14 06:14:28 [DEBUG] matplotlib: platform is win32
+2024-03-14 06:14:28 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-03-14 06:14:28 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-03-14 06:15:34 [DEBUG] matplotlib: matplotlib data path: C:\Program Files\Python310\lib\site-packages\matplotlib\mpl-data
+2024-03-14 06:15:34 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-03-14 06:15:34 [DEBUG] matplotlib: interactive is False
+2024-03-14 06:15:34 [DEBUG] matplotlib: platform is win32
+2024-03-14 06:15:34 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-03-14 06:15:34 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json
+2024-03-14 06:15:40 [DEBUG] matplotlib: matplotlib data path: C:\Program Files\Python310\lib\site-packages\matplotlib\mpl-data
+2024-03-14 06:15:40 [DEBUG] matplotlib: CONFIGDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-03-14 06:15:40 [DEBUG] matplotlib: interactive is False
+2024-03-14 06:15:40 [DEBUG] matplotlib: platform is win32
+2024-03-14 06:15:40 [DEBUG] matplotlib: CACHEDIR=C:\Users\luciusviniciusf\.matplotlib
+2024-03-14 06:15:40 [DEBUG] matplotlib.font_manager: Using fontManager instance from C:\Users\luciusviniciusf\.matplotlib\fontlist-v330.json

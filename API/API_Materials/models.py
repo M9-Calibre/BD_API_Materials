@@ -15,6 +15,7 @@ class InstitutionUser(models.Model):
     has_active_institution = models.BooleanField(default=False)
 
 
+
 class MaterialCategory1(models.Model):
     category = models.CharField(max_length=25, unique=True)
 
