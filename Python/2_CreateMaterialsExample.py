@@ -1,4 +1,4 @@
-from API import *
+from VxFormsAPI.VxFormsAPI.API import *
 
 token = authenticate("tester", "secretPass1234")
 

@@ -306,9 +306,10 @@ def upload_test_data(request, pk):
 
     files = test_data.keys()
 
-    if "stage_metadata.csv" not in files:
-        data = {"message": "No stage metadata file provided."}
-        return Response(status=400, data=data)
+    # TODO: use stage_metadata.csv
+    # if "stage_metadata.csv" not in files:
+    #     data = {"message": "No stage metadata file provided."}
+    #     return Response(status=400, data=data)
 
     if not (files - {"stage_metadata.csv"}):
         data = {"message": "Cannot POST/PUT test data, as no DIC files were uploaded."}
@@ -322,7 +323,7 @@ def upload_test_data(request, pk):
         return Response(status=400, data=data)
 
     if not_in_metadata:
-        data = {"message": "Missings metadata for files.", "no_metadata": not_in_metadata}
+        data = {"message": "Missing metadata for files.", "no_metadata": not_in_metadata}
         return Response(status=400, data=data)
 
     if bad_format:

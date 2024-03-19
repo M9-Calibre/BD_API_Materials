@@ -26,11 +26,12 @@ def process_test_data(files: FileDict, file_format="aramis", _3d=False):
     read_stages = list()
     stages = dict()
 
-    # Read csv file with load information
-    try:
-        metadata = pd.read_csv(files["stage_metadata.csv"], delimiter=";")
-    except:
-        return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
+    # TODO: ignore metadata
+    # # Read csv file with load information
+    # try:
+    #     metadata = pd.read_csv(files["stage_metadata.csv"], delimiter=";")
+    # except:
+    #     return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
 
     # For each file, process
     for file_name, file in files.items():
@@ -48,28 +49,33 @@ def process_test_data(files: FileDict, file_format="aramis", _3d=False):
         if stage in read_stages:
             duplicated_stages.append(stage)
             continue
-        # Get load and timestamp of the stage
-        stage_metadata = metadata.loc[metadata["Time"] == stage]
-        # Stage not in load file
-        if stage_metadata.empty:
-            # If stage 0, assume no load
-            if stage == 0:
-                ts_def = 0
-                load = 0
-            # No load information for the uploaded stage
-            else:
-                not_in_metadata.append(file_name)
-                continue
-        elif stage_metadata.shape[0] != 1:
-            duplicated_stages = list()
-            bad_format = list()
-            not_in_metadata = list()
-            skipped_files = list()
-            stages = dict()
-            return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
-        else:
-            ts_def = float(stage_metadata["TimeStamp"].iloc[0])
-            load = float(stage_metadata[" Force [N]"].iloc[0])
+
+        # TODO: Get load and timestamp of the stage. For now, ignore stage_metadata.csv
+        ts_def = 0
+        load = 0
+        # # Get load and timestamp of the stage
+        # stage_metadata = metadata.loc[metadata["Time"] == stage]
+        # # Stage not in load file
+        # if stage_metadata.empty:
+        #     # If stage 0, assume no load
+        #     if stage == 0:
+        #         ts_def = 0
+        #         load = 0
+        #     # No load information for the uploaded stage
+        #     else:
+        #         not_in_metadata.append(file_name)
+        #         continue
+        # elif stage_metadata.shape[0] != 1:
+        #     duplicated_stages = list()
+        #     bad_format = list()
+        #     not_in_metadata = list()
+        #     skipped_files = list()
+        #     stages = dict()
+        #     return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
+        # else:
+        #     ts_def = float(stage_metadata["TimeStamp"].iloc[0])
+        #     load = float(stage_metadata[" Force [N]"].iloc[0])
+
         datapoints = list()
         if file_format == "aramis":  # TODO 2D aramis? If not verify
             for line in file:

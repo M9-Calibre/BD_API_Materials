@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_extensions',
     'drf_yasg',
+    # 'cryptographic_fields',
     'django_filters',
     'allauth',
     'allauth.account',

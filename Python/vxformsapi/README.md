@@ -1,4 +1,4 @@
-![VxForms Logo](https://lh3.googleusercontent.com/proxy/k5_JT4Bb1BHN5EJPBTft36rfyjiKCfTAQ70QqRI0VQwdY9lUq13lbcr5pNS_k2uAK-ZYGFSNTpqO9Coo_N2O881ZPM535YFpAKKm15YPJ270yzdw8dZkm5GVxhybjjU "VxFormsLogo")
+![VxForms Logo](https://lh3.googleusercontent.com/proxy/sdPAG0tRVXLej9ipbqCDOBurd23ZOQkyUBt0wUMMoHsJE5a4kBE3irOAIjTDZbHdupB2aHKYXtsL9ArTFRLoowJcD-qwWqD8-NuVEWa_SKGKegmBujPW-4TtN93AtWA "VxFormsLogo")
 
 **vxformsapi** is a Python library to enable a high-level interaction with the VxForms Material's [API](http://193.137.84.5/api/swagger/) without the need of the VXForms Materials's [Website](http://193.137.84.5).
 
@@ -154,6 +154,7 @@ for test in get_tests():
     print(test.id, test.name)
 ```
 
+
 ### Upload DIC Files
 ```python
 from vxformsapi.API import *
@@ -187,6 +188,43 @@ stages_df = test.load_test_data()
 
 print(stages_df.keys())
 print(stages_df[2])
+```
+
+### Create MaterialParams
+```python
+from vxformsapi.API import *
+
+token = authenticate_from_json("secrets.json")
+
+material = get_material(2)
+
+material_parameter = MaterialParam("Material Parameter Name", material)
+register_material_param(token, material_parameter)
+```
+
+### Create BehaviorModels
+```python
+from vxformsapi.API import *
+
+yield_locus = get_model(7)
+hard = get_model(8)
+elastic = get_model(9)
+
+material_param = get_material_param(2)
+
+# Inputs will vary accordingly to the model
+locus_params = {"f": 0.3748, "h": 0.4709, "g": 1 - 0.4709, "n": 1.1125}
+params3 = ModelParams(yield_locus, material_param, locus_params)
+
+hard_params = {"k": 979.46, "eps0": 0.00535, "swift_n": 0.194}
+params4 = ModelParams(hard, material_param, hard_params)
+
+elastic_params = {"multiplier": 1.0}
+params5 = ModelParams(elastic, material_param, elastic_params)
+
+params3 = register_model_params(token, params3)
+params4 = register_model_params(token, params4)
+params5 = register_model_params(token, params5)
 ```
 
 ## API Methods
@@ -333,6 +371,81 @@ login_token : str
 modelp : ModelParams
     The model parameters to be saved 
 ```
+
+### MaterialParams
+`get_material_param`: Retrieve material parameters by id.
+```
+Parameters
+    ----------
+    materialp_id : int
+        The id of the material parameters to be fetched
+```
+
+`register_material_param`: Save material parameters to the database.
+```
+Parameters
+    ----------
+    login_token : str
+        The log-in token that can be retrieved from the authenticate function
+    materialp : MaterialParam
+        The material parameter to be saved 
+```
+
+## API Models
+### Material
+```
+id : int
+submitted_by : int
+user : str
+date : str
+name : str
+category : LowerCategory
+source : str
+designation : str
+heat_treatment : str
+description : str
+thermal_properties : dict
+mechanical_properties : dict
+physical_properties : dict
+```
+
+### Test
+```
+id : int
+material : int
+name : str
+metadata : dict
+submitted_by : str
+```
+
+### Model
+```
+id : int
+name : str
+tag : str
+function_name : str
+input : list[str]
+category : Category
+```
+
+
+### MaterialParam
+```
+id : int
+name : str
+submitted_by : int
+material : int 
+```
+
+### ModelParams
+```
+id : int
+submitted_by : int
+material_param : int
+model : int
+params : dict[str, float]
+```
+
 
 ## API Enums
 - `MaterialOrderings(Id, Date, Name, UpperC, MiddleC, LowerC)`

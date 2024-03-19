@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='vxformsapi',
-    version='0.1.1',
+    version='0.1.2',
     packages=['vxformsapi'],
     install_requires=['requests', 'pandas'],
     url='https://github.com/M9-Calibre/BD_API_Materials',

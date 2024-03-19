@@ -1,7 +1,6 @@
 from vxformsapi.vxformsapi.API import *
 
 token = authenticate("afonso", "1234")
-print(token)
 
 yield_locus = get_model(7)
 hard = get_model(8)
@@ -9,6 +8,7 @@ elastic = get_model(9)
 
 material_param = get_material_param(2)
 
+# Inputs will vary accordingly to the model
 locus_params = {"f": 0.3748, "h": 0.4709, "g": 1 - 0.4709, "n": 1.1125}
 params3 = ModelParams(yield_locus, material_param, locus_params)
 

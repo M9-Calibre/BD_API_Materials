@@ -58,9 +58,9 @@ class InstitutionUserFilter(filters.FilterSet):
 
 class MaterialParamsFilter(filters.FilterSet):
     # material_params = filters.NumberFilter(field_name="material_params", label="material_params")
-    # submitted_by = filters.NumberFilter(field_name="submitted_by", label="submitted_by")
+    submitted_by = filters.NumberFilter(field_name="submitted_by", label="submitted_by")
     material = filters.NumberFilter(field_name="material", label="material")
 
     class Meta:
         model = MaterialParams
-        fields = ["material"]
+        fields = ["material", "submitted_by"]

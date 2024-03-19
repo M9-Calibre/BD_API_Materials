@@ -76,6 +76,7 @@ class ModelParamsSerializer(serializers.ModelSerializer):
 class MaterialParamsSerializer(serializers.ModelSerializer):
     submitted_by = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     material = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Material.objects.all())
+    submitted_by_username = serializers.CharField(source='user.name', read_only=True) # Not working
 
     class Meta:
         model = MaterialParams
