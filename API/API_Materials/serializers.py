@@ -1,10 +1,11 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.validators import UniqueValidator
 
 from .models import Material, MaterialCategory3, MaterialCategory2, MaterialCategory1, Test, ThermalProperties, \
-    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model, ModelParams, Institution, InstitutionUser
+    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model, ModelParams, Institution, InstitutionUser, \
+    MaterialParams
 from django.contrib.auth.models import User
 
 from typing import Dict
@@ -23,18 +24,18 @@ class ModelSerializer(serializers.ModelSerializer):
 
 
 class ModelParamsSerializer(serializers.ModelSerializer):
-    test = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Test.objects.all())
+    # test = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Test.objects.all())
     user = serializers.SlugRelatedField(many=False, read_only=True, slug_field='username')
     submitted_by = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     name = serializers.CharField(source='model.name', read_only=True)
     function_name = serializers.CharField(source='model.function_name', read_only=True)
 
-    def validate(self, data):
-        linked_obj = data['test']
-        if linked_obj.submitted_by == self.context['request'].user:
-            return data
-        else:
-            raise PermissionDenied(detail=None, code=None)
+    # def validate(self, data):
+    #     linked_obj = data['test']
+    #     if linked_obj.submitted_by == self.context['request'].user:
+    #         return data
+    #     else:
+    #         raise PermissionDenied(detail=None, code=None)
 
     def validate_params(self, value):
         if not isinstance(value, dict):
@@ -54,6 +55,15 @@ class ModelParamsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ModelParams
+        fields = '__all__'
+
+class MaterialParamsSerializer(serializers.ModelSerializer):
+    submitted_by = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    material = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Material.objects.all())
+    submitted_by_username = serializers.CharField(source='user.name', read_only=True) # Not working
+
+    class Meta:
+        model = MaterialParams
         fields = '__all__'
 
 

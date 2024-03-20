@@ -17,15 +17,15 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter, \
-    InstitutionUserFilter
+    InstitutionUserFilter, MaterialParamsFilter
 from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCategory3, Supplier, Laboratory, Test, \
-    DICStage, DICDatapoint, Model, ModelParams, Institution, InstitutionUser
+    DICStage, DICDatapoint, Model, ModelParams, Institution, InstitutionUser, MaterialParams
 from .pagination import DICDataPagination
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
     Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer, \
     DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer, ModelSerializer, ModelParamsSerializer, \
-    InstitutionSerializer, InstitutionUserSerializer
+    InstitutionSerializer, InstitutionUserSerializer, MaterialParamsSerializer
 
 from .utils import process_test_data
 from .models_scripts.points_generation import generate_points
@@ -96,7 +96,21 @@ class ModelParamsViewSet(viewsets.ModelViewSet):
     queryset = ModelParams.objects.all()
     serializer_class = ModelParamsSerializer
     filter_backends = (filters2.DjangoFilterBackend,)
-    filterset_fields = ["model", "submitted_by", "test", "model__category"]
+    filterset_fields = ["model", "submitted_by", "model__category", "material_param"]
+
+    def perform_create(self, serializer: ModelParamsSerializer):
+        serializer.save(submitted_by=self.request.user)
+
+
+class MaterialParamsViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsOwnerOrReadOnly]
+    queryset = MaterialParams.objects.all()
+    serializer_class = MaterialParamsSerializer
+    filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
+    # ordering = ("id",)
+    # ordering_fields = ('id',)
+    # search_fields = ('name', 'country')
+    filterset_class = MaterialParamsFilter
 
     def perform_create(self, serializer: ModelParamsSerializer):
         serializer.save(submitted_by=self.request.user)
