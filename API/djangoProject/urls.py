@@ -41,7 +41,6 @@ router.register(r'institutions', views.InstitutionViewSet, basename='institution
 router.register(r'institution_users', views.InstitutionUserViewSet, basename='institution_users')
 router.register(r'suppliers', views.SupplierViewSet, basename='suppliers')
 router.register(r'labs', views.LaboratoryViewSet, basename='labs')
-router.register(r'tests/params', views.ModelParamsViewSet, basename='tests_params')
 router.register(r'tests', views.TestViewSet, basename='tests')
 router.register(r'DICstages', views.DICStageViewSet, basename='DICstages')
 router.register(r'DICdata', views.DICDataViewSet, basename='DICdata')
@@ -51,6 +50,7 @@ router.register(r'categories/lower', views.CategoriesLowerList, basename='catego
 router.register(r'models', views.ModelViewSet, basename='models')
 router.register(r'modelparams', views.ModelParamsViewSet, basename='modelparams')
 router.register(r'materialparams', views.MaterialParamsViewSet, basename='materialparams')
+router.register(r'tests/params', views.ModelParamsViewSet, basename='tests_params')
 
 urlpatterns = [
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),

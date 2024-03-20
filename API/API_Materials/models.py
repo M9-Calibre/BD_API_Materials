@@ -85,9 +85,7 @@ class MaterialParams(models.Model):
     material = models.ForeignKey(Material, models.CASCADE, related_name='params')
     name = models.CharField(max_length=50)
     submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='material_params')
-    # hardening_model_params = models.ForeignKey(ModelParams, models.CASCADE, related_name='hardening_material_params')
-    # elastic_model_params = models.ForeignKey(ModelParams, models.CASCADE, related_name='elastic_material_params')
-    # yield_model_params = models.ForeignKey(ModelParams, models.CASCADE, related_name='yield_material_params')
+
 
 class ModelParams(models.Model):
     model = models.ForeignKey(Model, models.CASCADE, related_name='params')
