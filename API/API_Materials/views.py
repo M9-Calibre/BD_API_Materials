@@ -28,7 +28,7 @@ from .serializers import MaterialSerializer, UserSerializer, Category1Serializer
     Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer, \
     DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer, ModelSerializer, ModelParamsSerializer, \
     CustomPasswordResetSerializer, InstitutionSerializer, InstitutionUserSerializer, MaterialParamsSerializer
-from .utils import process_test_data
+from .utils import process_dic_data, update_metadata
 from .models_scripts.points_generation import generate_points
 
 
@@ -274,7 +274,7 @@ def delete_test_data(request, pk):
 
 @transaction.atomic
 @api_view(['POST', 'PUT'])
-def upload_test_data(request, pk):
+def upload_dic_files(request, pk):
     try:
         test = Test.objects.get(pk=pk)
     except ObjectDoesNotExist:
@@ -292,7 +292,7 @@ def upload_test_data(request, pk):
         _3d = _3d.lower() in ["true", "1"]
 
     file_format = request.query_params.get("file_format", "aramis").lower()
-    if file_format not in ["aramis", "matchid"]:
+    if file_format not in ["aramis", "matchid", "matchid_multiple_files"]:
         data = {"message": f"Unrecognized file format: {file_format}."}
         return Response(status=400, data=data)
 
@@ -306,25 +306,20 @@ def upload_test_data(request, pk):
 
     files = test_data.keys()
 
-    # TODO: use stage_metadata.csv
-    # if "stage_metadata.csv" not in files:
-    #     data = {"message": "No stage metadata file provided."}
-    #     return Response(status=400, data=data)
-
-    if not (files - {"stage_metadata.csv"}):
+    if file_format != "matchid_multiple_files" and not (files - {"stage_metadata.csv"}):
         data = {"message": "Cannot POST/PUT test data, as no DIC files were uploaded."}
         return Response(status=400, data=data)
 
-    stages, bad_format, duplicated_stages, not_in_metadata, skipped_files = process_test_data(test_data, file_format,
-                                                                                              _3d)
+    stages, bad_format, duplicated_stages, not_in_metadata, skipped_files = process_dic_data(test_data, file_format,
+                                                                                             _3d)
 
     if not not_in_metadata and not bad_format and not duplicated_stages and not stages and not skipped_files:
         data = {"message": "Bad format of metadata file."}
         return Response(status=400, data=data)
 
-    if not_in_metadata:
-        data = {"message": "Missing metadata for files.", "no_metadata": not_in_metadata}
-        return Response(status=400, data=data)
+    # if not_in_metadata:
+    #     data = {"message": "Missing metadata for files.", "no_metadata": not_in_metadata}
+    #     return Response(status=400, data=data)
 
     if bad_format:
         data = {"message": "Bad format found in input data files.", "bad_format_files": bad_format}
@@ -357,6 +352,7 @@ def upload_test_data(request, pk):
         s.save()
         datapoint_list = []
         datapoints = stages[(stage, ts_def, load)]
+        print(f"view datapoints type: {type(datapoints)}")
         for datapoint in datapoints:
             datapoint_list.append(DICDatapoint(stage=s, **datapoint))
 
@@ -368,6 +364,43 @@ def upload_test_data(request, pk):
 
     return Response(data=data)
 
+
+@transaction.atomic
+@api_view(['POST'])
+def upload_metadata(request, pk):
+    print(f"{request.FILES=}")
+    try:
+        test = Test.objects.get(pk=pk)
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound()
+
+    if request.user != test.submitted_by:
+        return HttpResponseForbidden()
+
+    test_data = request.FILES
+    stage_metadata_file = test_data.get("stage_metadata.csv")
+
+    if not stage_metadata_file:
+        data = {"message": "No stage metadata file provided."}
+        return Response(status=400, data=data)
+
+    existing_stages = [stage for stage in test.stages.all()]
+    not_in_metadata, invalid_metadata, dic_stages = update_metadata(stage_metadata_file, existing_stages)
+
+    if invalid_metadata:
+        data = {"message": "Bad format of metadata file."}
+        return Response(status=400, data=data)
+
+    if not_in_metadata:
+        data = {"message": "Missing metadata for files.", "no_metadata": not_in_metadata}
+        return Response(status=400, data=data)
+
+    DICStage.objects.bulk_update(dic_stages, fields=['timestamp_def', 'load'])
+
+    data = {"updated_stages": [stage.stage_num for stage in dic_stages],
+            "message": "Metadata updated successfully."}
+
+    return Response(data=data)
 
 @api_view(['GET'])
 def get_test_data(request, pk):

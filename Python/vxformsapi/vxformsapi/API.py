@@ -9,8 +9,8 @@ from typing import Union, Any
 from copy import deepcopy
 from time import time
 
-URL = 'http://127.0.0.1:8000'
-# URL = 'http://193.137.84.5/api'
+# URL = 'http://127.0.0.1:8000'
+URL = 'http://193.137.84.5/api'
 
 class APIFailedRequest(Exception):
     def __init__(self, response : requests.Response) -> None:
@@ -412,7 +412,9 @@ class MaterialParam():
         self.material = material
 
     def to_json(self):
-        return deepcopy(self.__dict__)
+        material_param_json = deepcopy(self.__dict__)
+        material_param_json["material"] = self.material.id
+        return material_param_json
     
     @classmethod
     def load_json(cls, materialp_json : dict):
@@ -1056,6 +1058,8 @@ def register_model_params(login_token : str, modelp : ModelParams):
         modelp.submitted_by = response.json()["submitted_by"]
         return modelp
 
+# Material Params
+
 def get_material_param(materialp_id : int):
     """Retrieve material parameters by id.
     
@@ -1075,6 +1079,31 @@ def get_material_param(materialp_id : int):
     materialp_data = response.json()
 
     return MaterialParam.load_json(materialp_data)
+
+def register_material_param(login_token : str, materialp : MaterialParam):
+    """Save material parameters to the database.
+    
+    Parameters
+    ----------
+    login_token : str
+        The log-in token that can be retrieved from the authenticate function
+    materialp : MaterialParam
+        The material parameter to be saved 
+    """
+    headers = {"Authorization": f"Token {login_token}"}
+    
+    url = f"{URL}/materialparams/"
+    
+    body = materialp.to_json()
+    response = requests.post(url, json=body, headers=headers)
+
+    if response.status_code != 201:
+        raise APIFailedRequest(response)
+    else:
+        materialp.id = response.json()["id"]
+        materialp.submitted_by = response.json()["submitted_by"]
+        print(f"register_material_param: Successfully registered material parameter {materialp.name} with id {materialp.id}.")
+        return materialp
 
 # Institution
 

@@ -3,9 +3,7 @@ from rest_framework import permissions
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        print("very sussy")
         if request.method in permissions.SAFE_METHODS:
-            print("sus")
             return True
         if request.user.is_staff:
             return True
