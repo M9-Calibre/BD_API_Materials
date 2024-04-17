@@ -352,7 +352,6 @@ def upload_dic_files(request, pk):
         s.save()
         datapoint_list = []
         datapoints = stages[(stage, ts_def, load)]
-        print(f"view datapoints type: {type(datapoints)}")
         for datapoint in datapoints:
             datapoint_list.append(DICDatapoint(stage=s, **datapoint))
 
@@ -368,7 +367,6 @@ def upload_dic_files(request, pk):
 @transaction.atomic
 @api_view(['POST'])
 def upload_metadata(request, pk):
-    print(f"{request.FILES=}")
     try:
         test = Test.objects.get(pk=pk)
     except ObjectDoesNotExist:
@@ -469,25 +467,32 @@ def get_test_data(request, pk):
 @api_view(['POST'])
 def get_model_graph(request):
     data = request.data
-    hardening_args = data.get("hardening_arguments", {})
-    hardening_function = data.get("hardening_function", "")
-    yield_args = data.get("yield_arguments", {})
-    yield_function = data.get("yield_function", "")
-    elastic_args = data.get("elastic_arguments", {})
-    elastic_function = data.get("elastic_function", "")
+    function_type = data.get("function_type", "")
+    args = data.get("arguments", {})
+    function = data.get("function", "")
+    # hardening_args = data.get("hardening_arguments", {})
+    # hardening_function = data.get("hardening_function", "")
+    # yield_args = data.get("yield_arguments", {})
+    # yield_function = data.get("yield_function", "")
+    # elastic_args = data.get("elastic_arguments", {})
+    # elastic_function = data.get("elastic_function", "")
 
-    hardening_points, yield_points, elastic_points, hardening_x, elastic_x = generate_points(hardening_args, yield_args,
-                                                                                             elastic_args,
-                                                                                             hardening_function,
-                                                                                             yield_function,
-                                                                                             elastic_function)
+    if function_type not in ["hardening", "yield", "elastic"]:
+        return Response(status=400, data={"message": f"Invalid function type. Given function type was "
+                                                     f"'{function_type}'. Valid function types are: 'hardening', "
+                                                     f"'yield' and 'elastic'."})
+
+    # hardening_points, yield_points, elastic_points, hardening_x, elastic_x = generate_points(hardening_args, yield_args,
+    #                                                                                          elastic_args,
+    #                                                                                          hardening_function,
+    #                                                                                          yield_function,
+    #                                                                                          elastic_function)
+
+    points, inpt = generate_points(function_type, args, function)
 
     data = {
-        "hardening_points": hardening_points,
-        "yield_points": yield_points,
-        "elastic_points": elastic_points,
-        "hardening_x": hardening_x,
-        "elastic_x": elastic_x
+        "points": points,
+        "x": inpt
     }
 
     return Response(status=200, data=data)

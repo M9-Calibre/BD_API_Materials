@@ -2,9 +2,9 @@ import numpy as np
 from typing import Any
 
 
-def generate_points(hardening_args: dict[str, Any], yield_args: dict[str, float], elastic_args: dict[str, float],
-                    hardening_func: str, yield_func: str, elastic_func: str,
-                    minimum=0, maximum=1, step=0.01, min_elastic=0, max_elastic=0.02, step_elastic=0.001) -> \
+def generate_all_points(hardening_args: dict[str, Any], yield_args: dict[str, float], elastic_args: dict[str, float],
+                        hardening_func: str, yield_func: str, elastic_func: str,
+                        minimum=0, maximum=1, step=0.01, min_elastic=0, max_elastic=0.02, step_elastic=0.001) -> \
         tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Given the arguments for each function, it will generate the points for each one and return them as a tuple"""
     hardening_inpt = np.arange(minimum, maximum, step)
@@ -21,11 +21,34 @@ def generate_points(hardening_args: dict[str, Any], yield_args: dict[str, float]
     # Calculating Elastic locus
     elastic_points = calculate_elastic(elastic_func, **elastic_args)
 
-
     # TODO: Merge points to get final graph (i don't know if it is just a merge for instance)
     ...
 
     return hardening_points, yield_points, elastic_points, hardening_inpt, elastic_inpt
+
+
+def generate_points(function_type: str, args: [dict[str, Any]], function: str, minimum=0, maximum=1, step=0.01,
+                    min_elastic=0, max_elastic=0.02, step_elastic=0.001):
+    """Given the arguments for one function, it will generate the points for and return them"""
+
+    # Create input scalar for hardening or elastic function
+    inpt = None
+
+    match function_type:
+        case "hardening":
+            inpt = np.arange(minimum, maximum, step)
+            args["inpt"] = inpt
+            points = calculate_hardening(function, **args)
+        case "yield":
+            points = calculate_yield(function, **args)
+        case "elastic":
+            inpt = np.arange(min_elastic, max_elastic, step_elastic)
+            args["inpt"] = inpt
+            points = calculate_elastic(function, **args)
+        case _:
+            raise ValueError("Invalid function type")
+
+    return points, inpt
 
 
 # ------------- Hardening functions ----------------
@@ -62,7 +85,7 @@ def calculate_sample_yield(h: float, g: float, f: float, n: float) -> dict:
 
     for idx, val in enumerate(np.arange(0.2, 0.6, 0.2)):
         z = h * (x1 - x2) ** 2 + g * (x1 ** 2) + f * (x2 ** 2) + 2 * n * (val ** 2)
-        dic[f"z{idx+1}"] = z
+        dic[f"z{idx + 1}"] = z
 
     return dic
 
