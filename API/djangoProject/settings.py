@@ -41,7 +41,7 @@ SECRET_KEY = get_secret("API_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False  # change
 
-ALLOWED_HOSTS = ['.localhost', '193.137.84.5']
+ALLOWED_HOSTS = ['.localhost', '193.137.84.5', 'tema-xsteels.ua.pt']
 
 CORS_ALLOW_HEADERS = [
     'accept',
