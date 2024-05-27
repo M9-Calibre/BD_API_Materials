@@ -1,5 +1,7 @@
 import numpy as np
 from typing import Any
+from math import pi
+from API_Materials.models_scripts.points_generation_utils import *
 
 
 def generate_all_points(hardening_args: dict[str, Any], yield_args: dict[str, float], elastic_args: dict[str, float],
@@ -57,35 +59,74 @@ def calculate_hardening(func_name: str, **kwargs) -> np.ndarray:
 
 
 def calculate_swift_hardening(k: float, eps0: float, swift_n: float, inpt: np.ndarray) -> np.ndarray:
-    # Defined at the ent of file in SETUP area (check for "HARDENING_FUNCTIONS")
+    # Defined at the end of file in SETUP area (check for "HARDENING_FUNCTIONS")
     return k * ((eps0 + inpt) ** swift_n)
 
 
 # ------------- Yield functions -------------
 def calculate_yield(func_name: str, **kwargs) -> np.ndarray:
-    return YIELD_FUNCTIONS[func_name](**kwargs)
+    dic = {}
+    dic["3d"] = YIELD_FUNCTIONS_3D[func_name](**kwargs)
+    dic["2d"] = YIELD_FUNCTIONS[func_name](**kwargs)
+
+    return dic
 
 
-def calculate_sample_yield(h: float, g: float, f: float, n: float) -> dict:
+def calculate_yield_48_3d(h: float, g: float, f: float, n: float) -> dict:
     # TODO: Not sure if this beginning setup is exclusive to this function or not
     # Creating mesh points for populating the equations
-    x_min = -10
-    x_max = 10
-    y_min = -10
-    y_max = 10
 
-    x1, x2 = np.meshgrid(np.arange(x_min, x_max, 0.1), np.arange(y_min, y_max, 0.1))
+    x_min = -2
+    x_max = 2
+    y_min = -2
+    y_max = 2
+    z_min = -2
+    z_max = 2
+    step = 0.1
 
-    z0 = h * (x1 - x2) ** 2 + g * (x1 ** 2) + f * (x2 ** 2) + 2 * n * (0 ** 2)
+    x1, x2, x3 = np.meshgrid(np.arange(x_min, x_max, step), np.arange(y_min, y_max, step),
+                             np.arange(z_min, z_max, step))
+
+    z0 = h * (x1 - x2) ** 2 + g * (x1 ** 2) + f * (x2 ** 2) + 2 * n * (x3 ** 2)
     dic = {
-        "z0": z0,
-        "x": np.linspace(x_min, x_max, z0[0].size),
-        "y": np.linspace(y_min, y_max, z0[0].size)
+        "z0": z0.ravel(),
+        # "x": np.linspace(x_min, x_max, z0[0][0].size),
+        # "y": np.linspace(y_min, y_max, z0[0][0].size),
+        # "value": np.linspace(z_min, z_max, z0[0][0].size)
+        "x": x1.ravel(),
+        "y": x2.ravel(),
+        "value": x3.ravel()
     }
+    z0.ravel()
 
     for idx, val in enumerate(np.arange(0.2, 0.6, 0.2)):
         z = h * (x1 - x2) ** 2 + g * (x1 ** 2) + f * (x2 ** 2) + 2 * n * (val ** 2)
         dic[f"z{idx + 1}"] = z
+
+    return dic
+
+
+def calculate_yield_48(h: float, g: float, f: float, n: float) -> np.ndarray:
+    c, s0 = get_hill_48_parameters(h, g, f, n)
+
+    angle = np.linspace(0, pi / 2, 91)  # X axis (radians)
+    sAngles, rAngles = [], []  # Y1 and Y2
+
+    for i in range(0, len(angle)):
+        s = htpp_yfunc_anisotropy_aux1(angle[i])
+        se, dseds = htpp_yfunc_aniso_hill48(s, c)
+        sAng, rAng = htpp_yfunc_anisotropy_aux2(angle[i], se, dseds, s0)
+        sAngles.append(sAng)
+        rAngles.append(rAng)
+
+    # convert angles to degrees
+    degree_angles = np.degrees(angle)
+
+    dic = {
+        "x": degree_angles,
+        "s": sAngles,
+        "r": rAngles
+    }
 
     return dic
 
@@ -95,8 +136,11 @@ def calculate_elastic(func_name: str, **kwargs) -> np.ndarray:
     return ELASTIC_FUNCTIONS[func_name](**kwargs)
 
 
-def calculate_sample_elastic(multiplier: float, inpt: np.ndarray) -> np.ndarray:
-    return np.arange(0, len(inpt) * multiplier, 1 * multiplier)
+def calculate_sample_elastic(**kwargs) -> np.ndarray:
+    # This uses "kwargs" instead because "Young Modulus" cannot be a valid variable name
+    young_modulus = kwargs["Young Modulus"]
+    inpt = kwargs["inpt"]
+    return np.arange(0, len(inpt) * young_modulus, 1 * young_modulus)
 
 
 # ------------- SETUP ----------------
@@ -108,8 +152,12 @@ HARDENING_FUNCTIONS = {
 }
 
 # Yield Functions
+YIELD_FUNCTIONS_3D = {
+    "sample": calculate_yield_48_3d,
+}
+
 YIELD_FUNCTIONS = {
-    "sample": calculate_sample_yield,
+    "sample": calculate_yield_48
 }
 
 # Elastic Functions
