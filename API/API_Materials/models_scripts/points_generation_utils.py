@@ -3,7 +3,6 @@ import math
 from math import cos, sin
 
 
-
 # ------------ Hill 48 ----------------
 def get_hill_48_parameters(h: float, g: float, f: float, n: float, default_value=1.5):
     c = np.zeros((6, 6))

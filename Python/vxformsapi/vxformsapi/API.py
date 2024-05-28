@@ -9,8 +9,8 @@ from typing import Union, Any
 from copy import deepcopy
 from time import time
 
-# URL = 'http://127.0.0.1:8000'
-URL = 'http://193.137.84.5/api'
+URL = 'http://127.0.0.1:8000'
+# URL = 'http://193.137.84.5/api'
 
 class APIFailedRequest(Exception):
     def __init__(self, response : requests.Response) -> None:
