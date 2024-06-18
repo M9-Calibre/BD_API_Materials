@@ -7,7 +7,7 @@ from math import cos, sin
 def get_hill_48_parameters(h: float, g: float, f: float, n: float, default_value=1.5):
     c = np.zeros((6, 6))
 
-    s0 = 1.5
+    s0 = 1
 
     pf = f
     pg = g
@@ -20,23 +20,28 @@ def get_hill_48_parameters(h: float, g: float, f: float, n: float, default_value
     c[0, 1] = -ph
     c[0, 2] = -pg
     c[1, 0] = -ph
-    c[1, 1] = pf + ph
+    c[1, 1] = pf + pg
     c[1, 2] = -pf
     c[2, 0] = -pg
-    c[3, 1] = -pf
-    c[2, 2] = pf + pg
-    c[3, 3] = 2.0 * pn
+    c[2, 1] = -pf
+    c[2, 2] = pf + ph
+    c[3, 3] = 2.0 * pl
     c[4, 4] = 2.0 * pm
-    c[5, 5] = 2.0 * pl
+    c[5, 5] = 2.0 * pn
     c = c / (pg + ph)
 
     return c, s0
 
 
-def htpp_yfunc_anisotropy_aux1(ang):
+def htpp_yfunc_anisotropy_aux1(ang, shear=None):
+    round_range = 4
     xx = cos(ang) ** 2
     yy = sin(ang) ** 2
-    xy = sin(ang) * cos(ang)
+    xy = shear if shear else sin(ang) * cos(ang)
+
+    # xx = round(xx, round_range)
+    # yy = round(yy, round_range)
+    # xy = round(xy, round_range)
     s = [xx, yy, 0.0, xy, 0.0, 0.0]
 
     return s
