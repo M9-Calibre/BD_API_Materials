@@ -99,9 +99,12 @@ def calculate_yield_48_3d(h: float, g: float, f: float, n: float) -> dict:
     }
     z0.ravel()
 
+    x1_2d, x2_2d = np.meshgrid(np.arange(x_min, x_max, step), np.arange(y_min, y_max, step))
+    dic["x2"] = x1_2d.ravel()
+    dic["y2"] = x2_2d.ravel()
     for idx, val in enumerate(np.arange(0.2, 0.6, 0.2)):
-        z = h * (x1 - x2) ** 2 + g * (x1 ** 2) + f * (x2 ** 2) + 2 * n * (val ** 2)
-        dic[f"z{idx + 1}"] = z
+        z = h * (x1_2d - x2_2d) ** 2 + g * (x1_2d ** 2) + f * (x2_2d ** 2) + 2 * n * (val ** 2)
+        dic[f"z{idx + 1}"] = z.ravel()
 
     return dic
 
