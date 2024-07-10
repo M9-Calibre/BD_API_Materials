@@ -75,7 +75,7 @@ def calculate_yield(func_name: str, **kwargs) -> np.ndarray:
 def calculate_yield_48_3d(h: float, g: float, f: float, n: float) -> dict:
     # TODO: Not sure if this beginning setup is exclusive to this function or not
     # Creating mesh points for populating the equations
-
+    print(f"h: {h}, g: {g}, f: {f}, n: {n}")
     x_min = -2
     x_max = 2
     y_min = -2
@@ -183,6 +183,7 @@ def calculate_elastic(func_name: str, **kwargs) -> np.ndarray:
 
 def calculate_sample_elastic(**kwargs) -> np.ndarray:
     # This uses "kwargs" instead because "Young Modulus" cannot be a valid variable name
+    # young_modulus = kwargs["multiplier"]
     young_modulus = kwargs["Young Modulus"]
     inpt = kwargs["inpt"]
     return np.arange(0, len(inpt) * young_modulus, 1 * young_modulus)

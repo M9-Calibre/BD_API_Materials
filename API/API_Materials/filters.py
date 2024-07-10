@@ -61,7 +61,10 @@ class MaterialParamsFilter(filters.FilterSet):
     submitted_by = filters.NumberFilter(field_name="submitted_by", label="submitted_by")
     material = filters.NumberFilter(field_name="material", label="material")
     name = filters.CharFilter(field_name="name", label="name")
+    elastic_model = filters.NumberFilter(field_name="elastic_model_params__model", label="elastic_model")
+    yield_model = filters.NumberFilter(field_name="yield_model_params__model", label="yield_model")
+    hardening_model = filters.NumberFilter(field_name="hardening_model_params__model", label="hardening_model")
 
     class Meta:
         model = MaterialParams
-        fields = ["material", "submitted_by", "name"]
+        fields = ["material", "submitted_by", "name", "elastic_model", "yield_model", "hardening_model"]
