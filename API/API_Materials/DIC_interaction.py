@@ -1,8 +1,8 @@
 import _io
 
 import numpy as np
-import pandas as pd
 import re
+import json
 from typing import Dict, List
 
 from .DIC_processes import *
@@ -31,9 +31,7 @@ match_id_multiple_files_mapper = {match_id_multiple_files_field_names[i]: field_
 
 
 datapoints_non_nullable_fields = ["x", "y", "displacement_x", "displacement_y"]
-def process_dic_data(files: FileDict, file_format="aramis", _3d =False, file_identifiers=None):
-    if file_identifiers is None:
-        file_identifiers = {}
+def process_dic_data(files: FileDict, file_format="aramis", _3d =False, file_identifiers_str=""):
     duplicated_stages = list()
     duplicated_fields = list()
     bad_format = list()
@@ -58,6 +56,15 @@ def process_dic_data(files: FileDict, file_format="aramis", _3d =False, file_ide
 
     # List of the id_number that are still missing another identifier to be completed (used in matchid)
     missing_identifiers = []
+
+    file_identifiers = {}
+    if file_format == "matchid":
+        # Verify file_identifiers
+        try:
+            file_identifiers = json.loads(file_identifiers_str)
+        except json.JSONDecodeError:
+            bad_format.append("Not a valid json for file_identifiers!")
+            return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
 
     # For each file, process
     for file_name, file in files.items():
@@ -128,14 +135,11 @@ def process_dic_data(files: FileDict, file_format="aramis", _3d =False, file_ide
         read_stages.append(stage)
 
     # Process stages if multiple files or matchid
-    if file_format != "matchid_multiple_files" or file_format != "matchid":
+    if file_format not in ["matchid_multiple_files", "matchid"]:
         return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
 
     if file_format == "matchid":
         stages = verify_match_id(multiple_identifiers_stages, bad_format, _3d)
-
-        print(f"{stages=}")
-        raise ValueError("End of matchid")
         return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
 
     if file_format == "matchid_multiple_files":

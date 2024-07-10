@@ -299,7 +299,7 @@ def upload_dic_files(request, pk):
         data = {"message": f"Unrecognized file format: {file_format}."}
         return Response(status=400, data=data)
 
-    file_identifiers = request.query_params.get("file_identifiers")
+    file_identifiers = request.POST.get("file_identifiers")
 
     existing_stages = {stage.stage_num for stage in test.stages.all()}
     if request.method == 'POST':

@@ -201,7 +201,7 @@ def check_and_replace_headers(filename, csv_file, identifiers):
     first_row = df.iloc[0]
     if any(first_row.apply(lambda x: not isinstance(x, (int, float)) and not pd.isna(x))):
         # If headers are detected, read the CSV file again with headers
-        print(f"Headers detected in {filename}. Replacing headers.")
+        csv_file.seek(0)  # Reset the file pointer to allow a re-read
         df = pd.read_csv(csv_file, sep=';')
 
     # Find the identifier for the current file
@@ -214,6 +214,7 @@ def check_and_replace_headers(filename, csv_file, identifiers):
             break
 
     if identified_columns is None:
+        # TODO: not be a raise
         raise ValueError(f"No identifier found for file: {filename}")
 
     # Replace only the identified headers
