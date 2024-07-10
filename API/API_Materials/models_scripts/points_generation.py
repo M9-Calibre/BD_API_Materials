@@ -83,6 +83,7 @@ def calculate_yield_48_3d(h: float, g: float, f: float, n: float) -> dict:
     z_min = -2
     z_max = 2
     step = 0.1
+    shear_step = 0.005 #0.01
 
     x1, x2, x3 = np.meshgrid(np.arange(x_min, x_max, step), np.arange(y_min, y_max, step),
                              np.arange(z_min, z_max, step))
@@ -99,12 +100,26 @@ def calculate_yield_48_3d(h: float, g: float, f: float, n: float) -> dict:
     }
     z0.ravel()
 
-    x1_2d, x2_2d = np.meshgrid(np.arange(x_min, x_max, step), np.arange(y_min, y_max, step))
+    x1_2d, x2_2d = np.meshgrid(np.arange(x_min, x_max, shear_step), np.arange(y_min, y_max, shear_step))
     dic["x2"] = x1_2d.ravel()
     dic["y2"] = x2_2d.ravel()
-    for idx, val in enumerate(np.arange(0.2, 0.6, 0.2)):
+    for idx, val in enumerate(np.arange(0, 0.61, 0.2)):
         z = h * (x1_2d - x2_2d) ** 2 + g * (x1_2d ** 2) + f * (x2_2d ** 2) + 2 * n * (val ** 2)
         dic[f"z{idx + 1}"] = z.ravel()
+        dic[f"shear{idx + 1}"] = val
+
+    # Extra teste
+    # sus_step = 0.001
+    # x1_2d2, x2_2d2 = np.meshgrid(np.arange(x_min, x_max, sus_step), np.arange(y_min, y_max, sus_step))
+    # for idx, val in enumerate(np.arange(0, 0.61, 0.2)):
+    #     z = h * (x1_2d2 - x2_2d2) ** 2 + g * (x1_2d2 ** 2) + f * (x2_2d2 ** 2) + 2 * n * (val ** 2)
+    #     teste_float = 0.00001
+    #     print("------------")
+    #     print(f'shear: = {val}')
+    #     print(f'small_float: {teste_float}')
+    #     print(f'z == 1: {np.any(z == 1)}')
+    #     print(f'z >= 1 - small_float and z <= 1 + small_float: {np.any(np.logical_and(z >= 1 - teste_float, z <= 1 + teste_float))}')
+
 
     return dic
 
