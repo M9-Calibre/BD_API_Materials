@@ -14,12 +14,16 @@ FileDict = Dict[str, _io.BufferedReader]
 # Aramis: idx_x, idx_y, x, y, z, dis_x, dis_y, dis_z, str_x, str_y, str_major, str_minor, thick_red
 field_names = ["x", "y", "z", "displacement_x", "displacement_y", "displacement_z", "strain_x", "strain_y", "strain_xy",
                "strain_major", "strain_minor", "thickness_reduction"]
-match_id_field_names = ['coor.X.mm', 'coor.Y.mm', 'coor.Z.mm', 'disp.Horizontal.Displacement.U.mm',
-                        'disp.Vertical.Displacement.V.mm', 'disp.Out-Of-Plane.W.mm',
-                        'strain.Strain-global.frame.Exx', 'strain.Strain-global.frame.Eyy',
-                        'strain.Strain-global.frame.Exy', 'strain.Strain-major.E1',
-                        'strain.Strain-minor.E2', 'deltaThick.dThick']
+# match_id_field_names = ['coor.X.mm', 'coor.Y.mm', 'coor.Z.mm', 'disp.Horizontal.Displacement.U.mm',
+#                         'disp.Vertical.Displacement.V.mm', 'disp.Out-Of-Plane.W.mm',
+#                         'strain.Strain-global.frame.Exx', 'strain.Strain-global.frame.Eyy',
+#                         'strain.Strain-global.frame.Exy', 'strain.Strain-major.E1',
+#                         'strain.Strain-minor.E2', 'deltaThick.dThick']
+match_id_field_names = ["x", "y", "xy", "displacement_x", "displacement_y", "displacement_xy", "strain_x", "strain_y",
+                        "strain_xy", "strain_major", "strain_minor", "thickness_reduction"]
+
 match_id_mapper = {match_id_field_names[i]: field_names[i] for i in range(len(field_names))}
+
 
 match_id_multiple_files_field_names = ['x_pic', 'y_pic', '', 'u', 'v', '', 'exx', 'eyy', 'exy']
 match_id_multiple_files_mapper = {match_id_multiple_files_field_names[i]: field_names[i]
@@ -27,7 +31,9 @@ match_id_multiple_files_mapper = {match_id_multiple_files_field_names[i]: field_
 
 
 datapoints_non_nullable_fields = ["x", "y", "displacement_x", "displacement_y"]
-def process_dic_data(files: FileDict, file_format="aramis", _3d =False):
+def process_dic_data(files: FileDict, file_format="aramis", _3d =False, file_identifiers=None):
+    if file_identifiers is None:
+        file_identifiers = {}
     duplicated_stages = list()
     duplicated_fields = list()
     bad_format = list()
@@ -36,10 +42,11 @@ def process_dic_data(files: FileDict, file_format="aramis", _3d =False):
     read_stages = list()
     stages = dict()
 
-    # {stage_num: {ts_def: val, load: val, field_name: points, x: points, ...}}
-    # if variables in a stage_num (aka the keys of its dict) != minimum required, it fails. Also ts_def and load are "extra"
-    # variables
+    # {stage_num: {ts_def: val, load: val, field_name: points, x: points, ...}} if variables in a stage_num (aka the
+    # keys of its dict) != minimum required, it fails. Also ts_def and load are "extra" variables
     multiple_stages = {}
+    # {stage_num: {ts_def: val, load: val, file_identifier1: dataframe1 (points), file_identifier2: dataframe2, ...}}
+    multiple_identifiers_stages = {}
     mat_size = []  # [x, y]
 
     # Read csv file with load information
@@ -49,8 +56,8 @@ def process_dic_data(files: FileDict, file_format="aramis", _3d =False):
     except:
         metadata = None
 
-    # if file_format == "matchid_multiple_files":
-
+    # List of the id_number that are still missing another identifier to be completed (used in matchid)
+    missing_identifiers = []
 
     # For each file, process
     for file_name, file in files.items():
@@ -95,7 +102,10 @@ def process_dic_data(files: FileDict, file_format="aramis", _3d =False):
         if file_format == "aramis":  # TODO 2D aramis? If not verify
             datapoints = process_aramis(file_name, file, field_names, bad_format)
         elif file_format == "matchid":
-            datapoints = process_match_id(file_name, file, match_id_mapper, bad_format, _3d)
+            datapoints = process_match_id(file_name, file, match_id_mapper, bad_format,
+                                          file_identifiers, stage, multiple_identifiers_stages)
+            multiple_identifiers_stages[stage]["ts_def"] = ts_def
+            multiple_identifiers_stages[stage]["load"] = load
             # if datapoints is None:
             #     continue
         elif file_format == "matchid_multiple_files":
@@ -106,6 +116,9 @@ def process_dic_data(files: FileDict, file_format="aramis", _3d =False):
             multiple_stages[stage]["load"] = load
 
         # check for errors or duplicates
+        if file_format == "matchid":
+            continue
+
         if file_format != "matchid_multiple_files" and not datapoints:
             print("No datapoints?")
             bad_format.append(file_name)
@@ -114,30 +127,38 @@ def process_dic_data(files: FileDict, file_format="aramis", _3d =False):
         stages[(stage, ts_def, load)] = datapoints
         read_stages.append(stage)
 
-    # Process stages if multiple files
-    if file_format != "matchid_multiple_files":
+    # Process stages if multiple files or matchid
+    if file_format != "matchid_multiple_files" or file_format != "matchid":
         return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
 
-    for stage, data in multiple_stages.items():
-        ts_def = data.pop("ts_def")
-        load = data.pop("load")
-        datapoints = list()
-        for x in range(mat_size[0]):
-            for y in range(mat_size[1]):
-                skip_current = False
-                datapoint = dict()
-                for field, points in data.items():
-                    point = points.iloc[x, y]
-                    if np.isnan(point) and field in datapoints_non_nullable_fields:
-                        skip_current = True
-                        break
-                    datapoint[field] = point
-                if skip_current:
-                    continue
-                datapoints.append(datapoint)
-        stages[(stage, ts_def, load)] = datapoints
+    if file_format == "matchid":
+        stages = verify_match_id(multiple_identifiers_stages, bad_format, _3d)
 
-    return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
+        print(f"{stages=}")
+        raise ValueError("End of matchid")
+        return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
+
+    if file_format == "matchid_multiple_files":
+        for stage, data in multiple_stages.items():
+            ts_def = data.pop("ts_def")
+            load = data.pop("load")
+            datapoints = list()
+            for x in range(mat_size[0]):
+                for y in range(mat_size[1]):
+                    skip_current = False
+                    datapoint = dict()
+                    for field, points in data.items():
+                        point = points.iloc[x, y]
+                        if np.isnan(point) and field in datapoints_non_nullable_fields:
+                            skip_current = True
+                            break
+                        datapoint[field] = point
+                    if skip_current:
+                        continue
+                    datapoints.append(datapoint)
+            stages[(stage, ts_def, load)] = datapoints
+
+        return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
 
 
 

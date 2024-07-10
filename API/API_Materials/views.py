@@ -27,7 +27,7 @@ from .serializers import MaterialSerializer, UserSerializer, Category1Serializer
     DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer, ModelSerializer, ModelParamsSerializer, \
     InstitutionSerializer, InstitutionUserSerializer, MaterialParamsSerializer
 
-from .utils import process_dic_data, update_metadata
+from .DIC_interaction import process_dic_data, update_metadata
 from .models_scripts.points_generation import generate_points
 
 import logging
@@ -299,6 +299,8 @@ def upload_dic_files(request, pk):
         data = {"message": f"Unrecognized file format: {file_format}."}
         return Response(status=400, data=data)
 
+    file_identifiers = request.query_params.get("file_identifiers")
+
     existing_stages = {stage.stage_num for stage in test.stages.all()}
     if request.method == 'POST':
         if existing_stages:
@@ -314,7 +316,7 @@ def upload_dic_files(request, pk):
         return Response(status=400, data=data)
 
     stages, bad_format, duplicated_stages, not_in_metadata, skipped_files = process_dic_data(test_data, file_format,
-                                                                                             _3d)
+                                                                                             _3d, file_identifiers)
 
     if not not_in_metadata and not bad_format and not duplicated_stages and not stages and not skipped_files:
         data = {"message": "Bad format of metadata file."}
