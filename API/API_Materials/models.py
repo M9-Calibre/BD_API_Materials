@@ -82,32 +82,49 @@ class Model(models.Model):
     function_name = models.CharField(max_length=50)
     input = models.JSONField()
 
-class MaterialParams(models.Model):
-    material = models.ForeignKey(Material, models.CASCADE, related_name='params')
-    name = models.CharField(max_length=50)
-    submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='material_params')
-
 
 class ModelParams(models.Model):
     model = models.ForeignKey(Model, models.CASCADE, related_name='params')
-    material_param = models.ForeignKey(MaterialParams, models.CASCADE, related_name='model_params')
+    # material_param = models.ForeignKey(MaterialParams, models.CASCADE, related_name='model_params')
     submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='params')
     params = models.JSONField()  # {"x": 10, "z": 40, "output_do_outro" : 30} // {"input": [12, 1, 3.4], "output":}
 
     # Create a custom validator to check if there is only one category type for the material param
-    def validate_unique(self, exclude=None):
-        model_category = Model.objects.get(id=self.model_id).category
-        # Get all the model params associated with the material param that have the same category as the model
-        model_params = ModelParams.objects.filter(material_param_id=self.material_param_id,
-                                                  model__category=model_category)
-        if model_params.exists():
-            raise ValidationError(f"Material param already contains a '{model_category}' category model.")
+    # def validate_unique(self, exclude=None):
+    #     model_category = Model.objects.get(id=self.model_id).category
+    #     # Get all the model params associated with the material param that have the same category as the model
+    #     model_params = ModelParams.objects.filter(material_param_id=self.material_param_id,
+    #                                               model__category=model_category)
+    #     if model_params.exists():
+    #         raise ValidationError(f"Material param already contains a '{model_category}' category model.")
 
 
     # class Meta:
     #     constraints = [
     #         models.UniqueConstraint(fields=['model', 'material_param'], name='unique_model_params')
     #     ]
+
+class MaterialParams(models.Model):
+    material = models.ForeignKey(Material, models.CASCADE, related_name='params')
+    name = models.CharField(max_length=50)
+    submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='material_params')
+    hardening_model_params = models.ForeignKey(ModelParams, models.CASCADE, related_name='hardening_material_params')
+    elastic_model_params = models.ForeignKey(ModelParams, models.CASCADE, related_name='elastic_material_params')
+    yield_model_params = models.ForeignKey(ModelParams, models.CASCADE, related_name='yield_material_params')
+
+    # Create a unique validator to check if the model category is correct
+    def validate_unique(self, exclude=None):
+        hardening_model = Model.objects.get(id=self.hardening_model_params.model_id)
+        elastic_model = Model.objects.get(id=self.elastic_model_params.model_id)
+        yield_model = Model.objects.get(id=self.yield_model_params.model_id)
+
+        if hardening_model.category != "hardening":
+            raise ValidationError("Hardening model must be of category 'hardening'")
+        if elastic_model.category != "elastic":
+            raise ValidationError("Elastic model must be of category 'elastic'")
+        if yield_model.category != "yield":
+            raise ValidationError("Yield model must be of category 'yield'")
+
 
 class DICStage(models.Model):
     test = models.ForeignKey(Test, models.CASCADE, related_name='stages')

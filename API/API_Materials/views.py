@@ -97,7 +97,7 @@ class ModelParamsViewSet(viewsets.ModelViewSet):
     queryset = ModelParams.objects.all()
     serializer_class = ModelParamsSerializer
     filter_backends = (filters2.DjangoFilterBackend,)
-    filterset_fields = ["model", "submitted_by", "model__category", "material_param", "material_param__material"]
+    filterset_fields = ["model", "submitted_by", "model__category"]
 
     def perform_create(self, serializer: ModelParamsSerializer):
         serializer.save(submitted_by=self.request.user)
