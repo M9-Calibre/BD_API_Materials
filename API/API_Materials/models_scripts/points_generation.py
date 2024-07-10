@@ -130,8 +130,14 @@ def calculate_yield_48(h: float, g: float, f: float, n: float) -> np.ndarray:
     angle = np.linspace(0, pi / 2, 91)  # X axis (radians)
     sAngles, rAngles = [], []  # Y1 and Y2
 
+    xx = []
+    yy = []
+    xy = []
     for i in range(0, len(angle)):
         s = htpp_yfunc_anisotropy_aux1(angle[i])
+        xx.append(s[0])
+        yy.append(s[1])
+        xy.append(s[3])
         se, dseds = htpp_yfunc_aniso_hill48(s, c)
         sAng, rAng = htpp_yfunc_anisotropy_aux2(angle[i], se, dseds, s0)
         sAngles.append(sAng)
@@ -139,12 +145,33 @@ def calculate_yield_48(h: float, g: float, f: float, n: float) -> np.ndarray:
 
     # convert angles to degrees
     degree_angles = np.degrees(angle)
-
+    sAngles = np.round(sAngles, 8)
+    rAngles = np.round(rAngles, 8)
+    print(f'{sAngles=}')
     dic = {
         "x": degree_angles,
         "s": sAngles,
-        "r": rAngles
+        "r": rAngles,
+        "xx": xx,
+        "yy": yy,
+        "xy": xy
     }
+
+
+    # Add shear
+    # shears = np.arange(0, 0.61, 0.2)
+    # for shear, idx in enumerate(shears):
+    #     shearSAngles = []
+    #     shearRAngles = []
+    #     for i in range(0, len(angle)):
+    #         s = htpp_yfunc_anisotropy_aux1(angle[i], shear)
+    #         se, dseds = htpp_yfunc_aniso_hill48(s, c)
+    #         sAng, rAng = htpp_yfunc_anisotropy_aux2(angle[i], se, dseds, s0)
+    #         shearSAngles.append(sAng)
+    #         shearRAngles.append(rAng)
+
+        # dic[f"z{idx}"] = shearSAngles
+        # dic[f"shear{idx}"] = shear
 
     return dic
 
