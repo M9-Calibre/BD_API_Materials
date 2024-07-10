@@ -223,7 +223,7 @@ def check_and_replace_headers(filename, csv_file, identifiers):
         if col_idx < len(new_headers):
             new_headers[col_idx] = header_name
 
-    # Assign new headers
+    # Assign new header
     df.columns = new_headers
 
     # Remove columns not included in identified_columns

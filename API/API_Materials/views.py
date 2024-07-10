@@ -89,6 +89,7 @@ class ModelViewSet(viewsets.ModelViewSet):
     filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter)
     ordering = ("-name",)
     ordering_fields = ('name', 'tag', 'id')
+    filterset_fields = ["category"]
 
 
 class ModelParamsViewSet(viewsets.ModelViewSet):
@@ -96,7 +97,7 @@ class ModelParamsViewSet(viewsets.ModelViewSet):
     queryset = ModelParams.objects.all()
     serializer_class = ModelParamsSerializer
     filter_backends = (filters2.DjangoFilterBackend,)
-    filterset_fields = ["model", "submitted_by", "model__category", "material_param"]
+    filterset_fields = ["model", "submitted_by", "model__category", "material_param", "material_param__material"]
 
     def perform_create(self, serializer: ModelParamsSerializer):
         serializer.save(submitted_by=self.request.user)

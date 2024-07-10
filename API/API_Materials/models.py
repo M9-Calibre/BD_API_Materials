@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -93,10 +94,20 @@ class ModelParams(models.Model):
     submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='params')
     params = models.JSONField()  # {"x": 10, "z": 40, "output_do_outro" : 30} // {"input": [12, 1, 3.4], "output":}
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['model', 'material_param'], name='unique_model_params')
-        ]
+    # Create a custom validator to check if there is only one category type for the material param
+    def validate_unique(self, exclude=None):
+        model_category = Model.objects.get(id=self.model_id).category
+        # Get all the model params associated with the material param that have the same category as the model
+        model_params = ModelParams.objects.filter(material_param_id=self.material_param_id,
+                                                  model__category=model_category)
+        if model_params.exists():
+            raise ValidationError(f"Material param already contains a '{model_category}' category model.")
+
+
+    # class Meta:
+    #     constraints = [
+    #         models.UniqueConstraint(fields=['model', 'material_param'], name='unique_model_params')
+    #     ]
 
 class DICStage(models.Model):
     test = models.ForeignKey(Test, models.CASCADE, related_name='stages')
