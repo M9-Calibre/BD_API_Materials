@@ -9,8 +9,8 @@ from typing import Union, Any
 from copy import deepcopy
 from time import time
 
-URL = 'http://127.0.0.1:8000'
-# URL = 'http://193.137.84.5/api'
+# URL = 'http://127.0.0.1:8000'
+URL = 'http://193.137.84.5/api'
 
 class APIFailedRequest(Exception):
     def __init__(self, response : requests.Response) -> None:
@@ -221,7 +221,7 @@ class Test():
         self.id = None
         self.submitted_by = None
 
-    def upload_test_data(self, login_token : str, file_mapping : dict[str, Any], file_format : UploadFileFormat = UploadFileFormat.MatchId, _3d : bool = False, override : bool = False):
+    def upload_test_data(self, login_token : str, file_mapping : dict[str, Any], file_format : UploadFileFormat = UploadFileFormat.MatchId, file_identifiers : dict[str, dict[str, int]] = None, _3d : bool = False, override : bool = False):
         """Upload experimental data (as DIC files) to this test.
 
         Parameters
@@ -230,10 +230,13 @@ class Test():
             The log-in token that can be retrieved from the authenticate function (must be test creator)
         file_mapping : dict[str, File]
             A dictionary with the file names as keys and file contents as values
-            A "stage_metadata" file must be uploaded in order to specify stage's load and timestamp
+            A "stage_metadata" file may be uploaded in order to specify stage's load and timestamp
             Consult the upload manual to verify file naming and content formatting
         file_format : UploadFileFormat
             Specifies the file's formatting (matchid or aramis)
+            Consult the upload manual to verify file naming and content formatting
+        file_identifiers : dict[str, dic[str, int]]
+            A dictionary used if file_format is set to aramis, with the file identifier as keys and the fieldname and column in the file as values
             Consult the upload manual to verify file naming and content formatting
         _3d : bool
             Specifies the dimensionality of the DIC files being uploaded, if false 2-dimensional files are assumed
@@ -245,19 +248,36 @@ class Test():
         """
         
         if not self.id:
-            print("upload_test_data: Object not yet registered.")
-            return
+            raise ValueError("upload_test_data: Object not yet registered.")
         
-        headers = {"Authorization": f"Token {login_token}"}
+        headers = {
+            "Authorization": f"Token {login_token}",
+            # "Content-Type": "application/json; charset=utf-8"
+            # 'Content-Type': 'application/json',
+        }
         
-        url = f"{URL}/tests/{self.id}/upload/?3d={_3d}&file_format={file_format.value}&override={override}"
+        url = f"{URL}/tests/{self.id}/upload_dic/?3d={_3d}&file_format={file_format.value}&override={override}"
 
         tik = time()
+        
+        data = {}
+        
+        ## Check file format requirements
+        # MatchID
+        if file_format == UploadFileFormat.MatchId:
+            if not file_identifiers:
+                raise ValueError("upload_test_data: File identifiers must be provided for MatchID file format.")
+            data = {"file_identifiers": json.dumps(file_identifiers)}
+            
+            
 
+        print("upload_test_data: Uploading data...")
+        print(f"{data=}")
         if override:
-            response = requests.put(url, files=file_mapping, headers=headers)
+            response = requests.put(url, files=file_mapping, headers=headers, data=data)
         else:
-            response = requests.post(url, files=file_mapping, headers=headers)
+            # response = requests.post(url, files=file_mapping, headers=headers, data=json.dumps(data))
+            response = requests.post(url, files=file_mapping, headers=headers, data=data)
 
         tok = time()
 

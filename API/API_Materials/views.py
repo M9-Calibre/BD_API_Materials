@@ -1,4 +1,5 @@
 import io
+import json
 import zipfile
 import os
 
@@ -276,6 +277,9 @@ def delete_test_data(request, pk):
 @transaction.atomic
 @api_view(['POST', 'PUT'])
 def upload_dic_files(request, pk):
+    # print(f"{request.body=}")
+    # print(f"{json.loads(request.body)=}")
+    # teste = request.body
     try:
         test = Test.objects.get(pk=pk)
     except ObjectDoesNotExist:
@@ -298,7 +302,8 @@ def upload_dic_files(request, pk):
         return Response(status=400, data=data)
 
     file_identifiers = request.POST.get("file_identifiers")
-
+    print(f"{request.POST=}")
+    # print(f"{teste=}")
     existing_stages = {stage.stage_num for stage in test.stages.all()}
     if request.method == 'POST':
         if existing_stages:

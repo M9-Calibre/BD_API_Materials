@@ -1,6 +1,6 @@
-from VxFormsAPI.VxFormsAPI.API import *
+from vxformsapi.vxformsapi.API import *
 
-token = authenticate("tester", "secretPass1234")
+token = authenticate_from_json("secret_login.json")
 
 # Creating a test
 
