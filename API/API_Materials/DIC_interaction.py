@@ -9,6 +9,10 @@ from .DIC_processes import *
 from .models import DICStage
 from .models_scripts import yield_code, YieldLocus
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 FileDict = Dict[str, _io.BufferedReader]
 
 # Aramis: idx_x, idx_y, x, y, z, dis_x, dis_y, dis_z, str_x, str_y, str_major, str_minor, thick_red
@@ -40,6 +44,8 @@ def process_dic_data(files: FileDict, file_format="aramis", _3d =False, file_ide
     read_stages = list()
     stages = dict()
 
+    logger.debug(f"files: {files}")
+
     # {stage_num: {ts_def: val, load: val, field_name: points, x: points, ...}} if variables in a stage_num (aka the
     # keys of its dict) != minimum required, it fails. Also ts_def and load are "extra" variables
     multiple_stages = {}
@@ -68,6 +74,7 @@ def process_dic_data(files: FileDict, file_format="aramis", _3d =False, file_ide
 
     # For each file, process
     for file_name, file in files.items():
+        logger.debug(f"file: {file_name}")
         # Ignore metadata file
         if file_name == "stage_metadata.csv":
             continue
@@ -135,6 +142,7 @@ def process_dic_data(files: FileDict, file_format="aramis", _3d =False, file_ide
         read_stages.append(stage)
 
     # Process stages if multiple files or matchid
+    logger.debug("end first cycle")
     if file_format not in ["matchid_multiple_files", "matchid"]:
         return stages, bad_format, duplicated_stages, not_in_metadata, skipped_files
 

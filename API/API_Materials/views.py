@@ -314,6 +314,7 @@ def upload_dic_files(request, pk):
 
     if file_format != "matchid_multiple_files" and not (files - {"stage_metadata.csv"}):
         data = {"message": "Cannot POST/PUT test data, as no DIC files were uploaded."}
+        logger.debug(f"{files=}")
         return Response(status=400, data=data)
 
     stages, bad_format, duplicated_stages, not_in_metadata, skipped_files = process_dic_data(test_data, file_format,
@@ -366,6 +367,7 @@ def upload_dic_files(request, pk):
     data = {"created_stages": read_stages - already_in_db,
             "overridden_stages": already_in_db if already_in_db else None,
             "skipped_files": skipped_files if skipped_files else None}
+
 
     return Response(data=data)
 
