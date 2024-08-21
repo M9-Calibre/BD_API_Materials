@@ -1,5 +1,6 @@
 from API_Materials.models_scripts.points_generation_utils import *
 
+
 ### ----- Hill 48 ----- ###
 def calculate_yield_48_3d(h: float, g: float, f: float, n: float) -> dict:
     # TODO: Not sure if this beginning setup is exclusive to this function or not
@@ -12,7 +13,7 @@ def calculate_yield_48_3d(h: float, g: float, f: float, n: float) -> dict:
     z_min = -2
     z_max = 2
     step = 0.1
-    shear_step = 0.005 #0.01
+    shear_step = 0.005  # 0.01
 
     x1, x2, x3 = np.meshgrid(np.arange(x_min, x_max, step), np.arange(y_min, y_max, step),
                              np.arange(z_min, z_max, step))
@@ -49,7 +50,6 @@ def calculate_yield_48_3d(h: float, g: float, f: float, n: float) -> dict:
     #     print(f'z == 1: {np.any(z == 1)}')
     #     print(f'z >= 1 - small_float and z <= 1 + small_float: {np.any(np.logical_and(z >= 1 - teste_float, z <= 1 + teste_float))}')
 
-
     return dic
 
 
@@ -85,7 +85,6 @@ def calculate_yield_48(h: float, g: float, f: float, n: float) -> np.ndarray:
         "xy": xy
     }
 
-
     # Add shear
     # shears = np.arange(0, 0.61, 0.2)
     # for shear, idx in enumerate(shears):
@@ -98,10 +97,11 @@ def calculate_yield_48(h: float, g: float, f: float, n: float) -> np.ndarray:
     #         shearSAngles.append(sAng)
     #         shearRAngles.append(rAng)
 
-        # dic[f"z{idx}"] = shearSAngles
-        # dic[f"shear{idx}"] = shear
+    # dic[f"z{idx}"] = shearSAngles
+    # dic[f"shear{idx}"] = shear
 
     return dic
+
 
 ### ----- Yield 2000 ----- ###
 def calculate_yield_2000_3d(alpha1: float, alpha2: float, alpha3: float, alpha4: float, alpha5: float, alpha6: float,
@@ -116,7 +116,7 @@ def calculate_yield_2000_3d(alpha1: float, alpha2: float, alpha3: float, alpha4:
     # x12 = np.arange(min_range, max_range, step)
 
     x11, x22, x12 = np.meshgrid(np.arange(min_range, max_range, step), np.arange(min_range, max_range, step),
-                             np.arange(min_range, max_range, step))
+                                np.arange(min_range, max_range, step))
 
     cp = [355, alpha1, alpha2, alpha3, alpha4, alpha5, alpha6, alpha7, alpha8, alpha]
     a, em, s0 = htpp_yfunc_yld2000_2d_param(cp)
@@ -126,7 +126,8 @@ def calculate_yield_2000_3d(alpha1: float, alpha2: float, alpha3: float, alpha4:
     for i in range(len(x11)):
         for j in range(len(x22)):
             for k in range(len(x12)):
-                yy1[i, j, k] = htpp_yfunc_ylocus_yld2000_2d(x, x11[i, j, k], x22[i, j, k], x12[i, j, k], a, em, s0)  # shear=0
+                yy1[i, j, k] = htpp_yfunc_ylocus_yld2000_2d(x, x11[i, j, k], x22[i, j, k], x12[i, j, k], a, em,
+                                                            s0)
 
     dic = {
         "z0": yy1.ravel(),
@@ -136,7 +137,6 @@ def calculate_yield_2000_3d(alpha1: float, alpha2: float, alpha3: float, alpha4:
     }
 
     # Add shears
-
     x1_2d, x2_2d = np.meshgrid(np.arange(min_range, max_range, step), np.arange(min_range, max_range, step))
     for idx, shear in enumerate(np.arange(0, 0.61, 0.2)):
         yy = np.zeros((len(x1_2d), len(x2_2d)))
@@ -146,5 +146,58 @@ def calculate_yield_2000_3d(alpha1: float, alpha2: float, alpha3: float, alpha4:
         dic[f"z{idx + 1}"] = yy.ravel()
         dic[f"shear{idx + 1}"] = shear
 
+    return dic
+
+
+### ----- Yield 2004 ----- ###
+def calculate_yield_2004_3d(**kwargs) -> dict:
+    # This uses "kwargs" instead to facilitate because there is a lot lmao
+    min_range = -1000
+    max_range = 1000
+    step = 25
+
+    # Creating data pairs of S11,S22,S12
+    # x11 = np.arange(min_range, max_range, step)
+    # x22 = np.arange(min_range, max_range, step)
+    # x12 = np.arange(min_range, max_range, step)
+
+    x11, x22, x12 = np.meshgrid(np.arange(min_range, max_range, step), np.arange(min_range, max_range, step),
+                                np.arange(min_range, max_range, step))
+
+    # Add correct args to array
+    cp = [355]
+    idx_order = [12, 13, 21, 23, 31, 32, 44, 55, 66]  # Used only to get the variables in kwargs
+    for idx in idx_order:
+        cp.append(kwargs[f"c{idx}"])
+    for idx in idx_order:
+        cp.append(kwargs[f"cc{idx}"])
+    cp.append(kwargs["alpha"])
+
+    cp1,cp2,a,s0 = htpp_yfunc_yld2004_param(cp)
+
+    yy1 = np.zeros((len(x11), len(x22), len(x12)))
+    x = 1
+    for i in range(len(x11)):
+        for j in range(len(x22)):
+            for k in range(len(x12)):
+                yy1[i, j, k] = htpp_yfunc_ylocus_yld2004(x, x11[i, j, k], x22[i, j, k], x12[i, j, k], cp1, cp2,
+                                                            a, s0)
+
+    dic = {
+        "z0": yy1.ravel(),
+        "x": x11.ravel(),
+        "y": x22.ravel(),
+        "value": x12.ravel()
+    }
+
+    # Add shears
+    x1_2d, x2_2d = np.meshgrid(np.arange(min_range, max_range, step), np.arange(min_range, max_range, step))
+    for idx, shear in enumerate(np.arange(0, 0.61, 0.2)):
+        yy = np.zeros((len(x1_2d), len(x2_2d)))
+        for i in range(len(x1_2d)):
+            for j in range(len(x2_2d)):
+                yy[i, j] = htpp_yfunc_ylocus_yld2004(1, x1_2d[i, j], x2_2d[i, j], shear, cp1, cp2, a, s0)
+        dic[f"z{idx + 1}"] = yy.ravel()
+        dic[f"shear{idx + 1}"] = shear
 
     return dic

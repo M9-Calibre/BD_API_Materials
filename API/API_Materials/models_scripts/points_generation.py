@@ -97,6 +97,7 @@ HARDENING_FUNCTIONS = {
 YIELD_FUNCTIONS_3D = {
     "sample": calculate_yield_48_3d,
     "YLD2000": calculate_yield_2000_3d,
+    "YLD200418p": calculate_yield_2004_3d,
 }
 
 YIELD_FUNCTIONS = {

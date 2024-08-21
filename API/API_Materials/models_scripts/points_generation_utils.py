@@ -113,40 +113,158 @@ def htpp_yfunc_ylocus_yld2000_2d(x, s1, s2, s12, a, em, s0):
 
 
 def htpp_yfunc_yld2000_2d_am(a):
-	am = np.zeros((2,3,3))
+    am = np.zeros((2, 3, 3))
 
-	am[0,0,0] =  2.0*a[0]
-	am[0,0,1] = -1.0*a[0]
-	am[0,1,0] = -1.0*a[1]
-	am[0,1,1] =  2.0*a[1]
-	am[0,2,2] =  3.0*a[6]
+    am[0, 0, 0] = 2.0 * a[0]
+    am[0, 0, 1] = -1.0 * a[0]
+    am[0, 1, 0] = -1.0 * a[1]
+    am[0, 1, 1] = 2.0 * a[1]
+    am[0, 2, 2] = 3.0 * a[6]
 
-	am[1,0,0] = -2.0*a[2]+2.0*a[3]+8.0*a[4]-2.0*a[5]
-	am[1,0,1] =      a[2]-4.0*a[3]-4.0*a[4]+4.0*a[5]
-	am[1,1,0] =  4.0*a[2]-4.0*a[3]-4.0*a[4]+    a[5]
-	am[1,1,1] = -2.0*a[2]+8.0*a[3]+2.0*a[4]-2.0*a[5]
-	am[1,2,2] =  9.0*a[7]
+    am[1, 0, 0] = -2.0 * a[2] + 2.0 * a[3] + 8.0 * a[4] - 2.0 * a[5]
+    am[1, 0, 1] = a[2] - 4.0 * a[3] - 4.0 * a[4] + 4.0 * a[5]
+    am[1, 1, 0] = 4.0 * a[2] - 4.0 * a[3] - 4.0 * a[4] + a[5]
+    am[1, 1, 1] = -2.0 * a[2] + 8.0 * a[3] + 2.0 * a[4] - 2.0 * a[5]
+    am[1, 2, 2] = 9.0 * a[7]
 
-	am[0] = am[0]/3.0
-	am[1] = am[1]/9.0
-	return am
+    am[0] = am[0] / 3.0
+    am[1] = am[1] / 9.0
+    return am
 
 
-def htpp_yfunc_yld2000_2d_phi(am,em,s):
-	p = [1.0,-1.0]
+def htpp_yfunc_yld2000_2d_phi(am, em, s):
+    p = [1.0, -1.0]
 
-	y = np.zeros((2,3))
-	for n in range(2):
-		y[n] = am[n].dot(s)
+    y = np.zeros((2, 3))
+    for n in range(2):
+        y[n] = am[n].dot(s)
 
-	x = np.zeros((2,2))
-	for n in range(2):
-		a = math.sqrt((y[n,0]-y[n,1])**2 + 4*y[n,2]**2)
-		for i in range(2):
-			x[n,i] = 0.5*(y[n,0]+y[n,1]+p[i]*a)
+    x = np.zeros((2, 2))
+    for n in range(2):
+        a = math.sqrt((y[n, 0] - y[n, 1]) ** 2 + 4 * y[n, 2] ** 2)
+        for i in range(2):
+            x[n, i] = 0.5 * (y[n, 0] + y[n, 1] + p[i] * a)
 
-	phi = np.zeros(2)
-	phi[0] = abs(x[0,0]-x[0,1])**em
-	phi[1] = abs(2*x[1,1]+x[1,0])**em + abs(2*x[1,0]+x[1,1])**em
+    phi = np.zeros(2)
+    phi[0] = abs(x[0, 0] - x[0, 1]) ** em
+    phi[1] = abs(2 * x[1, 1] + x[1, 0]) ** em + abs(2 * x[1, 0] + x[1, 1]) ** em
 
-	return phi,x,y
+    return phi, x, y
+
+
+### ----- Yield 2004 ----- ###
+def htpp_yfunc_yld2004_param(cp):
+    cp1 = np.zeros((6, 6))
+    cp2 = np.zeros((6, 6))
+
+    s0 = cp[0]
+    cp1[0, 1] = -cp[1]
+    cp1[0, 2] = -cp[2]
+    cp1[1, 0] = -cp[3]
+    cp1[1, 2] = -cp[4]
+    cp1[2, 0] = -cp[5]
+    cp1[2, 1] = -cp[6]
+    cp1[3, 3] = cp[7]
+    cp1[4, 4] = cp[8]
+    cp1[5, 5] = cp[9]
+    cp2[0, 1] = -cp[10]
+    cp2[0, 2] = -cp[11]
+    cp2[1, 0] = -cp[12]
+    cp2[1, 2] = -cp[13]
+    cp2[2, 0] = -cp[14]
+    cp2[2, 1] = -cp[15]
+    cp2[3, 3] = cp[16]
+    cp2[4, 4] = cp[17]
+    cp2[5, 5] = cp[18]
+    a = 6
+
+    return cp1, cp2, a, s0
+
+
+def htpp_yfunc_ylocus_yld2004(x, s1, s2, s12, cp1, cp2, a, s0):
+    s = [s1 * x, s2 * x, 0, s12 * x, 0, 0]
+    cl = np.zeros((6, 6))
+    for i in range(3):
+        for j in range(3):
+            cl[i, j] = -1
+            if i == j:
+                cl[i, j] = 2
+
+    for i in range(3, 6):
+        cl[i, i] = 3
+    cl = cl / 3.0
+
+    dc = htpp_yfunc_yld2004_coef(cp1, cp2, a)
+    ctp1 = np.dot(cp1, cl)
+    ctp2 = cp2.dot(cl)
+    sp1 = np.dot(ctp1, s)
+    sp2 = ctp2.dot(s)
+
+    psp1, cetpq1, hp1 = htpp_yfunc_yld2004_sub(sp1)
+    psp2, cetpq2, hp2 = htpp_yfunc_yld2004_sub(sp2)
+
+    f = 0.0
+    for i in range(3):
+        for j in range(3):
+            f += abs(psp1[i] - psp2[j]) ** a
+    se = (f / dc) ** (1.0 / a) - s0
+
+    return se
+
+
+def htpp_yfunc_yld2004_coef(cp1, cp2, a):
+    bbp1 = htpp_yfunc_yld2004_coef_sub(cp1)
+    bbp2 = htpp_yfunc_yld2004_coef_sub(cp2)
+    dc = 0.0
+    for i in range(3):
+        for j in range(3):
+            dc += abs(bbp1[i] - bbp2[j]) ** a
+
+    return dc
+
+
+def htpp_yfunc_yld2004_coef_sub(cp):
+    aap = np.zeros(3)
+    aap[0] = (cp[0, 1] + cp[0, 2] - 2.0 * cp[1, 0] + cp[1, 2] - 2.0 * cp[2, 0] + cp[2, 1]) / 9.0
+    aap[1] = ((2.0 * cp[1, 0] - cp[1, 2]) * (cp[2, 1] - 2.0 * cp[2, 0]) + (2.0 * cp[2, 0] - cp[2, 1]) * (
+                cp[0, 1] + cp[0, 2]) + (cp[0, 1] + cp[0, 2]) * (2.0 * cp[1, 0] - cp[1, 2])) / 27.0
+    aap[2] = (cp[0, 1] + cp[0, 2]) * (cp[1, 2] - 2.0 * cp[1, 0]) * (cp[2, 1] - 2.0 * cp[2, 0]) / 54.0
+
+    ppp = aap[0] ** 2 + aap[1]
+    qqp = (2 * aap[0] ** 3 + 3 * aap[0] * aap[1] + 2 * aap[2]) / 2.0
+    ttp = math.acos(qqp / ppp ** (3.0 / 2.0))
+
+    bbp = np.zeros(3)
+    bbp[0] = 2 * math.sqrt(ppp) * math.cos(ttp / 3.0) + aap[0]
+    bbp[1] = 2 * math.sqrt(ppp) * math.cos((ttp + 4 * math.pi) / 3.0) + aap[0]
+    bbp[2] = 2 * math.sqrt(ppp) * math.cos((ttp + 2 * math.pi) / 3.0) + aap[0]
+
+    return bbp
+
+
+def htpp_yfunc_yld2004_sub(sp):
+    hp = np.zeros(3)
+    hp[0] = (sp[0] + sp[1] + sp[2]) / 3.0
+    hp[1] = (sp[4] ** 2 + sp[5] ** 2 + sp[3] ** 2 - sp[1] * sp[2] - sp[2] * sp[0] - sp[0] * sp[1]) / 3.0
+    hp[2] = (2 * sp[4] * sp[5] * sp[3] + sp[0] * sp[1] * sp[2] - sp[0] * sp[5] ** 2 - sp[1] * sp[4] ** 2 - sp[2] * sp[
+        3] ** 2) / 2.0
+
+    hpq = math.sqrt(hp[0] ** 2 + hp[1] ** 2 + hp[2] ** 2)
+    psp = np.zeros(3)
+    if hpq > 1.0e-16:
+        cep = hp[0] ** 2 + hp[1]
+        ceq = (2 * hp[0] ** 3 + 3 * hp[0] * hp[1] + 2 * hp[2]) / 2.0
+        cetpq = ceq / cep ** (3.0 / 2.0)
+        if cetpq > 1.0:
+            cetpq = 1.0
+        elif cetpq < -1.0:
+            cetpq = -1.0
+        cet = math.acos(cetpq)
+
+        psp[0] = 2 * math.sqrt(cep) * math.cos(cet / 3.0) + hp[0]
+        psp[1] = 2 * math.sqrt(cep) * math.cos((cet + 4.0 * math.pi) / 3.0) + hp[0]
+        psp[2] = 2 * math.sqrt(cep) * math.cos((cet + 2.0 * math.pi) / 3.0) + hp[0]
+    else:
+        cetpq = 0.0
+
+    return psp, cetpq, hp
