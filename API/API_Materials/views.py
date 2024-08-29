@@ -34,6 +34,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):
@@ -101,7 +102,6 @@ class ModelParamsViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer: ModelParamsSerializer):
         serializer.save(submitted_by=self.request.user)
-
 
 
 class MaterialParamsViewSet(viewsets.ModelViewSet):
@@ -295,6 +295,10 @@ def upload_dic_files(request, pk):
     if _3d:
         _3d = _3d.lower() in ["true", "1"]
 
+    separation = request.query_params.get("separation", ";")
+    if separation == "":
+        separation = " "  # Fix default trim
+
     file_format = request.query_params.get("file_format", "aramis").lower()
     if file_format not in ["aramis", "matchid", "matchid_multiple_files"]:
         data = {"message": f"Unrecognized file format: {file_format}."}
@@ -318,7 +322,8 @@ def upload_dic_files(request, pk):
         return Response(status=400, data=data)
 
     stages, bad_format, duplicated_stages, not_in_metadata, skipped_files = process_dic_data(test_data, file_format,
-                                                                                             _3d, file_identifiers)
+                                                                                             _3d, separation,
+                                                                                             file_identifiers)
 
     if not not_in_metadata and not bad_format and not duplicated_stages and not stages and not skipped_files:
         data = {"message": "Bad format of metadata file."}
@@ -368,8 +373,8 @@ def upload_dic_files(request, pk):
             "overridden_stages": already_in_db if already_in_db else None,
             "skipped_files": skipped_files if skipped_files else None}
 
-
     return Response(data=data)
+
 
 @transaction.atomic
 @api_view(['POST'])

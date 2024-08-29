@@ -24,17 +24,17 @@ def process_aramis(file_name: str, file: _io.BufferedReader, field_names: list[s
 
 
 def process_match_id(file_name: str, file: _io.BufferedReader, match_id_mapper: dict[str, str], bad_format: list,
-                     file_identifiers: dict[str, dict], stage: int, stages_points: dict[int, dict]):
+                     file_identifiers: dict[str, dict], stage: int, stages_points: dict[int, dict], separation: str):
     # file_identifiers = {"identifier_name": {"field_name": 0 # N_COL}}
-
     # Process stage_field dictionary
     if stage not in stages_points:
         stages_points[stage] = {"filename": file_name}
     try:
-        content, identifier = check_and_replace_headers(file_name, file, file_identifiers)
+        content, identifier = check_and_replace_headers(file_name, file, file_identifiers, separation)
         stages_points[stage][identifier] = content
 
         content.rename(inplace=True, columns=match_id_mapper)
+        return content
         # datapoints = content.to_dict(orient='records')
 
     # Bad File (Parser Error)
@@ -45,6 +45,7 @@ def process_match_id(file_name: str, file: _io.BufferedReader, match_id_mapper: 
 
 def verify_match_id(stages_points: dict[str, dict], bad_format: list, _3d=False):
     stages = {}
+    # print(f"{stages_points=}")
 
     if _3d:
         required = {'x', 'y', 'xy', 'displacement_x',
@@ -70,7 +71,10 @@ def verify_match_id(stages_points: dict[str, dict], bad_format: list, _3d=False)
         for stage_identifier, content in stage_identifiers.items():
             if stage_identifier in ["filename", "ts_def", "load"]:
                 continue
-
+            # print(f"{stage_identifier=}")
+            # print(f"{content=}")
+            # print(type(content))
+            # print("------")
             if stage_content is None:
                 stage_content = content
             else:
@@ -82,6 +86,8 @@ def verify_match_id(stages_points: dict[str, dict], bad_format: list, _3d=False)
             datapoints = content.to_dict(orient='records')
             stages[(stage, ts_def, load)] = datapoints
         else:
+            print(f"{required=}")
+            print(f"{stage_content.columns=}")
             print("No all required columns")
             bad_format.append(stage_identifiers["filename"])
             return None
@@ -185,16 +191,15 @@ def process_match_id_multiple_files(stage: int, file_name: str, file: _io.Buffer
 
 
 # ----- Other Functions -----
-def check_and_replace_headers(filename, csv_file, identifiers):
+def check_and_replace_headers(filename, csv_file, identifiers, separation):
     # Identifiers follow the structure: {
     # 	"identifier_name": {
     # 		"header_name_1": 0, # Integer that represents the column idx in the csv
     #       "header_name_2": 5
     # 	}
     # }
-
     # Read the CSV file without headers to inspect the first row
-    df = pd.read_csv(csv_file, sep=';', header=None)
+    df = pd.read_csv(csv_file, sep=separation, header=None)
 
     # Check if the first row is composed entirely of numbers or NaNs
     # If the first row is all numbers or NaNs, we assume there are no headers
@@ -202,7 +207,7 @@ def check_and_replace_headers(filename, csv_file, identifiers):
     if any(first_row.apply(lambda x: not isinstance(x, (int, float)) and not pd.isna(x))):
         # If headers are detected, read the CSV file again with headers
         csv_file.seek(0)  # Reset the file pointer to allow a re-read
-        df = pd.read_csv(csv_file, sep=';')
+        df = pd.read_csv(csv_file, sep=separation)
 
     # Find the identifier for the current file
     identified_columns = None

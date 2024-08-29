@@ -35,7 +35,7 @@ match_id_multiple_files_mapper = {match_id_multiple_files_field_names[i]: field_
 
 
 datapoints_non_nullable_fields = ["x", "y", "displacement_x", "displacement_y"]
-def process_dic_data(files: FileDict, file_format="aramis", _3d =False, file_identifiers_str=""):
+def process_dic_data(files: FileDict, file_format="aramis", _3d =False, separation=";", file_identifiers_str=""):
     duplicated_stages = list()
     duplicated_fields = list()
     bad_format = list()
@@ -117,7 +117,7 @@ def process_dic_data(files: FileDict, file_format="aramis", _3d =False, file_ide
             datapoints = process_aramis(file_name, file, field_names, bad_format)
         elif file_format == "matchid":
             datapoints = process_match_id(file_name, file, match_id_mapper, bad_format,
-                                          file_identifiers, stage, multiple_identifiers_stages)
+                                          file_identifiers, stage, multiple_identifiers_stages, separation)
             multiple_identifiers_stages[stage]["ts_def"] = ts_def
             multiple_identifiers_stages[stage]["load"] = load
             # if datapoints is None:
