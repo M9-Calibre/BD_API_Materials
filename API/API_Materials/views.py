@@ -499,11 +499,13 @@ def get_model_graph(request):
 
     return Response(status=200, data=data)
 
+
 ## DELETEs and PUTs methods that doesn't work in the Apache Servver (I have no idea why)
 
+# Materials
 class DeleteMaterialByPostView(APIView):
-
     permission_classes = [IsOwnerOrReadOnly]
+
     def post(self, request, material_id, format=None):
         if not material_id:
             return Response({'error': 'ID is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -514,3 +516,58 @@ class DeleteMaterialByPostView(APIView):
             return Response({'message': 'Material deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
         except Material.DoesNotExist:
             return Response({'error': 'Material not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class PostMaterialAsPutView(APIView):
+    permission_classes = [IsOwnerOrReadOnly]
+    def post(self, request, *args, **kwargs):
+        # Extract the ID from the URL parameters
+        resource_id = kwargs.get('id')
+        try:
+            # Fetch the resource by ID
+            resource = Material.objects.get(id=resource_id)
+        except Material.DoesNotExist:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Serialize the request data
+        serializer = MaterialSerializer(resource, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Tests
+
+class DeleteTestByPostView(APIView):
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def post(self, request, test_id, format=None):
+        if not test_id:
+            return Response({'error': 'ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            test = Test.objects.get(pk=test_id)
+            test.delete()
+            return Response({'message': 'Test deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Test.DoesNotExist:
+            return Response({'error': 'Test not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class PostTestAsPutView(APIView):
+    permission_classes = [IsOwnerOrReadOnly]
+    def post(self, request, *args, **kwargs):
+        # Extract the ID from the URL parameters
+        resource_id = kwargs.get('id')
+        try:
+            # Fetch the resource by ID
+            resource = Test.objects.get(id=resource_id)
+        except Test.DoesNotExist:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Serialize the request data
+        serializer = TestSerializer(resource, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

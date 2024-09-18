@@ -1,12 +1,12 @@
-from API import *
+from vxformsapi.vxformsapi.API import *
 from random import choice
 
-token = authenticate("tester", "secretPass1234")
+token = authenticate_from_json("secret_login.json")
 
 # Creating a test
 
 # ID of the material which the new test refers to
-material = get_material(3)
+material = get_material(2)
 
 # Test metadata
 metadata = {

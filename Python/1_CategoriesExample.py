@@ -1,7 +1,6 @@
-from API import *
+from vxformsapi.vxformsapi.API import *
 
-token = authenticate("tester", "secretPass1234")
-token = authenticate_from_json("secret_credentials.json")
+token = authenticate_from_json("secret_login.json")
 
 # Category creating restricted to admin users, i.e. only credentials with admnistrator priviledges will be able to run these commands
 

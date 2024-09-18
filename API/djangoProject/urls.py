@@ -68,5 +68,8 @@ urlpatterns = [
     path('models/points/', views.get_model_graph),
     path("tests", views.get_model_graph),
     path('deletematerial/<int:material_id>/', views.DeleteMaterialByPostView.as_view(), name='delete_material'),
+    path('updatematerial/<int:id>/', views.PostMaterialAsPutView.as_view(), name='post_material'),
+    path('deletetest/<int:test_id>/', views.DeleteTestByPostView.as_view(), name='delete_test'),
+    path('updatetest/<int:id>/', views.PostTestAsPutView.as_view(), name='post_test'),
     path('', include(router.urls))
 ]
