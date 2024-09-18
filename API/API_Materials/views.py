@@ -10,11 +10,12 @@ from django.db import transaction
 from django.db.models import F
 from django.http import HttpResponseForbidden, HttpResponseNotFound, HttpResponse
 from django_filters import rest_framework as filters2
-from rest_framework import generics, permissions, viewsets, filters, mixins
+from rest_framework import generics, permissions, viewsets, filters, mixins, status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFilter, DICStageFilter, DICDataFilter, \
     InstitutionUserFilter, MaterialParamsFilter
@@ -497,3 +498,19 @@ def get_model_graph(request):
     }
 
     return Response(status=200, data=data)
+
+## DELETEs and PUTs methods that doesn't work in the Apache Servver (I have no idea why)
+
+class DeleteMaterialByPostView(APIView):
+
+    permission_classes = [IsOwnerOrReadOnly]
+    def post(self, request, material_id, format=None):
+        if not material_id:
+            return Response({'error': 'ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            material = Material.objects.get(pk=material_id)
+            material.delete()
+            return Response({'message': 'Material deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Material.DoesNotExist:
+            return Response({'error': 'Material not found'}, status=status.HTTP_404_NOT_FOUND)

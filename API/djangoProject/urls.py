@@ -67,5 +67,6 @@ urlpatterns = [
     path('tests/<int:pk>/delete/', views.delete_test_data),
     path('models/points/', views.get_model_graph),
     path("tests", views.get_model_graph),
+    path('deletematerial/<int:material_id>/', views.DeleteMaterialByPostView.as_view(), name='delete_material'),
     path('', include(router.urls))
 ]
