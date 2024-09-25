@@ -5,11 +5,13 @@ import os
 import pandas as pd
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db import transaction
 from django.db.models import F
 from django.http import HttpResponseForbidden, HttpResponseNotFound, HttpResponse
 from django_filters import rest_framework as filters2
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, viewsets, filters, mixins, status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
@@ -22,7 +24,7 @@ from .filters import CategoryLowerFilter, CategoryMiddleFilter, CategoryUpperFil
 from .models import Material, MaterialCategory1, MaterialCategory2, MaterialCategory3, Supplier, Laboratory, Test, \
     DICStage, DICDatapoint, Model, ModelParams, Institution, InstitutionUser, MaterialParams
 from .pagination import DICDataPagination
-from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
+from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly, IsAdminOrOwner, IsAdminOrOwnerOrGroupCanInteract
 from .serializers import MaterialSerializer, UserSerializer, Category1Serializer, Category2Serializer, \
     Category3Serializer, SupplierSerializer, LaboratorySerializer, RegisterSerializer, TestSerializer, \
     DICStageSerializer, DICDataSerializer, MaterialNameIdSerializer, ModelSerializer, ModelParamsSerializer, \
@@ -106,7 +108,7 @@ class ModelParamsViewSet(viewsets.ModelViewSet):
 
 
 class MaterialParamsViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAdminOrOwnerOrGroupCanInteract]
     queryset = MaterialParams.objects.all()
     serializer_class = MaterialParamsSerializer
     filter_backends = (filters2.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
@@ -164,12 +166,39 @@ class MaterialViewSet(viewsets.ModelViewSet):
 
 
 class TestViewSet(viewsets.ModelViewSet):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [IsAdminOrOwnerOrGroupCanInteract]
     queryset = Test.objects.all()
     serializer_class = TestSerializer
     filterset_fields = ["material", "submitted_by"]
 
+    # Apply filters for Group permission and private
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Test.objects.all()
+        else:
+            filtered_query = Q(private=False)
+            # Check for group permissions
+            if not user.is_anonymous:
+                filtered_query |= Q(submitted_by=user)
+                user_groups = user.user_groups.all()
+                for user_group in user_groups:
+                    print(f"{user_group=}")
+                    filtered_query |= Q(read_groups=user_group)
+            ret_test = Test.objects.filter(filtered_query)
+            custom_test = ret_test.last()
+            print(f"{custom_test=}")
+            print(f"{custom_test.submitted_by=}")
+            print(f"{custom_test.private=}")
+            print(f"{custom_test.read_groups=}")
+
+
+
+            return Test.objects.filter(filtered_query)
+
     def perform_create(self, serializer: TestSerializer):
+        print(f"{serializer=}")
         serializer.save(submitted_by=self.request.user)
 
 
@@ -497,6 +526,20 @@ def get_model_graph(request):
         "x": inpt
     }
 
+    return Response(status=200, data=data)
+
+## User Groups
+
+def get_user_groups(request, pk):
+    request_user = request.user
+    # Only the user can see its own groups
+    if not request_user.is_staff and request_user.id != pk:
+        raise PermissionDenied()
+
+    user = User.objects.get(pk=pk)
+    data = {
+        "user_groups": user.user_groups
+    }
     return Response(status=200, data=data)
 
 

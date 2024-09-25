@@ -302,7 +302,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name']
         )
-        print(f"{validated_data=}")
         user.set_password(validated_data['password'])
         user.save()
         if "institution" in validated_data:
