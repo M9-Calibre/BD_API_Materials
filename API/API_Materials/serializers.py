@@ -4,8 +4,9 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.validators import UniqueValidator
 
 from .models import Material, MaterialCategory3, MaterialCategory2, MaterialCategory1, Test, ThermalProperties, \
-    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model, ModelParams, Institution, InstitutionUser, \
-    MaterialParams
+    MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model, \
+    ModelParams, Institution, InstitutionUser, \
+    MaterialParams, UserGroup
 from django.contrib.auth.models import User
 
 from typing import Dict
@@ -265,14 +266,22 @@ class MaterialSerializer(serializers.ModelSerializer):
                   'tests', 'upper_category', 'middle_category', 'lower_category', "upper_category_id",
                   "middle_category_id"]
 
+class UserGroupSerializer(serializers.ModelSerializer):
+    users = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all())
+    class Meta:
+        model = UserGroup
+        fields = ['id', 'name', 'users']
+
 
 class UserSerializer(serializers.ModelSerializer):
     materials = serializers.PrimaryKeyRelatedField(many=True, queryset=Material.objects.all())
     tests = serializers.PrimaryKeyRelatedField(many=True, queryset=Test.objects.all())
+    user_groups = serializers.PrimaryKeyRelatedField(many=True, queryset=UserGroup.objects.all())
 
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'username', 'email', 'materials', 'tests']
+
 
 
 class RegisterSerializer(serializers.ModelSerializer):

@@ -117,6 +117,21 @@ class MaterialParamsViewSet(viewsets.ModelViewSet):
     # search_fields = ('name', 'country')
     filterset_class = MaterialParamsFilter
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return MaterialParams.objects.all()
+        else:
+            filtered_query = Q(private=False)
+            # Check for group permissions
+            if not user.is_anonymous:
+                filtered_query |= Q(submitted_by=user)
+                user_groups = user.user_groups.all()
+                for user_group in user_groups:
+                    filtered_query |= Q(read_groups=user_group)
+
+            return MaterialParams.objects.filter(filtered_query)
+
     def perform_create(self, serializer: ModelParamsSerializer):
         serializer.save(submitted_by=self.request.user)
 
@@ -184,21 +199,11 @@ class TestViewSet(viewsets.ModelViewSet):
                 filtered_query |= Q(submitted_by=user)
                 user_groups = user.user_groups.all()
                 for user_group in user_groups:
-                    print(f"{user_group=}")
                     filtered_query |= Q(read_groups=user_group)
-            ret_test = Test.objects.filter(filtered_query)
-            custom_test = ret_test.last()
-            print(f"{custom_test=}")
-            print(f"{custom_test.submitted_by=}")
-            print(f"{custom_test.private=}")
-            print(f"{custom_test.read_groups=}")
-
-
 
             return Test.objects.filter(filtered_query)
 
     def perform_create(self, serializer: TestSerializer):
-        print(f"{serializer=}")
         serializer.save(submitted_by=self.request.user)
 
 
@@ -528,18 +533,20 @@ def get_model_graph(request):
 
     return Response(status=200, data=data)
 
-## User Groups
 
-def get_user_groups(request, pk):
+## User Groups
+@api_view(['GET'])
+def get_user_groups(request):
     request_user = request.user
     # Only the user can see its own groups
-    if not request_user.is_staff and request_user.id != pk:
+    if request_user.is_anonymous:
         raise PermissionDenied()
 
-    user = User.objects.get(pk=pk)
+    user = User.objects.get(pk=request_user.id)
     data = {
-        "user_groups": user.user_groups
+        "results": user.user_groups.values()
     }
+
     return Response(status=200, data=data)
 
 
@@ -563,6 +570,7 @@ class DeleteMaterialByPostView(APIView):
 
 class PostMaterialAsPutView(APIView):
     permission_classes = [IsOwnerOrReadOnly]
+
     def post(self, request, *args, **kwargs):
         # Extract the ID from the URL parameters
         resource_id = kwargs.get('id')
@@ -599,6 +607,7 @@ class DeleteTestByPostView(APIView):
 
 class PostTestAsPutView(APIView):
     permission_classes = [IsOwnerOrReadOnly]
+
     def post(self, request, *args, **kwargs):
         # Extract the ID from the URL parameters
         resource_id = kwargs.get('id')
