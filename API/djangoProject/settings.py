@@ -39,9 +39,9 @@ def get_secret(setting, secrets=secrets_content):
 SECRET_KEY = get_secret("API_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False  # change
+DEBUG = True  # change
 
-ALLOWED_HOSTS = ['.localhost', '193.137.84.5', 'tema-xsteels.ua.pt']
+ALLOWED_HOSTS = ['.localhost', '127.0.0.1', '[::1]', "*"]
 
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -55,19 +55,6 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
     'access-control-allow-origin'
 ]
-
-CORS_ALLOW_CREDENTIALS = True
-
-CORS_ALLOW_PRIVATE_NETWORK = True
-
-CORS_ALLOW_METHODS = (
-    "DELETE",
-    "GET",
-    "OPTIONS",
-    "PATCH",
-    "POST",
-    "PUT",
-)
 
 # Application definition
 
@@ -84,30 +71,31 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_extensions',
     'drf_yasg',
+    # 'cryptographic_fields',
     'django_filters',
-    'cryptographic_fields'
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
 ]
 
 MIDDLEWARE = [
-    'django.middleware.common.CommonMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware'
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware'
 
-]
-
-CORS_ALLOWED_ORIGINS = [
-    "http://193.137.84.5",
-    "http://localhost"
 ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 ROOT_URLCONF = 'djangoProject.urls'
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 TEMPLATES = [
     {
@@ -134,15 +122,8 @@ WSGI_APPLICATION = 'djangoProject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'API_Materials',
-        'USER': 'API',
-        'PASSWORD': get_secret("DB_KEY"),
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
-        }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'mydatabase',
     }
 }
 
@@ -181,7 +162,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = '/static_api/'
+STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -198,37 +179,37 @@ REST_FRAMEWORK = {
 }
 
 DATA_UPLOAD_MAX_NUMBER_FILES = None
-DATA_UPLOAD_MAX_NUMBER_FIELDS = None
-DATA_UPLOAD_MAX_MEMORY_SIZE = None
+DATA_UPLOAD_MAX_MEMORY_SIZE = None #2621440 * 10
 
-FILE_UPLOAD_MAX_MEMORY_SIZE = 2*1024*1024*1024*1024*1024*1024
-
-GRAPH_MODELS ={
+GRAPH_MODELS = {
     'all_applications': True,
     'graph_models': True,
 }
 
-LOG_FILE_PATH = os.path.join(BASE_DIR, "log.txt")
+# SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_SECONDS = 3600  # change
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'DEBUG',  # Set the desired log level (DEBUG, INFO, ERROR, etc.)
-            'class': 'logging.FileHandler',
-            'filename': LOG_FILE_PATH,
-            'formatter': 'verbose',
-        },
-    },
-    'formatters': {
-        'verbose': {
-            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S',
-        },
-    },
-    'root': {
-        'handlers': ['file'],
-        'level': 'DEBUG',  # Set the desired log level for the root logger
-    },
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+SECURE_SSL_REDIRECT = False  # change
+
+SECURE_HSTS_PRELOAD = False  # change
+
+SESSION_COOKIE_SECURE = True
+
+CSRF_COOKIE_SECURE = True
+
+
+# Password reset
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = get_secret("EMAIL_USER")
+EMAIL_HOST_PASSWORD = get_secret("EMAIL_PASSWORD")
+
+# settings.py
+REST_AUTH_SERIALIZERS = {
+    'PASSWORD_RESET_SERIALIZER':
+    'api.users.API_Materials.serializers.CustomPasswordResetSerializer',
 }

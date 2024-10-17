@@ -51,6 +51,7 @@ router.register(r'models', views.ModelViewSet, basename='models')
 router.register(r'modelparams', views.ModelParamsViewSet, basename='modelparams')
 router.register(r'materialparams', views.MaterialParamsViewSet, basename='materialparams')
 router.register(r'tests/params', views.ModelParamsViewSet, basename='tests_params')
+router.register(r'inversemethods', views.InverseMethodViewSet, basename='inverse_methods')
 
 urlpatterns = [
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),

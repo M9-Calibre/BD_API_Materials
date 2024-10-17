@@ -6,7 +6,7 @@ from rest_framework.validators import UniqueValidator
 from .models import Material, MaterialCategory3, MaterialCategory2, MaterialCategory1, Test, ThermalProperties, \
     MechanicalProperties, PhysicalProperties, Laboratory, Supplier, Location, DICStage, DICDatapoint, Model, \
     ModelParams, Institution, InstitutionUser, \
-    MaterialParams, UserGroup
+    MaterialParams, UserGroup, InverseMethod
 from django.contrib.auth.models import User
 
 from typing import Dict
@@ -62,6 +62,7 @@ class MaterialParamsSerializer(serializers.ModelSerializer):
     submitted_by = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     submitted_by_username = serializers.ReadOnlyField(source="submitted_by.username")
     material = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Material.objects.all())
+    inverse_method = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     elastic_model_name = serializers.ReadOnlyField(source="elastic_model_params.model.name")
     yield_model_name = serializers.ReadOnlyField(source="yield_model_params.model.name")
     hardening_model_name = serializers.ReadOnlyField(source="hardening_model_params.model.name")
@@ -70,6 +71,10 @@ class MaterialParamsSerializer(serializers.ModelSerializer):
         model = MaterialParams
         fields = '__all__'
 
+class InverseMethodSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InverseMethod
+        fields = '__all__'
 
 class StageListSerializer(serializers.ModelSerializer):
     class Meta:

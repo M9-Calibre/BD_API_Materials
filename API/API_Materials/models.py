@@ -91,20 +91,21 @@ class Model(models.Model):
     function_name = models.CharField(max_length=50)
     input = models.JSONField()
 
-class InverseMethods(models.Model):
+class InverseMethod(models.Model):
     name = models.CharField(max_length=50)
 
 class ModelParams(models.Model):
     model = models.ForeignKey(Model, models.CASCADE, related_name='params')
     submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='params')
     params = models.JSONField()  # {"x": 10, "z": 40, "output_do_outro" : 30} // {"input": [12, 1, 3.4], "output":}
+
 class MaterialParams(models.Model):
     material = models.ForeignKey(Material, models.CASCADE, related_name='params')
     name = models.CharField(max_length=50)
     submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='material_params')
     source_url = models.CharField(max_length=300)
-    inverse_method = models.ForeignKey(InverseMethods, models.CASCADE, related_name='material_params')
-    inverse_method_description = models.TextField()
+    extra_information = models.TextField(blank=True)
+    inverse_method = models.ForeignKey(InverseMethod, models.SET_NULL, null=True, related_name='material_params')
 
     # Model Params
     hardening_model_params = models.ForeignKey(ModelParams, models.CASCADE, related_name='hardening_material_params')
