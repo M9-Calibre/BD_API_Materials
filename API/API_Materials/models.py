@@ -76,9 +76,9 @@ class Test(models.Model):
 
     # Groups
     private = models.BooleanField(default=False)
-    edit_groups = models.ManyToManyField(UserGroup, related_name='can_edit_tests', default=None)
-    read_groups = models.ManyToManyField(UserGroup, related_name='can_read_tests', default=None)
-    delete_groups = models.ManyToManyField(UserGroup, related_name='can_delete_tests', default=None)
+    edit_groups = models.ManyToManyField(UserGroup, related_name='can_edit_tests', blank=True)
+    read_groups = models.ManyToManyField(UserGroup, related_name='can_read_tests', blank=True)
+    delete_groups = models.ManyToManyField(UserGroup, related_name='can_delete_tests', blank=True)
 
     class Meta:
         unique_together = ('material', 'name')
@@ -114,9 +114,9 @@ class MaterialParams(models.Model):
 
     # Groups
     private = models.BooleanField(default=False)
-    edit_groups = models.ManyToManyField(UserGroup, related_name='can_edit_material_params')
-    read_groups = models.ManyToManyField(UserGroup, related_name='can_read_material_params')
-    delete_groups = models.ManyToManyField(UserGroup, related_name='can_delete_material_params')
+    edit_groups = models.ManyToManyField(UserGroup, related_name='can_edit_material_params', blank=True)
+    read_groups = models.ManyToManyField(UserGroup, related_name='can_read_material_params', blank=True)
+    delete_groups = models.ManyToManyField(UserGroup, related_name='can_delete_material_params', blank=True)
 
     # Create a unique validator to check if the model category is correct
     def validate_unique(self, exclude=None):

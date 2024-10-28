@@ -62,7 +62,7 @@ class MaterialParamsSerializer(serializers.ModelSerializer):
     submitted_by = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     submitted_by_username = serializers.ReadOnlyField(source="submitted_by.username")
     material = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Material.objects.all())
-    inverse_method = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    inverse_method = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=InverseMethod.objects.all())
     elastic_model_name = serializers.ReadOnlyField(source="elastic_model_params.model.name")
     yield_model_name = serializers.ReadOnlyField(source="yield_model_params.model.name")
     hardening_model_name = serializers.ReadOnlyField(source="hardening_model_params.model.name")
