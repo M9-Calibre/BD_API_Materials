@@ -41,14 +41,28 @@ class IsAdminOrOwnerOrGroupCanInteract(permissions.BasePermission):
 
         # Filter if it is test or a material parameter object
         obj_type = type(obj)
-        print(f"{obj_type}")
+
+        user_groups = request_user.user_groups.all()
+        user_groups_ids = []
+
+        for user_group in user_groups:
+            user_groups_ids.append(user_group.id)
 
         if request.method == "GET":
-            # See if there is a group in common between the permissions and the user
-            return set(request_user.can_read_tests) & set(obj.read_groups)
+            # See if there is a group in common between the permissions and the user group
+            for read_group in obj.read_groups.all():
+                if read_group.id in user_groups_ids: return True
+                # if set(user_groups_ids) & set(obj.read_groups.all()): return True
+            return False
+
         elif request.method == "POST":
-            return set(request_user.can_edit_tests) & set(obj.edit_groups)
+            for edit_group in obj.edit_groups.all():
+                if edit_group.id in user_groups_ids: return True
+            return False
+
         elif request.method == "DELETE":
-            return set(request_user.can_delete_tests) & set(obj.delete_groups)
+            for delete_group in obj.delete_groups.all():
+                if delete_group.id in user_groups_ids: return True
+            return False
 
         return False
