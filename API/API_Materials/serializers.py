@@ -52,6 +52,10 @@ class ModelParamsSerializer(serializers.ModelSerializer):
 
         if keys == required:
             return value
+        # print("third")
+        # print(f"{self.initial_data=}")
+        # print(f"{model.input=}")
+        # print(f"{set(model.input)=}")
         raise serializers.ValidationError("Given params don't match model input.")
 
     class Meta:
@@ -64,8 +68,11 @@ class MaterialParamsSerializer(serializers.ModelSerializer):
     material = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=Material.objects.all())
     inverse_method = serializers.PrimaryKeyRelatedField(many=False, read_only=False, queryset=InverseMethod.objects.all())
     elastic_model_name = serializers.ReadOnlyField(source="elastic_model_params.model.name")
+    elastic_model = serializers.ReadOnlyField(source="elastic_model_params.model.id")
     yield_model_name = serializers.ReadOnlyField(source="yield_model_params.model.name")
+    yield_model = serializers.ReadOnlyField(source="yield_model_params.model.id")
     hardening_model_name = serializers.ReadOnlyField(source="hardening_model_params.model.name")
+    hardening_model = serializers.ReadOnlyField(source="hardening_model_params.model.id")
 
     class Meta:
         model = MaterialParams

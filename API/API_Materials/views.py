@@ -583,7 +583,7 @@ class PostMaterialAsPutView(APIView):
             # Fetch the resource by ID
             resource = Material.objects.get(id=resource_id)
         except Material.DoesNotExist:
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "Material Not found."}, status=status.HTTP_404_NOT_FOUND)
 
         # Serialize the request data
         serializer = MaterialSerializer(resource, data=request.data, partial=True)
@@ -620,10 +620,46 @@ class PostTestAsPutView(APIView):
             # Fetch the resource by ID
             resource = Test.objects.get(id=resource_id)
         except Test.DoesNotExist:
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "Test Not found."}, status=status.HTTP_404_NOT_FOUND)
 
         # Serialize the request data
         serializer = TestSerializer(resource, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Material Params
+
+class DeleteMaterialParamByPostView(APIView):
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def post(self, request, material_param_id, format=None):
+        if not material_param_id:
+            return Response({'Material Parameter': 'ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            material_param = MaterialParams.objects.get(pk=material_param_id)
+            material_param.delete()
+            return Response({'message': 'Material Parameter deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except MaterialParams.DoesNotExist:
+            return Response({'error': 'Material Parameter not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class PostMaterialParamAsPutView(APIView):
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def post(self, request, *args, **kwargs):
+        # Extract the ID from the URL parameters
+        resource_id = kwargs.get('id')
+        try:
+            # Fetch the resource by ID
+            resource = MaterialParams.objects.get(id=resource_id)
+        except MaterialParams.DoesNotExist:
+            return Response({"detail": "Material Parameter Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Serialize the request data
+        serializer = MaterialParamsSerializer(resource, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

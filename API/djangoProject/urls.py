@@ -72,6 +72,8 @@ urlpatterns = [
     path('updatematerial/<int:id>/', views.PostMaterialAsPutView.as_view(), name='post_material'),
     path('deletetest/<int:test_id>/', views.DeleteTestByPostView.as_view(), name='delete_test'),
     path('updatetest/<int:id>/', views.PostTestAsPutView.as_view(), name='post_test'),
+    path('deletematerialparameter/<int:material_param_id>/', views.DeleteMaterialParamByPostView.as_view(), name='delete_material_parameter'),
+    path('updatematerialparameter/<int:id>/', views.PostMaterialParamAsPutView.as_view(), name='post_material_parameter'),
     path('users/usergroup/', views.get_user_groups, name="get_user_groups"),
     path('', include(router.urls))
 ]
