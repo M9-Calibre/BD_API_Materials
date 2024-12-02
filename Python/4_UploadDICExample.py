@@ -1,7 +1,7 @@
-from API import *
+from vxformsapi.vxformsapi.API import *
 import os
 
-token = authenticate("tester", "secretPass1234")
+token = authenticate_from_json("secret_login.json")
 
 # Directory where the DIC files and load data are stored, consult the user manual for formatting and naming of the files
 dir = "test\\" 
