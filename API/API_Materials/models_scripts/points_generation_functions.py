@@ -1,6 +1,11 @@
 from API_Materials.models_scripts.points_generation_utils import *
+from math import pi
 
+import numpy as np
+from scipy.integrate import solve_ivp
+import matplotlib.pyplot as plt
 
+#### Yield ####
 ### ----- Hill 48 ----- ###
 def calculate_yield_48_3d(h: float, g: float, f: float, n: float) -> dict:
     # TODO: Not sure if this beginning setup is exclusive to this function or not
@@ -13,30 +18,32 @@ def calculate_yield_48_3d(h: float, g: float, f: float, n: float) -> dict:
     z_min = -2
     z_max = 2
     step = 0.1
-    shear_step = 0.005  # 0.01
+    shear_step = 0.1  # 0.005
 
     x1, x2, x3 = np.meshgrid(np.arange(x_min, x_max, step), np.arange(y_min, y_max, step),
                              np.arange(z_min, z_max, step))
 
     z0 = h * (x1 - x2) ** 2 + g * (x1 ** 2) + f * (x2 ** 2) + 2 * n * (x3 ** 2)
     dic = {
-        "z0": z0.ravel(),
+        "value": z0.ravel(),
         # "x": np.linspace(x_min, x_max, z0[0][0].size),
         # "y": np.linspace(y_min, y_max, z0[0][0].size),
         # "value": np.linspace(z_min, z_max, z0[0][0].size)
         "x": x1.ravel(),
         "y": x2.ravel(),
-        "value": x3.ravel()
+        "z": x3.ravel()
     }
     z0.ravel()
 
     x1_2d, x2_2d = np.meshgrid(np.arange(x_min, x_max, shear_step), np.arange(y_min, y_max, shear_step))
-    dic["x2"] = x1_2d.ravel()
-    dic["y2"] = x2_2d.ravel()
+    dic["shear_x"] = x1_2d.ravel()
+    dic["shear_y"] = x2_2d.ravel()
+    dic["shears"] = {}
     for idx, val in enumerate(np.arange(0, 0.61, 0.2)):
+        dic["shears"][val] = {}
         z = h * (x1_2d - x2_2d) ** 2 + g * (x1_2d ** 2) + f * (x2_2d ** 2) + 2 * n * (val ** 2)
-        dic[f"z{idx + 1}"] = z.ravel()
-        dic[f"shear{idx + 1}"] = val
+        dic["shears"][val]["value"] = z.ravel()
+        dic["shears"][val]["z"] = val
 
     # Extra teste
     # sus_step = 0.001
@@ -201,3 +208,132 @@ def calculate_yield_2004_3d(**kwargs) -> dict:
         dic[f"shear{idx + 1}"] = shear
 
     return dic
+
+#### Hardening ####
+
+
+# Constants and parameters (these would need to be initialized properly)
+constants = {
+    "young": 180000.0,  # Young's modulus
+    "poiss": 0.3,  # Poisson's ratio
+    "raypi": 400.0,  # Material property
+    "granqp": 300.0,  # Material property
+    "petibp": 20.0,  # Material property
+    "grc1p": 60000.0,  # Material property
+    "grd1p": 200.0,  # Material property
+    "linHard_h": 5000.,  # Material property
+    "swift_n": 0.1,
+    "swift_k": 400.,
+    "swift_eps0": 0.001
+}
+
+
+def charging(t, dt):
+    # Charging strain with time
+    if t <= 0.3:
+        eps11 = t  # * 0.3 # 1 correspond to 0.3
+        deps11 = dt  # * 0.3 # increments of time corresponds to increments on load
+    elif t > 0.3:
+        eps11 = 0.3 - (t - 0.3)  # * 0.3
+        deps11 = -1. * dt  # * (-0.3) # inversion
+    return eps11, deps11
+
+
+def isoHardening(epcum, constants):
+    drdp = 0
+    r_iso = constants["swift_k"] * (epcum + constants["swift_eps0"]) ** constants["swift_n"]
+    if epcum > 0: drdp = constants["swift_n"] * constants["swift_k"] * epcum ** (constants["swift_n"] - 1.)
+    return r_iso, drdp
+
+
+# Define the derivative function based on grandF
+def grandF(t, y):
+    global last_time  # Store the last time step here
+    if last_time is None:
+        dt = 0  # Initial call, set increment to zero
+    else:
+        dt = t - last_time  # Calculate the time increment
+    last_time = t  # Update last_time for the next call
+
+    # Unpack y values into variables for readability
+    # epcum, epl11, alf11, sig11  = y
+    sig11, epl11 = y  # State variables: stress and plastic strain
+    # Charging strain with time
+    eps11, deps11 = charging(t, dt)
+    # Determine sig based on charging in xx direction
+    sig11 = constants["young"] * (eps11 - epl11)
+    # determining hardening
+    ris, drdp = isoHardening(epl11, constants)
+    critp = abs(sig11) - ris
+    flow = deps11 * sig11
+
+    if critp >= 0. and deps11 * sig11 >= 0.:
+        depl11 = constants["young"] / (constants["young"] + drdp)  # using book
+    else:
+        depl11 = 0.
+
+    dsig11 = np.sign(deps11) * constants["young"] * (1. - depl11)  # dsig11 = dsig11/desp11
+    return [dsig11, depl11]
+
+
+# Initial conditions for solve_ivp
+# y0 = [0., 0., 0.] #, 0.]  # Initial values of the state variables
+y0 = [0., 0.]
+
+# Time span for integration
+t_span = (0, 0.5)
+last_time = None  # Initialize to store the last time
+
+# Perform the integration
+result = solve_ivp(lambda t, y: grandF(t, y), t_span, y0, method='RK23', max_step=0.001)
+
+eps11 = np.zeros_like(result.t)
+deps11 = np.zeros_like(result.t)
+# Calculate eps11 based on the results
+for i, t in enumerate(result.t):
+    eps11[i], deps11[i] = charging(t, 0.)
+    # print(i,"t=",t,result.t[i], eps11[i])
+
+sig11 = constants["young"] * (eps11 - result.y[1])  # Recalculate sig11
+
+# Plotting the results
+plt.figure(figsize=(8, 7))
+
+# Subplot 1: Epcum
+plt.subplot(4, 1, 1)
+plt.plot(eps11, result.y[0], label='sigma', color='b')
+plt.title('Evolution of stress-strain')
+plt.xlabel('strain eps11, time')
+plt.ylabel('sig11')
+plt.grid()
+plt.legend()
+
+# Subplot 2: Depl11
+plt.subplot(4, 1, 2)
+plt.plot(result.t, result.y[1], label='epl11', color='g')
+plt.title('Evolution of epl11')
+plt.xlabel('strain eps11, time')
+plt.ylabel('epl 11')
+plt.grid()
+plt.legend()
+
+# Subplot 3: Dalf11
+plt.subplot(4, 1, 3)
+plt.plot(result.t, eps11, label='eps11', color='r')
+plt.title('Evolution of eps11')
+plt.xlabel('time')
+plt.ylabel('strain eps11')
+plt.grid()
+plt.legend()
+
+# Subplot 4: Sig11 vs Eps11
+plt.subplot(4, 1, 4)
+plt.plot(eps11, sig11, label='Sig11', color='m')  # result.y[3]
+plt.title('Sig11 vs Eps11')
+plt.xlabel('straon eps11')
+plt.ylabel('sig11 calculated outside')
+plt.grid()
+plt.legend()
+
+plt.tight_layout()
+plt.show()

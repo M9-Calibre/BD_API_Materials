@@ -24,6 +24,11 @@ class APIFailedRequest(Exception):
         if self.json_body: self.message += "\n"+json.dumps(self.json_body, indent=2)
         super().__init__(self.message)
 
+class FunctionTypes(Enum):
+    Elastic = "elastic"
+    Hardening = "hardening",
+    Yield = "yield",
+
 class MaterialOrderings(Enum):
     Id = "id"
     Date = "entry_date"
@@ -189,6 +194,54 @@ class Material():
         self = register_material(login_token, self)
         return self
 
+    def get_card(self):
+        if not self.id:
+            raise TypeError("Can only get card to submitted materials!")
+        
+        def modelp2str(model_param:ModelParams):
+            str_res = f"* {model_param.model.name}\n"
+            str_res += f"{model_param.model.tag}\n"
+            for param, param_val in model_param.params.items():
+                str_res += f"{param_val}, "
+            # remove aditional comma + space
+            str_res = str_res[:-2] + "\n"
+            return str_res
+            
+        
+        str_result = "** NAME\n* Material\n"
+        str_result += f"{self.name}\n"
+        str_result += "** ---------------------------------------------------------\n"
+        str_result += "** MATERIAL PROPERTIES\n"
+        material_params = get_material_params_from_material(self.id)
+        # deveria aparecer para cada um???? resposta: sim
+        for material_param in material_params:
+            str_result += f"** {material_param.name}\n"
+            str_result += "** Elastic\n"
+            
+            # Print each Model Parameter in the Material Parameter
+            elastic_model_params = material_param.elastic_model_params
+            hardening_model_params = material_param.hardening_model_params
+            yield_model_params = material_param.yield_model_params
+            
+            str_result += modelp2str(elastic_model_params)
+            str_result += modelp2str(hardening_model_params)
+            str_result += modelp2str(yield_model_params)
+        
+            # Inverse Methods
+            str_result += "** ---------------------------------------------------------\n"
+            str_result += "** IDENTIFICATION\n"
+            str_result += f"{material_param.inverse_method.name}\n"
+            
+            # Extra Information
+            str_result += "** ---------------------------------------------------------\n"
+            str_result += "** DESCRIPTION\n"
+            str_result += "*Message\n"
+            str_result += f"{material_param.extra_information}\n"
+            str_result += "** ---------------------------------------------------------\n"
+        
+        print(str_result)
+        return str_result
+        
     @classmethod
     def load_json(cls, material_json : dict):
         name = material_json["name"]
@@ -403,36 +456,17 @@ class Model():
         model = Model(model_json["name"], model_json["tag"], model_json["function_name"], model_json["input"], model_json["category"])
         model.id = model_json.get('id', None)
         return model
-
-class MaterialParam():
-    def __init__(self, name : str, material : Material) -> None:
-        self.id = None
-        self.name = name
-        self.submitted_by = None
-        self.material = material
-
-    def to_json(self):
-        return deepcopy(self.__dict__)
-    
-    @classmethod
-    def load_json(cls, materialp_json : dict):
-        material_param = MaterialParam(materialp_json["name"], get_material(materialp_json["material"]))
-        material_param.id = materialp_json.get('id', None)
-        material_param.submitted_by = materialp_json.get('submitted_by', None)
-        return material_param
     
 class ModelParams():
-    def __init__(self, model : Model, material_param : MaterialParam, params : dict) -> None:
+    def __init__(self, model : Model, params : dict) -> None:
         self.id = None
         self.submitted_by = None
-        self.material_param = material_param
         self.model = model
         self.params = params
 
     def to_json(self):
         modelp_json = deepcopy(self.__dict__)
         modelp_json["model"] = self.model.id
-        modelp_json["material_param"] = self.material_param.id
         return modelp_json
     
     def get_graph(self):
@@ -455,11 +489,71 @@ class ModelParams():
     
     @classmethod
     def load_json(cls, modelp_json : dict):
-        modelp = ModelParams(get_test(modelp_json["test"]), get_model(modelp_json["model"]), get_material_param(modelp_json["material_param"]), modelp_json["params"])
+        modelp = ModelParams(get_model(modelp_json["model"]), modelp_json["params"])
         modelp.id = modelp_json.get('id', None)
         # modelp.user = modelp_json.get('user', None)
         modelp.submitted_by = modelp_json.get('submitted_by', None)
         return modelp
+
+class InverseMethod():
+    def __init__(self, name : str):
+        self.id = None
+        self.name = name
+    
+    def to_json(self):
+        return deepcopy(self.__dict__)
+    
+    @classmethod
+    def load_json(cls, model_json : dict):
+        model = InverseMethod(model_json["name"])
+        model.id = model_json.get('id', None)
+        return model
+
+class MaterialParam():
+    def __init__(self, name : str, material : Material, extra_information : str, source_url : str, inverse_method : InverseMethod, hardening_model_params : ModelParams, elastic_model_params : ModelParams, yield_model_params : ModelParams, private : bool, edit_groups=None, read_groups=None, delete_groups=None) -> None:
+        self.id = None
+        self.name = name
+        self.submitted_by = None
+        self.material = material
+        self.source_url = source_url
+        self.extra_information = extra_information
+        self.inverse_method = inverse_method
+        
+        # Model Params
+        self.hardening_model_params = hardening_model_params
+        self.elastic_model_params = elastic_model_params
+        self.yield_model_params = yield_model_params
+        
+        # Groups
+        self.private = private
+        if edit_groups is None: 
+            self.edit_groups = []
+        else: self.edit_groups = edit_groups
+        if read_groups is None: 
+            self.read_groups = []
+        else: self.read_groups = read_groups
+        if delete_groups is None: 
+            self.delete_groups = []
+        else: self.delete_groups = delete_groups
+        
+
+    def to_json(self):
+        materialp = deepcopy(self.__dict__)
+        materialp["material"] = self.material.id
+        materialp["inverse_method"] = self.inverse_method.id
+        materialp["edit_groups"] = [group.id for group in self.edit_groups]
+        materialp["read_groups"] = [group.id for group in self.read_groups]
+        materialp["delete_groups"] = [group.id for group in self.delete_groups]
+        
+        
+        return materialp
+    
+    @classmethod
+    def load_json(cls, materialp_json : dict):
+        material_param = MaterialParam(name=materialp_json["name"], material=get_material(materialp_json["material"]), inverse_method=get_inverse_method(materialp_json["inverse_method"]), source_url=materialp_json["source_url"], extra_information=materialp_json["extra_information"], hardening_model_params=get_model_param(materialp_json["hardening_model_params"]), elastic_model_params=get_model_param(materialp_json["elastic_model_params"]), yield_model_params=get_model_param(materialp_json["yield_model_params"]), edit_groups=materialp_json["edit_groups"], read_groups=materialp_json["read_groups"], delete_groups=materialp_json["delete_groups"], private=materialp_json["private"])
+        material_param.id = materialp_json.get('id', None)
+        material_param.submitted_by = materialp_json.get('submitted_by', None)
+        return material_param
 
 class Institution():
     def __init__(self, name : str, country : str) -> None:
@@ -473,6 +567,20 @@ class Institution():
     @classmethod
     def load_json(cls, model_json : dict):
         model = Model(model_json["name"], model_json["country"])
+        model.id = model_json.get('id', None)
+        return model
+
+class UserGroup():
+    def __init__(self, name : str):
+        self.id = None
+        self.name = name
+    
+    def to_json(self):
+        return deepcopy(self.__dict__)
+    
+    @classmethod
+    def load_json(cls, model_json : dict):
+        model = UserGroup(model_json["name"])
         model.id = model_json.get('id', None)
         return model
 
@@ -501,7 +609,7 @@ def authenticate(username : str, password : str) -> str:
     
     token = login.json()["token"]
 
-    print("authenticate: Authentication successful.")
+    # print("authenticate: Authentication successful.")
 
     return token
 
@@ -510,10 +618,8 @@ def authenticate_from_json(file_path : str) -> str:
 
     Parameters
     ----------
-    username : str
-        The username of the user
-    password : str
-        The password of the user
+    file_path : str
+        The JSON file path to get the login credentials. The format should be "{'username': '[USERNAME]', 'password': '[PASSWORD]'}
     
     """
 
@@ -527,7 +633,7 @@ def authenticate_from_json(file_path : str) -> str:
     
     token = login.json()["token"]
 
-    print("authenticate: Authentication successful.")
+    # print("authenticate: Authentication successful.")
 
     return token
 
@@ -564,7 +670,7 @@ def get_materials(page : int = 1, page_size : int = 10, ordering : MaterialOrder
     for material_json in results:
         materials.append(Material.load_json(material_json))
 
-    print(f"get_materials: Successfully retrieved {len(materials)} materials.")
+    # print(f"get_materials: Successfully retrieved {len(materials)} materials.")
 
     return materials
 
@@ -587,7 +693,7 @@ def get_material(material_id : int) -> Material:
     material_data = response.json()
     material = Material.load_json(material_data)
 
-    print(f"get_material: Successfully fetched material {material.name} with id {material.id}.")
+    # print(f"get_material: Successfully fetched material {material.name} with id {material.id}.")
 
     return material
 
@@ -614,7 +720,7 @@ def register_material(login_token : str, material : Material):
     material.submitted_by = response.json()["submitted_by"]
     material.user = response.json()["user"]
     material.date = response.json()["entry_date"]
-    print(f"register_material: Material {material.name} successfully registered with id {material.id}.")
+    # print(f"register_material: Material {material.name} successfully registered with id {material.id}.")
     return material
 
 # Categories
@@ -691,7 +797,7 @@ def get_categories(mode : CategoriesDisplayModes = CategoriesDisplayModes.List):
                     low_category.id = id
                     result[up_category][mid_category].append(low_category)
 
-    print(f"get_categories: Successfully fetched {count} categories. Format {mode.value}.")
+    # print(f"get_categories: Successfully fetched {count} categories. Format {mode.value}.")
 
     return result
 
@@ -728,7 +834,7 @@ def get_category(category_id : int, level : CategoryLevel = CategoryLevel.Lower)
         lower_name = category_data["category"]
         lower = LowerCategory(middle, lower_name)
         lower.id = lower_id
-        print(f"get_category: Successfully fetched lower category {lower.name} with id {lower.id}.")
+        # print(f"get_category: Successfully fetched lower category {lower.name} with id {lower.id}.")
         return lower
     elif level == CategoryLevel.Middle:
         upper_id = category_data["upper_category"]
@@ -739,14 +845,14 @@ def get_category(category_id : int, level : CategoryLevel = CategoryLevel.Lower)
         middle_name = category_data["category"]
         middle = MiddleCategory(upper, middle_name)
         middle.id = middle_id
-        print(f"get_category: Successfully fetched middle category {middle.name} with id {middle.id}.")
+        # print(f"get_category: Successfully fetched middle category {middle.name} with id {middle.id}.")
         return middle
     elif level == CategoryLevel.Upper:
         upper_id = category_data["id"]
         upper_name = category_data["category"]
         upper = UpperCategory(upper_name)
         upper.id = upper_id
-        print(f"get_category: Successfully fetched upper category {upper.name} with id {upper.id}.")
+        # print(f"get_category: Successfully fetched upper category {upper.name} with id {upper.id}.")
         return upper
     
 def get_category_by_name(category_name : str, level : CategoryLevel = CategoryLevel.Lower):
@@ -789,7 +895,7 @@ def get_category_by_name(category_name : str, level : CategoryLevel = CategoryLe
         lower_name = category_data["category"]
         lower = LowerCategory(middle, lower_name)
         lower.id = lower_id
-        print(f"get_category_by_name: Successfully fetched lower category {lower.name} with id {lower.id}.")
+        # print(f"get_category_by_name: Successfully fetched lower category {lower.name} with id {lower.id}.")
         return lower
     elif level == CategoryLevel.Middle:
         upper_id = category_data["upper_category"]
@@ -800,14 +906,14 @@ def get_category_by_name(category_name : str, level : CategoryLevel = CategoryLe
         middle_name = category_data["category"]
         middle = MiddleCategory(upper, middle_name)
         middle.id = middle_id
-        print(f"get_category_by_name: Successfully fetched middle category {middle.name} with id {middle.id}.")
+        # print(f"get_category_by_name: Successfully fetched middle category {middle.name} with id {middle.id}.")
         return middle
     elif level == CategoryLevel.Upper:
         upper_id = category_data["id"]
         upper_name = category_data["category"]
         upper = UpperCategory(upper_name)
         upper.id = upper_id
-        print(f"get_category_by_name: Successfully fetched upper category {upper.name} with id {upper.id}.")
+        # print(f"get_category_by_name: Successfully fetched upper category {upper.name} with id {upper.id}.")
         return upper
 
 def register_category(admin_token : str, category : Category):
@@ -936,7 +1042,7 @@ def get_tests(page : int = 1, page_size : int = 10, material : int = None, submi
     for test_json in results:
         test.append(Test.load_json(test_json))
 
-    print(f"get_tests: Successfully retrieved {len(test)} tests.")
+    # print(f"get_tests: Successfully retrieved {len(test)} tests.")
 
     return test
 
@@ -959,7 +1065,7 @@ def get_test(test_id : int):
     test_data = response.json()
     test = Test.load_json(test_data)
 
-    print(f"get_test: Successfully fetched test {test.name} with id {test.id}.")
+    # print(f"get_test: Successfully fetched test {test.name} with id {test.id}.")
 
     return test
 
@@ -1011,7 +1117,7 @@ def register_model(admin_token : str, model : Model):
     
 # ModelParams
 
-def get_model_params(modelp_id : int):
+def get_model_param(modelp_id : int):
     """Retrieve model parameters by id.
     
     Parameters
@@ -1031,7 +1137,7 @@ def get_model_params(modelp_id : int):
 
     return ModelParams.load_json(modelp_data)
 
-def register_model_params(login_token : str, modelp : ModelParams):
+def _register_model_params(login_token : str, modelp : ModelParams):
     """Save model parameters to the database.
 
     Parameters
@@ -1055,8 +1161,77 @@ def register_model_params(login_token : str, modelp : ModelParams):
         modelp.id = response.json()["id"]
         modelp.submitted_by = response.json()["submitted_by"]
         return modelp
+    
+def register_material_param(login_token : str, materialp : MaterialParam):
+    """Save material parameter to the database.
 
-def get_material_param(materialp_id : int):
+    Parameters
+    ----------
+    login_token : str
+        The log-in token that can be retrieved from the authenticate function
+    materialp : MaterialParam
+        The material parameter to be saved 
+    
+    """
+
+    headers = {"Authorization": f"Token {login_token}"}
+
+    url = f"{URL}/materialparams/"
+    body = materialp.to_json()
+    
+    # First register model parameters
+    hard_modelp = _register_model_params(login_token, materialp.hardening_model_params)
+    elastic_modelp = _register_model_params(login_token, materialp.elastic_model_params)
+    yield_modelp = _register_model_params(login_token, materialp.yield_model_params)
+    
+    body["hardening_model_params"] = hard_modelp.id
+    body["elastic_model_params"] = elastic_modelp.id
+    body["yield_model_params"] = yield_modelp.id
+    
+    # Then register material parameter
+    response = requests.post(url, json=body, headers=headers)
+
+    if response.status_code != 201:
+        raise APIFailedRequest(response)
+    else:
+        materialp.id = response.json()["id"]
+        materialp.submitted_by = response.json()["submitted_by"]
+        # print(f"register_material_param: Successfully registered material parameter {materialp.name} with id {materialp.id}.")
+        return materialp
+
+def get_material_params_from_material(material_id : int, login_token : str = ""):
+    """Retrieve material parameters by id.
+    
+    Parameters
+    ----------
+    material_id : int
+        The id of the material associated with material parameters
+    """
+
+    url = f"{URL}/materialparams/?material={material_id}"
+    
+    if login_token == "": 
+        response = requests.get(url)
+    else:
+        headers = {"Authorization": f"Token {login_token}"}
+        response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        raise APIFailedRequest(response)
+    
+    results = response.json()["results"]
+    
+    material_params = list[MaterialParam]()
+    for material_param_json in results:
+        material_params.append(MaterialParam.load_json(material_param_json))
+
+    # print(f"get_tests: Successfully retrieved {len(material_params)} material parameters.")
+
+    return material_params
+
+    return MaterialParam.load_json(materialp_data)
+
+def get_material_param(materialp_id : int, login_token : str = ""):
     """Retrieve material parameters by id.
     
     Parameters
@@ -1066,8 +1241,12 @@ def get_material_param(materialp_id : int):
     """
 
     url = f"{URL}/materialparams/{materialp_id}/"
-
-    response = requests.get(url)
+    
+    if login_token == "": 
+        response = requests.get(url)
+    else:
+        headers = {"Authorization": f"Token {login_token}"}
+        response = requests.get(url, headers=headers)
 
     if response.status_code != 200:
         raise APIFailedRequest(response)
@@ -1102,3 +1281,109 @@ def register_institution(login_token : str, modelp : Institution):
         modelp.id = response.json()["id"]
         return modelp
 
+# Inverse Method
+
+def get_inverse_methods() -> list[InverseMethod]:
+    """Retrieve all inverse methods.
+
+    """
+
+    url = f"{URL}/inversemethods/"
+
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        raise APIFailedRequest(response)
+    inverse_method_data = response.json()
+    
+    results = response.json()["results"]
+
+    inverse_methods = list[Test]()
+    for inverse_json in results:
+        inverse_methods.append(InverseMethod.load_json(inverse_json))
+
+    # print(f"get_tests: Successfully retrieved {len(inverse_methods)} tests.")
+
+    return inverse_methods
+
+def get_inverse_method(inverse_method_id : int) -> InverseMethod:
+    """Retrieve an inverse method by id.
+    
+    Parameters
+    ----------
+    inverse_method_id : int
+        The id of the inverse method to be fetched
+    """
+
+    url = f"{URL}/inversemethods/{inverse_method_id}/"
+
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        raise APIFailedRequest(response)
+    
+    inverse_method_data = response.json()
+    inverse_method = InverseMethod.load_json(inverse_method_data)
+
+    # print(f"get_inverse_method: Successfully fetched material {inverse_method.name} with id {inverse_method.id}.")
+
+    return inverse_method
+
+# User Groups
+
+def get_user_groups(login_token : str):
+    """Retrieve the groups that the user is in.
+
+    Parameters
+    ----------
+    login_token : str
+        The log-in token that can be retrieved from the authenticate function
+    
+    """
+
+    headers = {"Authorization": f"Token {login_token}"}
+
+    url = f"{URL}/users/usergroup/"
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        raise APIFailedRequest(response)
+
+    user_group_data = response.json()
+    user_groups = []
+    for ug in user_group_data["results"]:
+        user_group = UserGroup.load_json(ug)
+        user_groups.append(user_group)
+    
+    return user_groups
+
+# Points
+
+def get_points(function_type : FunctionTypes, function : str, params : dict):
+    """Retrieve the points for given function.
+
+    Parameters
+    ----------
+    function_type : FunctionTypes
+        The type of the function (elastic, hardening, yield)
+    function : str
+        The name of the given function. Given by Model.function_name
+    params : dict
+        Dictionary of variables that the function use. The Model Params has the default values for each one, but they can be changed to use in this function
+    
+    """
+    
+    url = f"{URL}/models/points/"
+    
+    body = {
+        "function_type": function_type.value[0],
+        "function": function,
+        "arguments": params
+    }
+    
+    response = requests.post(url, json=body)
+    
+    if response.status_code != 200:
+        raise APIFailedRequest(response)
+    
+    return response.json()

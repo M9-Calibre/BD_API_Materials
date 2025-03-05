@@ -1,7 +1,10 @@
 import numpy as np
 from typing import Any
 from math import pi
-from API_Materials.models_scripts.points_generation_functions import *
+
+from API_Materials.models_scripts.new_yield_calculations_models import calculate_yield_2000_3d
+from API_Materials.models_scripts.points_generation_functions import calculate_yield_48, calculate_yield_48_3d, calculate_yield_2004_3d
+
 
 
 def generate_all_points(hardening_args: dict[str, Any], yield_args: dict[str, float], elastic_args: dict[str, float],

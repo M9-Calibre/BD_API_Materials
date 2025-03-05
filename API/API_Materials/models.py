@@ -67,6 +67,15 @@ class Material(models.Model):
     mechanical_properties = models.OneToOneField(MechanicalProperties, models.CASCADE, null=True)
     physical_properties = models.OneToOneField(PhysicalProperties, models.CASCADE, null=True)
 
+    def get_material_card(self):
+        str_result = "** NAME\n*Material\n"
+        str_result += f"{self.name}\n** ---------------------------------------------------------"
+        str_result += "** MATERIAL PROPERTIES\n** Elastic\n"
+        material_params = MaterialParams.objects.filter(material=self.id)
+
+
+
+
 
 class Test(models.Model):
     submitted_by = models.ForeignKey(User, models.SET_NULL, null=True, related_name='tests')

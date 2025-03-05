@@ -1,6 +1,4 @@
-![VxForms Logo](https://lh3.googleusercontent.com/proxy/k5_JT4Bb1BHN5EJPBTft36rfyjiKCfTAQ70QqRI0VQwdY9lUq13lbcr5pNS_k2uAK-ZYGFSNTpqO9Coo_N2O881ZPM535YFpAKKm15YPJ270yzdw8dZkm5GVxhybjjU "VxFormsLogo")
-
-**vxformsapi** is a Python library to enable a high-level interaction with the VxForms Material's [API](http://193.137.84.5/api/swagger/) without the need of the VXForms Materials's [Website](http://193.137.84.5).
+**vxformsapi** is a Python library to enable a high-level interaction with the VxForms Material's API without the need of the VXForms Materials's [Website](http://tema-xsteels.ua.pt/).
 
 The project is being developed in association with University of Aveiro - Portugal, and it is currently mantained by the research grant team.
 
@@ -189,6 +187,30 @@ print(stages_df.keys())
 print(stages_df[2])
 ```
 
+### Point Generation (with Numpy)
+```python
+from vxformsapi.API import *
+import numpy as np
+
+token = authenticate_from_json("secret_login.json")
+
+# Obtain the corresponding Material Parameter
+material_param = get_material_param(15, token)
+
+# Obtain the params
+hardening_model_params = material_param.hardening_model_params
+hardening_params = hardening_model_params.params # {'k': 979.46, 'eps0': 0.00535, 'swift_n': 0.194}. Can be edited to calculate the function with different values
+hardening_function = hardening_model_params.model.function_name # Swift Hardening
+
+# Get points to make operations
+points = get_points(FunctionTypes.Hardening, hardening_function, hardening_params)
+
+x = np.array(points["x"])
+y = np.array(points["points"])
+
+# ...
+
+```
 ## API Methods
 ### Materials
 `get_materials`: Retrieve a page of materials.
@@ -316,7 +338,7 @@ model : Model
 ```
 
 ### ModelParams
-`get_model_params`: Retrieve model parameters by id.
+`get_model_param`: Retrieve model parameters by id.
 ```
 Parameters
 ----------
@@ -324,14 +346,47 @@ modelp_id : int
     The id of the model parameters to be fetched
 ```
 
-`register_model_params`: Save model parameters to the database.
+### MaterialParams
+`register_material_param`: Save a material parameter to the database.
 ```
 Parameters
 ----------
 login_token : str
     The log-in token that can be retrieved from the authenticate function
-modelp : ModelParams
-    The model parameters to be saved 
+materialp : MaterialParam
+    The material parameter to be saved 
+```
+
+`get_material_param`: Retrieve material parameters by id.
+```
+Parameters
+----------
+materialp_id : int
+    The id of the material parameters to be fetched
+```
+
+### InverseMethods
+`get_inverse_methods`: Retrieve a page of inverse methods.
+
+`get_inverse_method`: Retrieve an inverse method by id.
+```
+Parameters
+----------
+inverse_method_id : int
+    The id of the inverse method to be fetched
+```
+
+### Points
+`get_points`: Retrieve the points given by a function and its variables (params).
+```
+Parameters
+----------
+function_type : FunctionTypes
+    The type of the function (elastic, hardening, yield)
+function : str
+    The name of the given function. Given by Model.function_name
+params : dict
+    Dictionary of variables that the function use. The Model Params has the default values for each one, but they can be changed to use in this function
 ```
 
 ## API Enums
@@ -339,3 +394,4 @@ modelp : ModelParams
 - `CategoriesDisplayModes(Tree, List)`
 - `CategoryLevel(Upper, Middle, Lower)`
 - `UploadFileFormat(MatchId, Aramis)`
+- `FunctionTypes(Elastic, Hardening, Yield)`
